@@ -1,0 +1,84 @@
+<div
+  class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-900 to-blue-800 relative"
+>
+  <!-- Fondo decorativo -->
+  <div
+    class="absolute inset-0 bg-[#0369a1] bg-gradient-to-b from-gray-900 via-gray-900 to-[#0369a1] opacity-75"
+  ></div>
+
+  <!-- Contenedor principal -->
+  <div
+    class="relative flex flex-col sm:flex-row justify-center bg-white rounded-3xl shadow-xl overflow-hidden w-11/12 sm:w-4/5 lg:w-3/4 max-w-4xl z-10"
+  >
+
+    <!-- Sección izquierda -->
+<div class="flex-col flex self-center lg:px-14 sm:max-w-4xl xl:max-w-md text-center lg:text-left">
+	<h1
+	  class="my-3 font-extrabold text-blue-400 text-4xl sm:text-6xl lg:text-8xl"
+	>
+	  Olmos Marine Service
+	</h1>
+  </div>
+
+    <!-- Sección derecha -->
+    <div class="flex justify-center self-center p-12 w-full sm:w-1/2">
+      <div class="bg-white mx-auto rounded-3xl w-96">
+        <!-- Formulario de inicio de sesión -->
+        <div class="mb-7">
+          <h3 class="font-semibold text-2xl text-gray-800">Iniciar sesión</h3>
+        </div>
+        <div class="space-y-6">
+          <div
+            *ngIf="errorMessage"
+            class="bg-red-500 text-white p-3 rounded-lg text-center"
+          >
+            {{ errorMessage }}
+          </div>
+          <div>
+            <input
+              [(ngModel)]="user"
+              type="email"
+              placeholder="Username"
+              class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <input
+              [(ngModel)]="password"
+              type="password"
+              placeholder="Password"
+              class="w-full px-4 py-3 bg-gray-100 rounded-lg border border-gray-300 text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <button
+              (click)="login()"
+              type="submit"
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-semibold transition duration-300"
+            >
+              Iniciar sesión
+            </button>
+          </div>
+        </div>
+
+        <!-- Pie de página -->
+        <div class="mt-7 text-center text-gray-400 text-xs">
+          <span>Copyright © GLI {{fecha}}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Fondo decorativo SVG -->
+  <svg
+    class="absolute bottom-0 left-0 w-full"
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox="0 0 1440 320"
+  >
+    <path
+      fill="#fff"
+      fill-opacity="1"
+      d="M0,0L40,42.7C80,85,160,171,240,197.3C320,224,400,192,480,154.7C560,117,640,75,720,74.7C800,75,880,117,960,154.7C1040,192,1120,224,1200,213.3C1280,203,1360,149,1400,122.7L1440,96L1440,320L1400,320C1360,320,1280,320,1200,320C1120,320,1040,320,960,320C880,320,800,320,720,320C640,320,560,320,480,320C400,320,320,320,240,320C160,320,80,320,40,320L0,320Z"
+    ></path>
+  </svg>
+</div>

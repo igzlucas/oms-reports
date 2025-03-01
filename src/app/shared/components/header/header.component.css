@@ -1,0 +1,16 @@
+/* Ejemplo de estilos adicionales */
+aside {
+    transition: transform 0.3s ease-in-out;
+  }
+  
+  aside .bg-gradient-to-br {
+    background: linear-gradient(to bottom right, #2d3748, #1a202c);
+  }
+  
+  aside ul li button {
+    transition: all 0.3s ease-in-out;
+  }
+  
+  aside ul li button:hover {
+    transform: scale(1.05);
+  }

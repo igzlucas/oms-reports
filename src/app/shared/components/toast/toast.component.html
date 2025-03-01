@@ -1,0 +1,15 @@
+<div
+  *ngIf="visible"
+  class="fixed bottom-5 right-5 z-50 flex items-center p-4 max-w-sm w-full text-white bg-red-600 rounded-lg shadow-lg"
+  role="alert"
+>
+  <div class="text-sm font-medium">
+    {{ message }}
+  </div>
+  <button
+    (click)="closeToast()"
+    class="ml-auto text-white hover:text-gray-200 focus:outline-none"
+  >
+    ✖
+  </button>
+</div>

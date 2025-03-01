@@ -1,0 +1,23 @@
+export const environment = {
+    production: true,
+    apiUrl: 'https://oms-reports-latest.onrender.com/api/v1',
+    encript:{
+        publickey: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAuUMnNX+S5QbD2Y0KMJlXSbtzpaW0475edJ4y7YSvjGPIc9KLwvNyR5y/dlacQTUxYghQ977rGGZL9UQSRLqWz2oWZN6BQYFXXT6CFu1vIbJH4g7zKn0zS/1vwtu2tpKEnrH4QS6HVgvuNLUrLty7pFCs6K8Y8ItR8WlfIv/SDVWZJN1oZ+7Qelc54ucI5vsrNwpboWCMkEMzvJX5f7u7AwXcC4nYT85HUkJqgUdNBXjE7WV4Uohaz3VLWUQfNjq4tAZHykkyKqsWkIFtyqNF+TSw1N4VSas35/UHL1odZ7tkX9aQZeTYNbxHpEQ5IJ7SKq6JrLvaWifyPA2e4OO4nwIDAQAB",
+        privatekey: "MIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDEWbSqtFXZ3LzpB/J2H6IpRlFBFEGPu3GwZQd/h3iXnhE7X/WhqFIZQOFYIUBliqBn+dDrFFBXd6hWhr+2hJ43Vrzfr2AZq8Qj7AuBMpBhfxOJyAO+dxJQulX8v39BE/qo7Dk7ugN+WyNF8UHt/WWYQArrrdD7lZ0m4Ar4jXAcmMFEPEQi77xfCLQQMb1XcwDIv3kzxM9iZI2KDvocKCA+eq2/f+8CTIDfuEABcEclpnnKccLB39adUJXZ9YJIIOTXnMrh6rnQFz8EGrEdBGa3gEkIV20bm6YZwsqt2rKi8Poj7ofbnnHJaTRNMf4j8+mGKDif08TnRzZ8WnB8UaZhAgMBAAECggEAAkRdotavEtNS0k85XkIoXnkBj0p9RQxDUFfDR9Z75sbAQM7vZGrfy0s5qtmD74QzrM2oaw1ujcr7tGeNAz3J4J5RkxTYm4VFYAuNuLO5cWm841NuESL5cPmMzHy2yrzhARYspT8VIx5o5GnoIqgBRjovkhftPLlmEYzGzaa+6ZKX/XVEpLbfgLSYN4vppLhhuZ5mR71xPJpCm5VIMDKYthXsQ0CyUDbj5EnZcfyiQamQnxCv2syal8+V1/5hlxhW6HjREVZljuWCAk9oNpqQt9/GfV8WQLtwiw+sc242ufZrLuPGmuPbBWRTBZ/T9LlLmIgH/R/Z9YjC9/mQ+ZeBgQKBgQD3MTYibF9K5bSC4Xz0pl8wdJGdHxVTAsFlpNl+NfMPcSZirxbFC6GHEla85+9wiJo5YXPxW/4YhXbi0D4rM7564zLo+p1N5WT5FAoLx0pCY4S4H9nQsVbCXMovhDY6atCyCEVes3HDxtcLLz5zR5i0PiHV4ZZQtucXqD59QIVsIQKBgQDLWLxNUdMqjIQ8+czjX669MU+/JlnF0L3q3G3JCtblemrdHX34HPSmjuaqlw4xiqYcYK7ZHtltQ6peB8IYeljlzNbOlqWm2pU1vS0/LkLhzk62DVzF+8kvGRFiOg78e9MuRT7N4dbR1IcRTd+5RvfIbFRyCqXhgQKuPLNdIvryQQKBgFDQg/RJHfZsltFbSvDpG6HJ2nlV2jDja7sBZCHBHY/k3DnTKEyPeuWf9z+XTE6sOk+cLr2v56i4qZ+JmWmiZxniAZjtplP7NUHBbW9gXkTKKG/R6fIyqDyu/WL/hIMgvM4XqiZF4GGzNkbv0Sj7NU9oKMO2FuCYi4DOfm+Qko5BAoGBALIlWDqIz+370rI0yln8bnKTK+EzsPxLhsamPIwfseqy18JFXyGqBG+Sy+Rxl96xMBu2XBgdHbDK0gu00kdtkEoqrZmpgxBteMDuriAm4DNA8dYuWLOehT98v60FXjG2LWnhAkeObgvAHGB9j92aneN5fHW4fGDWDEonJaAX0C/BAoGBAOwqNyuubj6sndF7ONezV6BO2PYr6lVVQ2DISqBGTcU3Q6/EVOPs3LpPX0FvtL+fn3ccm/MQRXPBuGsabOPk6FEBbOXljLElwVyWyiCh7RYpTZwGzlea93KR7vGihnWF8VTP5MWX3UBriXhZrYGibN/1+F/2ZmLZ9yDFGyaRJFG3",
+        simmetric: "+U4yCDUaZTFQZOCGd5zmUAT78eUSZkOSfPmYDU5PDno=",
+        hash: "lKSWGt7SWy09KBEb38fNeBARnYrPnloXKTRBep8JqZM="
+    },
+    auth: {
+        loginUrl: "/auth/login",
+        refreshUrl: "/auth/refresh"
+    },
+    users:{
+        usersUrl: "/usuarios/",
+        id: ""
+    },
+    bussines:{
+        id:""
+    }
+  };
+
+ 

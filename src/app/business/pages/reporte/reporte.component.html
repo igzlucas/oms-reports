@@ -1,0 +1,585 @@
+<div class="max-w-6xl mx-auto mt-8 p-6 bg-white shadow-md rounded-lg">
+  <h2 class="text-2xl font-semibold mb-6 text-gray-700">
+    Formulario de Reporte
+  </h2>
+
+  <form (ngSubmit)="sendReport()" class="grid grid-cols-2 gap-6">
+   <!-- Cliente -->
+<div class="col-span-2 flex flex-col md:flex-row md:items-center gap-2">
+  <label
+    for="cliente"
+    class="relative w-full rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+    [ngClass]="{ 'border-red-500 ring-red-500': errors.cliente }"
+  >
+    <select
+      id="cliente"
+      [(ngModel)]="reportData.cliente"
+      name="cliente"
+      required
+      (change)="onCustomerChange(reportData.cliente)"
+      class="peer mt-1 block w-full p-2 bg-transparent rounded-md shadow-sm focus:outline-none focus:ring-0"
+    >
+      <option value="" disabled selected>Seleccione un cliente</option>
+      <option *ngFor="let customer of customers" [value]="customer.clienteNombre">
+        {{ customer.clienteNombre }}
+      </option>
+    </select>
+    <span
+      class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+    >
+      Cliente
+    </span>
+  </label>
+  <button
+    class=" self-end h-auto w-auto rounded-lg bg-green-500 text-white shadow-md transition-all hover:shadow-lg focus:opacity-[0.75] disabled:pointer-events-none disabled:opacity-50"
+    type="button"
+    (click)="openModalCreate($event)"
+    data-ripple-light="true"
+  >
+  <svg class="center w-auto h-auto text-gray-800 text-white p-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+    <path stroke="currentColor" stroke-width="2" d="M10 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM1.615 16.428a1.224 1.224 0 0 1-.569-1.175 6.002 6.002 0 0 1 11.908 0c.058.467-.172.92-.57 1.174A9.953 9.953 0 0 1 7 18a9.953 9.953 0 0 1-5.385-1.572ZM16.25 5.75a.75.75 0 0 0-1.5 0v2h-2a.75.75 0 0 0 0 1.5h2v2a.75.75 0 0 0 1.5 0v-2h2a.75.75 0 0 0 0-1.5h-2v-2Z" />
+  </svg>
+  </button>
+</div>
+
+    <!-- Dirección -->
+    <div class="col-span-2">
+      <label
+        for="direccion"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+        [ngClass]="{ 'border-red-500 ring-red-500': errors.direccion }"
+      >
+        <input
+          id="direccion"
+          type="text"
+          [(ngModel)]="reportData.direccion"
+          name="direccion"
+          required
+          readonly
+          class="peer mt-1 block w-full p-2 bg-gray-100 placeholder-transparent rounded-md shadow-sm focus:outline-none focus:ring-0"
+          placeholder="Dirección"
+        />
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Dirección
+        </span>
+      </label>
+    </div>
+    <!-- Fecha -->
+    <div>
+      <label
+        for="fecha"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+        [ngClass]="{ 'border-red-500 ring-red-500': errors.fecha }"
+      >
+        <input
+          id="fecha"
+          type="date"
+          [ngModel]="formatDate(reportData.fecha)"
+          (ngModelChange)="updateFecha($event)"
+          name="fecha"
+          required
+          class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
+          placeholder="Fecha"
+        />
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Fecha
+        </span>
+      </label>
+    </div>
+
+    <!-- Persona -->
+    <div>
+      <label
+        for="persona"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+        [ngClass]="{ 'border-red-500 ring-red-500': errors.persona }"
+      >
+        <input
+          id="persona"
+          type="text"
+          [(ngModel)]="reportData.persona"
+          name="persona"
+          required
+          class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
+          placeholder="Persona"
+        />
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Persona
+        </span>
+      </label>
+    </div>
+
+    <!-- Equipo -->
+    <div>
+      <label
+        for="equipo"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+        [ngClass]="{ 'border-red-500 ring-red-500': errors.equipo }"
+      >
+        <input
+          id="equipo"
+          type="text"
+          [(ngModel)]="reportData.equipo"
+          name="equipo"
+          required
+          class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
+          placeholder="Equipo"
+        />
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Equipo
+        </span>
+      </label>
+    </div>
+
+    <!-- Problema -->
+    <div class="col-span-2">
+      <label
+        for="problema"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+        [ngClass]="{ 'border-red-500 ring-red-500': errors.problema }"
+      >
+        <input
+          id="problema"
+          type="text"
+          [(ngModel)]="reportData.problema"
+          name="problema"
+          required
+          class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
+          placeholder="Problema"
+        />
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Problema
+        </span>
+      </label>
+    </div>
+
+    <!-- Trabajo -->
+    <div class="col-span-2">
+      <label
+        for="trabajo"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+        [ngClass]="{ 'border-red-500 ring-red-500': errors.trabajo }"
+      >
+        <textarea
+          id="trabajo"
+          [(ngModel)]="reportData.trabajo"
+          name="trabajo"
+          required
+          rows="4"
+          class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
+          placeholder="Trabajo"
+        ></textarea>
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Trabajo
+        </span>
+      </label>
+    </div>
+
+    <!-- Monto -->
+    <div>
+      <label
+        for="monto"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+      >
+        <input
+          id="monto"
+          type="number"
+          [(ngModel)]="reportData.monto"
+          name="monto"
+          required
+          min="0"
+          class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
+          placeholder="Monto"
+        />
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Monto
+        </span>
+      </label>
+    </div>
+
+    <!-- Moneda -->
+    <div>
+      <label
+        for="moneda"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+      >
+        <select
+          id="moneda"
+          [(ngModel)]="reportData.moneda"
+          name="moneda"
+          required
+          class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
+          placeholder="Moneda"
+        >
+          <option value="MXN">MXN</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+        </select>
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Moneda
+        </span>
+      </label>
+    </div>
+
+    <!-- Observaciones -->
+    <div class="col-span-2">
+      <label
+        for="observaciones"
+        class="relative block rounded-md border border-gray-200 shadow-sm focus-within:border-blue-600 focus-within:ring-1 focus-within:ring-blue-600"
+      >
+        <textarea
+          id="observaciones"
+          [(ngModel)]="reportData.observaciones"
+          name="observaciones"
+          rows="2"
+          class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
+          placeholder="Observaciones"
+        ></textarea>
+        <span
+          class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+        >
+          Observaciones
+        </span>
+      </label>
+    </div>
+
+    <!-- Detalles -->
+    <div class="col-span-2">
+      <div class="overflow-x-auto mb-12 xl:mb-0 px-4 mx-auto mt-4">
+        <div
+          class="relative flex flex-col min-w-0 break-words bg-white w-full mb-6 shadow-lg rounded"
+        >
+          <div class="rounded-t mb-0 px-4 py-3 border-0">
+            <div class="flex flex-wrap items-center">
+              <div class="relative w-full px-4 max-w-full flex-grow flex-1">
+                <h3 class="font-semibold text-base text-blueGray-700">
+                  Detalles
+                </h3>
+              </div>
+              <div
+                class="relative w-full px-4 max-w-full flex-grow flex-1 text-right"
+              >
+                <button
+                  type="button"
+                  (click)="addDetalle()"
+                  class="bg-indigo-500 text-white active:bg-indigo-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
+                  type="button"
+                >
+                  Nuevo
+                </button>
+              </div>
+            </div>
+            <div class="block w-full overflow-x-auto">
+              <table class="items-center bg-transparent w-full border-collapse">
+                <thead class="bg-gray-200">
+                  <tr>
+                    <th
+                      class="px-4 py-2 text-left text-sm font-medium text-gray-700"
+                    >
+                      Cantidad
+                    </th>
+                    <th
+                      class="px-4 py-2 text-left text-sm font-medium text-gray-700"
+                    >
+                      Descripción
+                    </th>
+                    <th
+                      class="px-4 py-2 text-left text-sm font-medium text-gray-700"
+                    >
+                      Precio
+                    </th>
+                    <th
+                      class="px-4 py-2 text-left text-sm font-medium text-gray-700"
+                    >
+                      Total
+                    </th>
+                    <th
+                      class="px-4 py-2 text-center text-sm font-medium text-gray-700"
+                    >
+                      Acciones
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr
+                    *ngFor="let detalle of reportData.detalles; let i = index"
+                    class="border-t"
+                  >
+                    <td class="px-4 py-2">
+                      <input
+                        type="number"
+                        [(ngModel)]="detalle.cantidad"
+                        (ngModelChange)="updateTotal(detalle)"
+                        [ngClass]="{
+                          'border-red-500 ring-red-500': errors.cantidad
+                        }"
+                        name="cantidad-{{ i }}"
+                        required
+                        min="0"
+                        class="w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                      />
+                    </td>
+                    <td class="px-4 py-2">
+                      <input
+                        type="text"
+                        [(ngModel)]="detalle.descripcion"
+                        [ngClass]="{
+                          'border-red-500 ring-red-500': errors.descripcion
+                        }"
+                        name="descripcion-{{ i }}"
+                        required
+                        class="w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                      />
+                    </td>
+                    <td class="px-4 py-2">
+                      <input
+                        type="number"
+                        [(ngModel)]="detalle.precio"
+                        [ngClass]="{
+                          'border-red-500 ring-red-500': errors.detalle
+                        }"
+                        (ngModelChange)="updateTotal(detalle)"
+                        name="precio-{{ i }}"
+                        required
+                        class="w-full p-2 border border-gray-300 rounded-md shadow-sm"
+                      />
+                    </td>
+                    <td class="px-4 py-2">
+                      <input
+                        type="number"
+                        [(ngModel)]="detalle.total"
+                        name="total-{{ i }}"
+                        readonly
+                        class="w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100"
+                      />
+                    </td>
+                    <td class="px-4 py-2 text-center">
+                      <button
+                        type="button"
+                        (click)="removeDetalle(i)"
+                        class="text-gray-500 transition-colors duration-200 dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none"
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke-width="1.5"
+                          stroke="currentColor"
+                          class="w-5 h-5"
+                        >
+                          <path
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                            d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+                          />
+                        </svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Firma -->
+
+    <div class="col-span-2">
+      <h3 class="text-lg font-semibold mt-6 mb-2">Firma</h3>
+      <div class="px-4 py-6 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-0">
+        <dt class="text-sm/6 font-medium text-gray-900">
+          <button
+            type="button"
+            class="mt-3 inline-flex items-center px-4 py-2 bg-blue-500 text-white rounded-md shadow-sm hover:bg-blue-600"
+            (click)="openModal()"
+          >
+            Firmar
+          </button>
+        </dt>
+        <dd class="mt-1 text-sm/6 text-gray-700 sm:col-span-2 sm:mt-0">
+          <div *ngIf="reportData.firma" class="mb-4">
+            <img
+              [src]="reportData.firma"
+              alt="Firma guardada"
+              class="box-content h-32 w-32 p-4 border-4"
+            />
+            <button
+              type="button"
+              class="mt-2 px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+              (click)="removeSignature()"
+            >
+              Eliminar Firma
+            </button>
+          </div>
+        </dd>
+      </div>
+    </div>
+
+    <button
+    type="submit"
+    [disabled]="loading"
+    class="col-span-1 sm:col-span-2 mt-6 px-6 py-3 bg-green-600 text-white rounded-md shadow-md 
+               hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 
+               flex items-center justify-center gap-2"
+  >
+    <span *ngIf="loading">
+      <svg class="animate-spin h-5 w-5 text-white" viewBox="0 0 24 24" fill="none"
+           xmlns="http://www.w3.org/2000/svg">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor"
+              d="M4 12a8 8 0 018-8v8H4z"></path>
+      </svg>
+    </span>
+    <span *ngIf="!loading">Enviar Reporte</span>
+  </button>
+    <app-alert
+      [isVisible]="alertVisible"
+      [message]="alertMessage"
+      [type]="alertType"
+    ></app-alert>
+  </form>
+</div>
+
+<!-- Modal de Firma -->
+<div
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+  *ngIf="isModalOpen"
+>
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
+    <h3 class="text-xl font-semibold text-gray-800 mb-4">Dibujar Firma</h3>
+    <canvas
+      #signatureCanvas
+      class="border border-gray-300 rounded-md w-full h-48"
+    ></canvas>
+    <div class="mt-6 flex justify-between">
+      <button
+        class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none"
+        (click)="clearCanvas()"
+      >
+        Limpiar
+      </button>
+      <button
+        class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none"
+        (click)="saveSignature()"
+      >
+        Guardar
+      </button>
+      <button
+        class="px-4 py-2 bg-gray-600 text-white rounded-md hover:bg-gray-700 focus:outline-none"
+        (click)="closeModal()"
+      >
+        Cerrar
+      </button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- Create user modal -->
+<div
+id="createUserModal"
+tabindex="-1"
+aria-hidden="true"
+class="fixed top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto h-full max-h-full bg-opacity-50 bg-black"
+*ngIf="isModalOpenCreate"
+>
+<div class="relative w-full max-w-2xl max-h-full mx-auto">
+  <form class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+    <div
+      class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 border-gray-200"
+    >
+      <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+        Crear Cliente
+      </h3>
+      <button
+        type="button"
+        (click)="closeModalCreate()"
+        class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+      >
+        <svg
+          class="w-3 h-3"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 14 14"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+          />
+        </svg>
+        <span class="sr-only">Close modal</span>
+      </button>
+    </div>
+    <div class="p-6 space-y-6">
+      <div class="grid grid-cols-6 gap-6">
+        <div class="col-span-6 sm:col-span-3">
+          <label
+            for="first-name"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Nombre</label
+          >
+          <input
+            type="text"
+            id="first-name"
+            [(ngModel)]="currentCustomer.nombre"
+            name="nombre"
+            class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Bonnie"
+            required
+          />
+        </div>
+        <div class="col-span-6 sm:col-span-3">
+          <label
+            for="last-name"
+            class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+            >Dirección</label
+          >
+          <input
+            type="text"
+            id="last-name"
+            [(ngModel)]="currentCustomer.direccion"
+            name="direccion"
+            class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+            placeholder="Green"
+            required
+          />
+        </div>
+      </div>
+    </div>
+    <div
+      class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600"
+    >
+      <button
+        type="button"
+        (click)="saveCustomer()"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+      >
+        Crear
+      </button>
+    </div>
+  </form>
+</div>
+</div>

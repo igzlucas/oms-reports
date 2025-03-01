@@ -1,0 +1,636 @@
+<div
+  *ngIf="isLoading"
+  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+>
+  <svg
+    class="pl"
+    viewBox="0 0 160 160"
+    width="160px"
+    height="160px"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000"></stop>
+        <stop offset="100%" stop-color="#fff"></stop>
+      </linearGradient>
+      <mask id="mask1">
+        <rect x="0" y="0" width="160" height="160" fill="url(#grad)"></rect>
+      </mask>
+      <mask id="mask2">
+        <rect x="28" y="28" width="104" height="104" fill="url(#grad)"></rect>
+      </mask>
+    </defs>
+
+    <g>
+      <g class="pl__ring-rotate">
+        <circle
+          class="pl__ring-stroke"
+          cx="80"
+          cy="80"
+          r="72"
+          fill="none"
+          stroke="hsl(223,90%,55%)"
+          stroke-width="16"
+          stroke-dasharray="452.39 452.39"
+          stroke-dashoffset="452"
+          stroke-linecap="round"
+          transform="rotate(-45,80,80)"
+        ></circle>
+      </g>
+    </g>
+    <g mask="url(#mask1)">
+      <g class="pl__ring-rotate">
+        <circle
+          class="pl__ring-stroke"
+          cx="80"
+          cy="80"
+          r="72"
+          fill="none"
+          stroke="hsl(193,90%,55%)"
+          stroke-width="16"
+          stroke-dasharray="452.39 452.39"
+          stroke-dashoffset="452"
+          stroke-linecap="round"
+          transform="rotate(-45,80,80)"
+        ></circle>
+      </g>
+    </g>
+
+    <g>
+      <g
+        stroke-width="4"
+        stroke-dasharray="12 12"
+        stroke-dashoffset="12"
+        stroke-linecap="round"
+        transform="translate(80,80)"
+      >
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(-135,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(-90,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(-45,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(0,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(45,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(90,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(135,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(180,0,0) translate(0,40)"
+        ></polyline>
+      </g>
+    </g>
+    <g mask="url(#mask1)">
+      <g
+        stroke-width="4"
+        stroke-dasharray="12 12"
+        stroke-dashoffset="12"
+        stroke-linecap="round"
+        transform="translate(80,80)"
+      >
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(-135,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(-90,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(-45,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(0,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(45,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(90,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(135,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(180,0,0) translate(0,40)"
+        ></polyline>
+      </g>
+    </g>
+
+    <g>
+      <g transform="translate(64,28)">
+        <g class="pl__arrows" transform="rotate(45,16,52)">
+          <path
+            fill="hsl(3,90%,55%)"
+            d="M17.998,1.506l13.892,43.594c.455,1.426-.56,2.899-1.998,2.899H2.108c-1.437,0-2.452-1.473-1.998-2.899L14.002,1.506c.64-2.008,3.356-2.008,3.996,0Z"
+          ></path>
+          <path
+            fill="hsl(223,10%,90%)"
+            d="M14.009,102.499L.109,58.889c-.453-1.421,.559-2.889,1.991-2.889H29.899c1.433,0,2.444,1.468,1.991,2.889l-13.899,43.61c-.638,2.001-3.345,2.001-3.983,0Z"
+          ></path>
+        </g>
+      </g>
+    </g>
+    <g mask="url(#mask2)">
+      <g transform="translate(64,28)">
+        <g class="pl__arrows" transform="rotate(45,16,52)">
+          <path
+            fill="hsl(333,90%,55%)"
+            d="M17.998,1.506l13.892,43.594c.455,1.426-.56,2.899-1.998,2.899H2.108c-1.437,0-2.452-1.473-1.998-2.899L14.002,1.506c.64-2.008,3.356-2.008,3.996,0Z"
+          ></path>
+          <path
+            fill="hsl(223,90%,80%)"
+            d="M14.009,102.499L.109,58.889c-.453-1.421,.559-2.889,1.991-2.889H29.899c1.433,0,2.444,1.468,1.991,2.889l-13.899,43.61c-.638,2.001-3.345,2.001-3.983,0Z"
+          ></path>
+        </g>
+      </g>
+    </g>
+  </svg>
+</div>
+
+
+<div class="relative overflow-x-auto shadow-md sm:rounded-lg">
+  <div
+    class="flex items-center justify-between flex-column md:flex-row flex-wrap space-y-4 md:space-y-0 py-4 bg-white dark:bg-gray-900"
+  >
+    <div>
+      <button
+        (click)="toggleDropdown()"
+        class="inline-flex items-center text-gray-500 bg-white border border-gray-300 focus:outline-none hover:bg-gray-100 focus:ring-4 focus:ring-gray-100 font-medium rounded-lg text-sm px-3 py-1.5 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:bg-gray-700 dark:hover:border-gray-600 dark:focus:ring-gray-700"
+        type="button"
+      >
+        <span class="sr-only">Action button</span>
+        Action
+        <svg
+          class="w-2.5 h-2.5 ms-2.5"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 10 6"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m1 1 4 4 4-4"
+          />
+        </svg>
+      </button>
+      <!-- Dropdown menu -->
+      <div
+        *ngIf="dropdownOpen"
+        class="absolute z-10 bg-white divide-y divide-gray-100 rounded-lg shadow-sm w-44 dark:bg-gray-700 dark:divide-gray-600"
+      >
+        <ul
+          class="py-1 text-sm text-gray-700 dark:text-gray-200"
+          aria-labelledby="dropdownActionButton"
+        >
+          <li>
+            <a
+              href="#"
+              (click)="openModalCreate($event)"
+              class="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+              >Crear</a
+            >
+          </li>
+        </ul>
+      </div>
+    </div>
+    <label for="table-search" class="sr-only">Search</label>
+    <div class="relative">
+      <div
+        class="absolute inset-y-0 rtl:inset-r-0 start-0 flex items-center ps-3 pointer-events-none"
+      >
+        <svg
+          class="w-4 h-4 text-gray-500 dark:text-gray-400"
+          aria-hidden="true"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 20 20"
+        >
+          <path
+            stroke="currentColor"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="m19 19-4-4m0-7A7 7 0 1 1 1 8a7 7 0 0 1 14 0Z"
+          />
+        </svg>
+      </div>
+      <input
+        type="text"
+        id="table-search-users"
+        class="block pt-2 ps-10 text-sm text-gray-900 border border-gray-300 rounded-lg w-80 bg-gray-50 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+        placeholder="Search for users"
+        [(ngModel)]="searchText"
+      />
+    </div>
+  </div>
+  <table
+    *ngIf="!isLoading"
+    class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
+  >
+    <thead>
+      <tr>
+        <th scope="col" class="p-4">
+          <div class="flex items-center">
+            <input
+              id="checkbox-all-search"
+              type="checkbox"
+              (change)="toggleSelectAll()"
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
+            />
+          </div>
+        </th>
+        <th scope="col" class="px-6 py-3">Nombre</th>
+        <th scope="col" class="px-6 py-3">Dirección</th>
+        <th scope="col" class="px-6 py-3">Acción</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let customer of filteredCustomers">
+        <td class="w-4 p-4">
+          <div class="flex items-center">
+            <input
+              type="checkbox"
+              class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded-sm focus:ring-blue-500"
+              [(ngModel)]="customer.selected"
+            />
+          </div>
+        </td>
+        <td class="px-6 py-4">{{ customer.clienteNombre }}</td>
+        <td class="px-6 py-4">{{ customer.clienteDireccion }}</td>
+        <td class="px-6 py-4">
+         
+
+          <button
+          type="button"
+          (click)="openModal(customer, $event)"
+          class="text-gray-500 transition-colors duration-200 dark:hover:text-blue-500 dark:text-gray-300 hover:text-blue-500 focus:outline-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="m14.304 4.844 2.852 2.852M7 7H4a1 1 0 0 0-1 1v10a1 1 0 0 0 1 1h11a1 1 0 0 0 1-1v-4.5m2.409-9.91a2.017 2.017 0 0 1 0 2.853l-6.844 6.844L8 14l.713-3.565 6.844-6.844a2.015 2.015 0 0 1 2.852 0Z"
+            />
+          </svg>
+        </button>
+
+
+
+
+          <button
+          type="button"
+          (click)="openModalDelete(customer, $event)"
+          class="text-gray-500 transition-colors duration-200 dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke-width="1.5"
+            stroke="currentColor"
+            class="w-5 h-5"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
+            />
+          </svg>
+        </button>
+
+          
+        </td>
+      </tr>
+    </tbody>
+  </table>
+  <!-- Edit user modal -->
+  <div
+    id="editUserModal"
+    tabindex="-1"
+    aria-hidden="true"
+    class="fixed top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto h-full max-h-full bg-opacity-50 bg-black"
+    *ngIf="isModalOpen"
+  >
+    <div class="relative w-full max-w-2xl max-h-full mx-auto">
+      <form class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+        <div
+          class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 border-gray-200"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Editar Cliente
+          </h3>
+          <button
+            type="button"
+            (click)="closeModal()"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+          >
+            <svg
+              class="w-3 h-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+              />
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-6 gap-6">
+            <div class="col-span-6 sm:col-span-3">
+              <label
+                for="first-name"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >Nombre</label
+              >
+              <input
+                type="text"
+                id="first-name"
+                [(ngModel)]="selectedCustomer.clienteNombre"
+                name="clienteNombre"
+                class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Bonnie"
+                required
+              />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <label
+                for="last-name"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >Dirección</label
+              >
+              <input
+                type="text"
+                id="last-name"
+                [(ngModel)]="selectedCustomer.clienteDireccion"
+                name="clienteDireccion"
+                class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Green"
+                required
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600"
+        >
+          <button
+            type="button"
+            (click)="updateCustomer()"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            Actualizar
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Create user modal -->
+  <div
+    id="createUserModal"
+    tabindex="-1"
+    aria-hidden="true"
+    class="fixed top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto h-full max-h-full bg-opacity-50 bg-black"
+    *ngIf="isModalOpenCreate"
+  >
+    <div class="relative w-full max-w-2xl max-h-full mx-auto">
+      <form class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+        <div
+          class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 border-gray-200"
+        >
+          <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+            Crear Cliente
+          </h3>
+          <button
+            type="button"
+            (click)="closeModalCreate()"
+            class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+          >
+            <svg
+              class="w-3 h-3"
+              aria-hidden="true"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 14 14"
+            >
+              <path
+                stroke="currentColor"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+              />
+            </svg>
+            <span class="sr-only">Close modal</span>
+          </button>
+        </div>
+        <div class="p-6 space-y-6">
+          <div class="grid grid-cols-6 gap-6">
+            <div class="col-span-6 sm:col-span-3">
+              <label
+                for="first-name"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >Nombre</label
+              >
+              <input
+                type="text"
+                id="first-name"
+                [(ngModel)]="currentCustomer.nombre"
+                name="nombre"
+                class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Bonnie"
+                required
+              />
+            </div>
+            <div class="col-span-6 sm:col-span-3">
+              <label
+                for="last-name"
+                class="block mb-2 text-sm font-medium text-gray-900 dark:text-white"
+                >Dirección</label
+              >
+              <input
+                type="text"
+                id="last-name"
+                [(ngModel)]="currentCustomer.direccion"
+                name="direccion"
+                class="shadow-xs bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-600 focus:border-blue-600 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
+                placeholder="Green"
+                required
+              />
+            </div>
+          </div>
+        </div>
+        <div
+          class="flex items-center p-6 space-x-3 rtl:space-x-reverse border-t border-gray-200 rounded-b dark:border-gray-600"
+        >
+          <button
+            type="button"
+            (click)="saveCustomer()"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+          >
+            Crear
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+    <!-- Delete user modal -->
+  <div
+    *ngIf="isModalOpenDelete"
+    id="popup-modal"
+    tabindex="-1"
+    class="fixed top-0 left-0 right-0 z-50 items-center justify-center w-full p-4 overflow-x-hidden overflow-y-auto h-full max-h-full bg-opacity-50 bg-black"
+  >
+    <div class="relative w-full max-w-2xl max-h-full mx-auto">
+      <div class="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+        <button
+        (click)="closeModalDelete()"
+          type="button"
+          class="absolute top-3 end-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white"
+          data-modal-hide="popup-modal"
+        >
+          <svg
+            class="w-3 h-3"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 14 14"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"
+            />
+          </svg>
+          <span class="sr-only">Close modal</span>
+        </button>
+        <div class="p-4 md:p-5 text-center">
+          <svg
+            class="mx-auto mb-4 text-gray-400 w-12 h-12 dark:text-gray-200"
+            aria-hidden="true"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 20 20"
+          >
+            <path
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M10 11V6m0 8h.01M19 10a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+            />
+          </svg>
+          <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">
+            <label
+            id="first-name"
+            name="clienteNombre"
+            required
+          > Seguro que quiere eliminar el cliente  {{selectedCustomer.clienteNombre}} </label>
+          </h3>
+          <button
+            data-modal-hide="popup-modal"
+            (click) = "deleteCustomer()"
+            type="button"
+            class="text-white bg-red-600 hover:bg-red-800 focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 font-medium rounded-lg text-sm inline-flex items-center px-5 py-2.5 text-center"
+          >
+            Si, Seguro
+          </button>
+          <button
+          (click)="closeModalDelete()"
+            data-modal-hide="popup-modal"
+            type="button"
+            class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700"
+          >
+            No, cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<app-alert
+  [isVisible]="alertVisible"
+  [message]="alertMessage"
+  [type]="alertType"
+></app-alert>

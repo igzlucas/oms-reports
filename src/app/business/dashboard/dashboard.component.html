@@ -1,0 +1,402 @@
+<div
+  *ngIf="isLoading"
+  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+>
+  <svg
+    class="pl"
+    viewBox="0 0 160 160"
+    width="160px"
+    height="160px"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <defs>
+      <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="#000"></stop>
+        <stop offset="100%" stop-color="#fff"></stop>
+      </linearGradient>
+      <mask id="mask1">
+        <rect x="0" y="0" width="160" height="160" fill="url(#grad)"></rect>
+      </mask>
+      <mask id="mask2">
+        <rect x="28" y="28" width="104" height="104" fill="url(#grad)"></rect>
+      </mask>
+    </defs>
+
+    <g>
+      <g class="pl__ring-rotate">
+        <circle
+          class="pl__ring-stroke"
+          cx="80"
+          cy="80"
+          r="72"
+          fill="none"
+          stroke="hsl(223,90%,55%)"
+          stroke-width="16"
+          stroke-dasharray="452.39 452.39"
+          stroke-dashoffset="452"
+          stroke-linecap="round"
+          transform="rotate(-45,80,80)"
+        ></circle>
+      </g>
+    </g>
+    <g mask="url(#mask1)">
+      <g class="pl__ring-rotate">
+        <circle
+          class="pl__ring-stroke"
+          cx="80"
+          cy="80"
+          r="72"
+          fill="none"
+          stroke="hsl(193,90%,55%)"
+          stroke-width="16"
+          stroke-dasharray="452.39 452.39"
+          stroke-dashoffset="452"
+          stroke-linecap="round"
+          transform="rotate(-45,80,80)"
+        ></circle>
+      </g>
+    </g>
+
+    <g>
+      <g
+        stroke-width="4"
+        stroke-dasharray="12 12"
+        stroke-dashoffset="12"
+        stroke-linecap="round"
+        transform="translate(80,80)"
+      >
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(-135,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(-90,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(-45,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(0,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(45,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(90,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(135,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,10%,90%)"
+          points="0,2 0,14"
+          transform="rotate(180,0,0) translate(0,40)"
+        ></polyline>
+      </g>
+    </g>
+    <g mask="url(#mask1)">
+      <g
+        stroke-width="4"
+        stroke-dasharray="12 12"
+        stroke-dashoffset="12"
+        stroke-linecap="round"
+        transform="translate(80,80)"
+      >
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(-135,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(-90,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(-45,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(0,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(45,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(90,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(135,0,0) translate(0,40)"
+        ></polyline>
+        <polyline
+          class="pl__tick"
+          stroke="hsl(223,90%,80%)"
+          points="0,2 0,14"
+          transform="rotate(180,0,0) translate(0,40)"
+        ></polyline>
+      </g>
+    </g>
+
+    <g>
+      <g transform="translate(64,28)">
+        <g class="pl__arrows" transform="rotate(45,16,52)">
+          <path
+            fill="hsl(3,90%,55%)"
+            d="M17.998,1.506l13.892,43.594c.455,1.426-.56,2.899-1.998,2.899H2.108c-1.437,0-2.452-1.473-1.998-2.899L14.002,1.506c.64-2.008,3.356-2.008,3.996,0Z"
+          ></path>
+          <path
+            fill="hsl(223,10%,90%)"
+            d="M14.009,102.499L.109,58.889c-.453-1.421,.559-2.889,1.991-2.889H29.899c1.433,0,2.444,1.468,1.991,2.889l-13.899,43.61c-.638,2.001-3.345,2.001-3.983,0Z"
+          ></path>
+        </g>
+      </g>
+    </g>
+    <g mask="url(#mask2)">
+      <g transform="translate(64,28)">
+        <g class="pl__arrows" transform="rotate(45,16,52)">
+          <path
+            fill="hsl(333,90%,55%)"
+            d="M17.998,1.506l13.892,43.594c.455,1.426-.56,2.899-1.998,2.899H2.108c-1.437,0-2.452-1.473-1.998-2.899L14.002,1.506c.64-2.008,3.356-2.008,3.996,0Z"
+          ></path>
+          <path
+            fill="hsl(223,90%,80%)"
+            d="M14.009,102.499L.109,58.889c-.453-1.421,.559-2.889,1.991-2.889H29.899c1.433,0,2.444,1.468,1.991,2.889l-13.899,43.61c-.638,2.001-3.345,2.001-3.983,0Z"
+          ></path>
+        </g>
+      </g>
+    </g>
+  </svg>
+</div>
+
+<div class="mb-12 grid gap-y-10 gap-x-6 md:grid-cols-2 xl:grid-cols-4">
+  <div
+    class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md"
+  >
+    <div
+      class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-gradient-to-tr from-blue-600 to-blue-400 text-white shadow-blue-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+        class="w-6 h-6 text-white"
+      >
+        <path d="M12 7.5a2.25 2.25 0 100 4.5 2.25 2.25 0 000-4.5z"></path>
+        <path
+          fill-rule="evenodd"
+          d="M1.5 4.875C1.5 3.839 2.34 3 3.375 3h17.25c1.035 0 1.875.84 1.875 1.875v9.75c0 1.036-.84 1.875-1.875 1.875H3.375A1.875 1.875 0 011.5 14.625v-9.75zM8.25 9.75a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0zM18.75 9a.75.75 0 00-.75.75v.008c0 .414.336.75.75.75h.008a.75.75 0 00.75-.75V9.75a.75.75 0 00-.75-.75h-.008zM4.5 9.75A.75.75 0 015.25 9h.008a.75.75 0 01.75.75v.008a.75.75 0 01-.75.75H5.25a.75.75 0 01-.75-.75V9.75z"
+          clip-rule="evenodd"
+        ></path>
+        <path
+          d="M2.25 18a.75.75 0 000 1.5c5.4 0 10.63.722 15.6 2.075 1.19.324 2.4-.558 2.4-1.82V18.75a.75.75 0 00-.75-.75H2.25z"
+        ></path>
+      </svg>
+    </div>
+    <div class="p-4 text-right">
+      <p
+        class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600"
+      >
+        Reportes
+      </p>
+      <h4
+        class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900"
+      >
+        {{ totalReportes }}
+      </h4>
+    </div>
+    <div class="border-t border-blue-gray-50 p-4">
+      <p
+        class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600"
+      >
+        <strong class="text-green-500">{{ totalReportes }}</strong>&nbsp;Reportes Generados
+      </p>
+    </div>
+  </div>
+
+  <div
+    class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md"
+  >
+    <div
+      class="bg-clip-border mx-4 rounded-xl overflow-hidden bg-gradient-to-tr from-green-600 to-green-400 text-white shadow-green-500/40 shadow-lg absolute -mt-4 grid h-16 w-16 place-items-center"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        aria-hidden="true"
+        class="w-6 h-6 text-white"
+      >
+        <path
+          d="M6.25 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM3.25 19.125a7.125 7.125 0 0114.25 0v.003l-.001.119a.75.75 0 01-.363.63 13.067 13.067 0 01-6.761 1.873c-2.472 0-4.786-.684-6.76-1.873a.75.75 0 01-.364-.63l-.001-.122zM19.75 7.5a.75.75 0 00-1.5 0v2.25H16a.75.75 0 000 1.5h2.25v2.25a.75.75 0 001.5 0v-2.25H22a.75.75 0 000-1.5h-2.25V7.5z"
+        ></path>
+      </svg>
+    </div>
+    <div class="p-4 text-right">
+      <p
+        class="block antialiased font-sans text-sm leading-normal font-normal text-blue-gray-600"
+      >
+        Clientes
+      </p>
+      <h4
+        class="block antialiased tracking-normal font-sans text-2xl font-semibold leading-snug text-blue-gray-900"
+      >
+        {{ totalClientes }}
+      </h4>
+    </div>
+    <div class="border-t border-blue-gray-50 p-4">
+      <p
+        class="block antialiased font-sans text-base leading-relaxed font-normal text-blue-gray-600"
+      >
+        <strong class="text-blue-500">{{ totalClientes }}</strong>&nbsp;Clientes registrados
+      </p>
+    </div>
+  </div>
+
+</div>
+
+<div class="mb-4 grid grid-cols-1 gap-6 xl:grid-cols-2">
+  <div
+    class="relative flex flex-col bg-clip-border rounded-xl bg-white text-gray-700 shadow-md overflow-hidden xl:col-span-2"
+  >
+    <div
+      class="relative bg-clip-border rounded-xl overflow-hidden bg-transparent text-gray-700 shadow-none m-0 flex items-center justify-between p-6"
+    >
+      <div>
+        <h6
+          class="block antialiased tracking-normal font-sans text-base font-semibold leading-relaxed text-blue-gray-900 mb-1"
+        >
+          Reportes
+        </h6>
+      </div>
+
+      <div class="shadow rounded-lg absolute relative z-50">
+        <button
+          (click)="toggleDropdown()"
+          class="flex rounded-lg inline-flex items-center bg-white hover:text-blue-500 focus:outline-none focus:shadow-outline text-gray-500 font-semibold py-2 px-2 md:px-4"
+        >
+          <span class="hidden md:block">Columnas</span>
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            class="w-5 h-5 ml-1"
+            viewBox="0 0 24 24"
+            stroke-width="2"
+            stroke="currentColor"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </button>
+        <!-- Dropdown -->
+        <div
+          *ngIf="showDropdown"
+          class="content top-full mt-2 right-0 bg-white shadow-lg rounded-lg w-48 z-50 p-2"
+        >
+          <div
+            *ngFor="let columna of columnas; let i = index"
+            class="flex items-center gap-2 px-4 py-2 hover:bg-gray-100"
+          >
+            <input
+              type="checkbox"
+              [checked]="columna.visible"
+              (change)="toggleColumn(i)"
+              class="form-checkbox text-blue-500"
+            />
+            <span class="text-gray-700">{{ columna.label }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-6 overflow-x-scroll px-0 pt-0 pb-2">
+      <div class="flex justify-between items-center mt-4">
+        <p>
+          Mostrar {{ pagination.page }} de {{ pagination.totalPages }} paginas
+        </p>
+
+        <div class="flex space-x-2">
+          <button
+            *ngFor="
+              let page of [].constructor(pagination.totalPages);
+              let i = index
+            "
+            (click)="changePage(i + 1)"
+            class="px-3 py-1 border rounded hover:bg-gray-200"
+            [class.bg-blue-500]="pagination.page === i + 1"
+            [class.text-white]="pagination.page === i + 1"
+          >
+            {{ i + 1 }}
+          </button>
+        </div>
+      </div>
+      <table class="w-full min-w-[640px] table-auto">
+        <thead>
+          <tr>
+            <th
+              *ngFor="let columnat of columnas"
+              class="border-b border-blue-gray-50 py-3 px-6 text-left"
+            >
+              <p
+                *ngIf="columnat.visible"
+                class="block antialiased font-sans text-[11px] font-medium uppercase text-blue-gray-400"
+              >
+                {{ columnat.label }}
+              </p>
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let reporte of reportes">
+            <td
+              *ngFor="let columna of columnas"
+              class="py-3 px-5 border-b border-gray-300"
+            >
+              <p *ngIf="columna.visible" class="text-xs text-gray-700">
+                {{ reporte[columna.key] }}
+              </p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
