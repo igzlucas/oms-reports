@@ -45,7 +45,7 @@ interface Detalle {
 })
 export class ReportService {
 
-  private apiUrl = 'https://sn8gmljs-8082.usw3.devtunnels.ms/api/v1/reporte';
+  private apiUrl = `${environment.apiUrl}/reporte`;
 
   constructor(private http: HttpClient) {}
 
