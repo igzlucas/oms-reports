@@ -21,7 +21,35 @@ export class AuthService {
 
   private USERGET = `${environment.apiUrl}${environment.users.usersUrl}`;
 
-  constructor(private httpClient: HttpClient, private router: Router, private encryptService: EncryptService) { }
+  private inactivityTimeout = 2 * 60 * 60 * 1000; // 2 horas
+  private inactivityTimer: any;
+
+
+
+  constructor(private httpClient: HttpClient, private router: Router, private encryptService: EncryptService) {
+    this.setupInactivityTimer();
+   }
+
+   private setupInactivityTimer() {
+    this.resetInactivityTimer();
+
+    window.addEventListener('mousemove', () => this.resetInactivityTimer());
+    window.addEventListener('keydown', () => this.resetInactivityTimer());
+    window.addEventListener('click', () => this.resetInactivityTimer());
+    window.addEventListener('scroll', () => this.resetInactivityTimer());
+  }
+
+
+  private resetInactivityTimer() {
+    clearTimeout(this.inactivityTimer);
+    this.inactivityTimer = setTimeout(() => this.handleInactivity(), this.inactivityTimeout);
+  }
+
+  private handleInactivity() {
+    console.warn('Sesión cerrada por inactividad');
+    this.logout();
+  }
+
 
   login(username: string, password: string): Observable<any>{
     return this.httpClient.post<any>(this.LOGIN_URL, {username, password}).pipe(
@@ -41,7 +69,7 @@ export class AuthService {
     localStorage.setItem(this.tokenKey, token);
   }
 
- 
+
   private getToken(): string | null {
     if(typeof window !== 'undefined'){
       return localStorage.getItem(this.tokenKey);
@@ -53,7 +81,7 @@ export class AuthService {
 
   private setRefreshToken(token: string): void {
     localStorage.setItem(this.refreshTokenKey, token);
-  } 
+  }
 
   private getRefreshToken(): string | null {
     if(typeof window !== 'undefined'){
@@ -65,32 +93,32 @@ export class AuthService {
 
   public async getUserName(): Promise<{ name: string | null; colaborador: string | null } | null> {
     const token = this.getToken();
-    const datos: { 
-      name: string | null; 
+    const datos: {
+      name: string | null;
       colaborador: string | null;
       correo: string | null;
       rol: string |null;
-      } = 
-      { 
-        name: null, 
+      } =
+      {
+        name: null,
         colaborador: null,
         correo: null,
         rol: null
       };
-    
+
     if (token) {
       try {
         const payload = JSON.parse(atob(token.split('.')[1]));
-        
+
         environment.users.id = payload.id;
         const response = await this.httpClient.get<any>(`${this.USERGET}${environment.users.id}`).toPromise();
-        
+
         datos.name = response.resultado?.nombreCompleto || null;
         datos.colaborador = response.resultado?.colaboradorId || null;
         datos.correo = response.resultado?.username || null;
         datos.rol = response.resultado?.roles|| null;
         environment.bussines.id = response.resultado?.empresaId || null;
-        return datos; 
+        return datos;
       } catch (error) {
         console.error('Error al obtener el nombre del usuario', error);
         return null;
@@ -98,7 +126,7 @@ export class AuthService {
     }
     return null;
   }
-  
+
 
 
 
@@ -108,7 +136,7 @@ export class AuthService {
       console.error('No refresh token available');
       return throwError(() => new Error('No refresh token available'));
     }
-  
+
     return this.httpClient.post<any>(this.REFRESH_URL, { refreshToken }).pipe(
       tap(response => {
         if (response.token) {
@@ -123,15 +151,18 @@ export class AuthService {
       })
     );
   }
-  
+
   autoRefreshToken(): void {
     const token = this.getToken();
     if (!token) return;
-  
+
     const payload = JSON.parse(atob(token.split('.')[1]));
-    const exp = payload.exp * 1000;  // Convertir a milisegundos
-    const timeout = exp - Date.now() - (60 * 1000);  // 60 segundos antes de la expiración
-  
+    // const exp = payload.exp * 1000;  // Convertir a milisegundos
+    // const timeout = exp - Date.now() - (60 * 1000);   60 segundos antes de la expiración
+    const expUtc = new Date(payload.exp * 1000).getTime();
+    const nowUtc = new Date().getTime();
+    const timeout = expUtc - nowUtc - (60 * 1000);
+
     if (timeout > 0) {
       setTimeout(() => {
         this.refreshToken().subscribe({

@@ -11,7 +11,7 @@ export class ConfigService {
   constructor(private http: HttpClient) {}
   getConfigById(configId: number): Observable<any> {
 
-    const token = localStorage.getItem('token'); 
+    const token = localStorage.getItem('token');
     let headers = new HttpHeaders();
     if (token) {
       headers = headers.append('Authorization', `Bearer ${token}`);
