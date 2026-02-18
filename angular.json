@@ -34,7 +34,40 @@
             "prerender": true,
             "ssr": {
               "entry": "server.ts"
-            }
+            },
+            "allowedCommonJsDependencies": [
+              "jspdf",
+              "canvg",
+              "core-js/modules/es.promise.js",
+              "core-js/modules/es.string.match.js",
+              "core-js/modules/es.string.replace.js",
+              "core-js/modules/es.string.starts-with.js",
+              "core-js/modules/es.array.iterator.js",
+              "core-js/modules/web.dom-collections.iterator.js",
+              "core-js/modules/es.array.reduce.js",
+              "core-js/modules/es.string.ends-with.js",
+              "core-js/modules/es.string.split.js",
+              "raf",
+              "core-js/modules/es.string.trim.js",
+              "rgbcolor",
+              "core-js/modules/es.array.index-of.js",
+              "core-js/modules/es.string.includes.js",
+              "core-js/modules/es.array.reverse.js",
+              "core-js/modules/es.regexp.to-string.js",
+              "@grpc/grpc-js",
+              "@grpc/proto-loader",
+              "undici",
+              "firebase/app",
+              "firebase/auth",
+              "firebase/firestore",
+              "firebase/storage",
+              "xlsx",
+              "file-saver",
+              "chart.js",
+              "long",
+              "protobufjs/minimal",
+              "firebase/analytics"
+            ]
           },
           "configurations": {
             "production": {
@@ -47,8 +80,8 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "500kB",
-                  "maximumError": "1MB"
+                  "maximumWarning": "1MB",
+                  "maximumError": "2MB"
                 },
                 {
                   "type": "anyComponentStyle",

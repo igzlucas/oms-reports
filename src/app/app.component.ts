@@ -1,24 +1,15 @@
 import { Component, OnInit } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { AuthService } from './core/services/auth.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterOutlet],
+  imports: [RouterModule],
   templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+  styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   title = 'ng-menu-dashboard';
 
-  constructor( private authService: AuthService) {
-
-  }
-
-  ngOnInit(): void {
-   if(this.authService.isAuthenticated()) {
-    this.authService.autoRefreshToken()
-   }
-  }
+  ngOnInit(): void {}
 }

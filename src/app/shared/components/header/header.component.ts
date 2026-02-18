@@ -1,37 +1,64 @@
-// header.component.ts
-import { Component, HostListener, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Subscription } from 'rxjs';
+import { SidebarService } from '../../../core/services/sidebar.service';
 import { AuthService } from '../../../core/services/auth.service';
-import { Router } from '@angular/router';
-import {CommonModule} from '@angular/common';
-import { SidebarStateService } from '../../../core/services/sidebar-state.service';
-import { SidebarComponent } from '../sidebar/sidebar.component';
-import { environment } from '../../../../environments/environment';
-import { EncryptService } from '../../../core/services/encrypt.service';
+import { CommonModule } from '@angular/common';
+import { User } from 'firebase/auth';
+import { Router, RouterModule } from '@angular/router';
+import { ClickOutsideDirective } from '../../../core/services/click-outside.directive';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, SidebarComponent],
+  imports: [CommonModule, RouterModule, ClickOutsideDirective],
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit {
-
+export class HeaderComponent implements OnInit, OnDestroy {
+  isSidebarVisible = false;
+  user: User | null = null;
+  private sidebarSubscription!: Subscription;
+  private userSubscription!: Subscription;
   isDropdownOpen = false;
-  datos: any; 
-  name: string = ''; 
-  isSidebarOpen = false;
+  name = '';
 
   constructor(
-    private authService: AuthService, 
-    private router: Router, 
-    private sidebarService: SidebarStateService,
-    private encryptService: EncryptService
-  ) { }
+    private sidebarService: SidebarService,
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
-  async ngOnInit(): Promise<void> {
-    this.datos = (await this.authService.getUserName()) ;
-    this.name = this.encryptService.descifrarRsa(this.datos.name.toString()) || 'Invitado';
+  ngOnInit() {
+    this.sidebarSubscription = this.sidebarService.sidebarVisible$.subscribe(
+      (isVisible: boolean) => {
+        this.isSidebarVisible = isVisible;
+      }
+    );
+    this.userSubscription = this.authService.user$.subscribe((user: User | null) => {
+      this.user = user;
+      if (user) {
+        this.name = user.displayName || user.email || '';
+      }
+    });
+  }
+
+  ngOnDestroy() {
+    if (this.sidebarSubscription) {
+      this.sidebarSubscription.unsubscribe();
+    }
+    if (this.userSubscription) {
+      this.userSubscription.unsubscribe();
+    }
+  }
+
+  toggleSidebar() {
+    this.sidebarService.toggleSidebar();
+  }
+
+  logout(): void {
+    this.authService.logout().subscribe(() => {
+      this.router.navigate(['/login']);
+    });
   }
 
   toggleDropdown() {
@@ -42,40 +69,17 @@ export class HeaderComponent implements OnInit {
     this.isDropdownOpen = false;
   }
 
-  selectOption(option: string) {
+  redirectToConfiguracion() {
+    this.router.navigate(['/profile']);
     this.closeDropdown();
+  }
+
+  selectOption(option: string) {
     if (option === 'profile') {
-      this.router.navigate(['/profile']);
+      this.redirectToConfiguracion();
     } else if (option === 'logout') {
       this.logout();
     }
+    this.closeDropdown();
   }
-
-  @HostListener('document:click', ['$event'])
-  handleClickOutside(event: Event) {
-    if (!(event.target as HTMLElement).closest('.relative')) {
-      this.closeDropdown();
-    }
-  }
-
-  logout(): void {
-    this.authService.logout();
-  }
-
-  redirectToConfiguracion(): void {
-    this.router.navigate([`/configuracion/${environment.users.id}`]);
-  }
-
-  isMenuOpen = false;
-
-  toggleMenu(): void {
-    this.isMenuOpen = !this.isMenuOpen;
-  }
-
-  // Alterna el estado del sidebar
-  toggleSidebar() {
-    this.isSidebarOpen = !this.isSidebarOpen;
-  }
-
-
 }

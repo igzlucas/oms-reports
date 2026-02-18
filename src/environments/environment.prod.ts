@@ -17,7 +17,15 @@ export const environment = {
     },
     bussines:{
         id:""
+    },
+    firebaseConfig: {
+      apiKey: "AIzaSyAD6TlHhsEfOm4sbw-EYdlMu-mkFXTGGjg",
+      authDomain: "olmos-marine-services.firebaseapp.com",
+      databaseURL: "https://olmos-marine-services-default-rtdb.firebaseio.com",
+      projectId: "olmos-marine-services",
+      storageBucket: "olmos-marine-services.firebasestorage.app",
+      messagingSenderId: "317835802386",
+      appId: "1:317835802386:web:cfa9f28ddf7828c803a5cb",
+      measurementId: "G-J4REFY8W3J"
     }
   };
-
- 

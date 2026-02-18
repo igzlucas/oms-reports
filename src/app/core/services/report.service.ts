@@ -1,72 +1,64 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-
-
-interface Reporte {
-  reporteId: number;
-  fecha: string;
-  empresa: string;
-  empresaDireccion: string;
-  cliente: string;
-  clienteDireccion: string;
-  persona: string;
-  equipo: string;
-  problema: string;
-  trabajo: string;
-  monto: number;
-  moneda: string;
-  observaciones: string;
-}
-
-interface ApiResponse {
-  reportes: Reporte[];
-  pagination: {
-    totalPages: number;
-    totalRecordsPage: number;
-    totalRecords: number;
-    page: number;
-  };
-}
-
-interface Detalle {
-  cantidad: number;
-  descripcion: string;
-  precio: number;
-  total: number;
-}
-
-
-
+import { Firestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, where, DocumentData, CollectionReference } from '@angular/fire/firestore';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Report } from '../models/report.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
 
-  private apiUrl = `${environment.apiUrl}/reporte`;
+  private reportsCollection: CollectionReference<DocumentData>;
 
-  constructor(private http: HttpClient) {}
+  constructor(private firestore: Firestore) {
+    this.reportsCollection = collection(this.firestore, 'reports');
+  }
 
-  sendReport(reportData: any): Observable<any> { 
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
+  getReportes(clienteId: string | null, top: number): Observable<Report[]> {
+    let q = query(this.reportsCollection);
+    if (clienteId) {
+      q = query(this.reportsCollection, where('clienteId', '==', clienteId));
+    }
+    return from(getDocs(q)).pipe(
+      map(snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Report)))
+    );
+  }
+
+  createReport(report: Report): Observable<any> {
+    return from(addDoc(this.reportsCollection, report));
+  }
+
+  updateReport(reportId: string, report: Partial<Report>): Observable<void> {
+    const reportDoc = doc(this.firestore, `reports/${reportId}`);
+    return from(updateDoc(reportDoc, report));
+  }
+
+  deleteReport(reportId: string): Observable<void> {
+    const reportDoc = doc(this.firestore, `reports/${reportId}`);
+    return from(deleteDoc(reportDoc));
+  }
+
+  getDetallesReporte(reporteId: string): Promise<Report | null> {
+    const reportDoc = doc(this.firestore, `reports/${reporteId}`);
+    return getDoc(reportDoc).then(docSnap => {
+      if (docSnap.exists()) {
+        return { id: docSnap.id, ...docSnap.data() } as Report;
+      } else {
+        return null;
+      }
     });
-
-    return this.http.post<any>(this.apiUrl, reportData, { headers });
   }
 
-
-  getReportes(pageNumber: number = 1, pageRecords: number = 10): Observable<ApiResponse> {
-    return this.http.get<ApiResponse>(`${this.apiUrl}?empresaId=${environment.bussines.id}&pageNumber=${pageNumber}&pageRecords=${pageRecords}`);
+  getNumeroReportes(): Promise<number> {
+    return getDocs(this.reportsCollection).then(snapshot => snapshot.size);
   }
 
-  getDetallesReporte(reporteId: number){
-    return this.http.get<Detalle[]>(`${this.apiUrl}/${reporteId}`);
-  }
-
-  getNumeroReportes(){
-    return this.http.get(`${this.apiUrl}/numero/${environment.bussines.id}`);
+  sendReport(report: Report): Observable<any> {
+    if (report.id) {
+      return this.updateReport(report.id, report);
+    } else {
+      return this.createReport(report);
+    }
   }
 }

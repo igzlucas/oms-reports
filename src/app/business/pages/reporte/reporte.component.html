@@ -13,15 +13,15 @@
   >
     <select
       id="cliente"
-      [(ngModel)]="reportData.cliente"
+      [(ngModel)]="reportData.clienteId"
       name="cliente"
       required
-      (change)="onCustomerChange(reportData.cliente)"
+      (change)="onCustomerChange(reportData.clienteId)"
       class="peer mt-1 block w-full p-2 bg-transparent rounded-md shadow-sm focus:outline-none focus:ring-0"
     >
       <option value="" disabled selected>Seleccione un cliente</option>
-      <option *ngFor="let customer of customers" [value]="customer.clienteNombre">
-        {{ customer.clienteNombre }}
+      <option *ngFor="let customer of customers" [value]="customer.id">
+        {{ customer.nombre }}
       </option>
     </select>
     <span
@@ -52,7 +52,7 @@
         <input
           id="direccion"
           type="text"
-          [(ngModel)]="reportData.direccion"
+          [(ngModel)]="reportData.clienteDireccion"
           name="direccion"
           required
           readonly
@@ -76,8 +76,7 @@
         <input
           id="fecha"
           type="date"
-          [ngModel]="formatDate(reportData.fecha)"
-          (ngModelChange)="updateFecha($event)"
+          [(ngModel)]="reportData.fecha"
           name="fecha"
           required
           class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
@@ -101,7 +100,7 @@
         <input
           id="persona"
           type="text"
-          [(ngModel)]="reportData.persona"
+          [(ngModel)]="reportData.personaRecibe"
           name="persona"
           required
           class="peer mt-1 block w-full p-2 border-none bg-transparent placeholder-transparent rounded-md shadow-sm focus:border-transparent focus:outline-none focus:ring-0"
@@ -110,7 +109,7 @@
         <span
           class="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-white p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
         >
-          Persona
+          Persona que recibe
         </span>
       </label>
     </div>
@@ -172,7 +171,7 @@
       >
         <textarea
           id="trabajo"
-          [(ngModel)]="reportData.trabajo"
+          [(ngModel)]="reportData.trabajoRealizado"
           name="trabajo"
           required
           rows="4"
@@ -277,7 +276,7 @@
               >
                 <button
                   type="button"
-                  (click)="addDetalle()"
+                  (click)="addDetail()"
                   class="bg-indigo-500 text-white active:bg-indigo-600 text-xs font-bold uppercase px-3 py-1 rounded outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150"
                   type="button"
                 >
@@ -350,7 +349,7 @@
                     <td class="px-4 py-2">
                       <input
                         type="number"
-                        [(ngModel)]="detalle.precio"
+                        [(ngModel)]="detalle.valorUnitario"
                         [ngClass]="{
                           'border-red-500 ring-red-500': errors.detalle
                         }"
@@ -363,7 +362,7 @@
                     <td class="px-4 py-2">
                       <input
                         type="number"
-                        [(ngModel)]="detalle.total"
+                        [(ngModel)]="detalle.valorTotal"
                         name="total-{{ i }}"
                         readonly
                         class="w-full p-2 border border-gray-300 rounded-md shadow-sm bg-gray-100"
@@ -372,7 +371,7 @@
                     <td class="px-4 py-2 text-center">
                       <button
                         type="button"
-                        (click)="removeDetalle(i)"
+                        (click)="removeDetail(i)"
                         class="text-gray-500 transition-colors duration-200 dark:hover:text-red-500 dark:text-gray-300 hover:text-red-500 focus:outline-none"
                       >
                         <svg
@@ -450,11 +449,7 @@
     </span>
     <span *ngIf="!loading">Enviar Reporte</span>
   </button>
-    <app-alert
-      [isVisible]="alertVisible"
-      [message]="alertMessage"
-      [type]="alertType"
-    ></app-alert>
+    
   </form>
 </div>
 
@@ -466,7 +461,7 @@
   <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-lg">
     <h3 class="text-xl font-semibold text-gray-800 mb-4">Dibujar Firma</h3>
     <canvas
-      #signatureCanvas
+      #signaturePad
       class="border border-gray-300 rounded-md w-full h-48"
     ></canvas>
     <div class="mt-6 flex justify-between">

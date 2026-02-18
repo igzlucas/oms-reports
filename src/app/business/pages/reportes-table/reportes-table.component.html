@@ -205,153 +205,167 @@
   </svg>
 </div>
 
-<div class="flex justify-between items-center mt-4">
-  <p>Showing {{ pagination.page }} of {{ pagination.totalPages }} pages</p>
-
-  <div class="flex space-x-2">
-    <button
-      *ngFor="let page of [].constructor(pagination.totalPages); let i = index"
-      (click)="changePage(i + 1)"
-      class="px-3 py-1 border rounded hover:bg-gray-200"
-      [class.bg-blue-500]="pagination.page === i + 1"
-      [class.text-white]="pagination.page === i + 1"
-    >
-      {{ i + 1 }}
-    </button>
-  </div>
-</div>
 <div class="p-4">
-  <!-- Barra de búsqueda -->
-  <input
-    type="text"
-    placeholder="Search..."
-    [(ngModel)]="searchTerm"
-    (input)="filterReports()"
-    class="w-full p-2 border rounded mb-3"
-  />
+  <div class="flex justify-between items-center mb-4">
+    <input
+      type="text"
+      placeholder="Buscar..."
+      [(ngModel)]="searchTerm"
+      (input)="filterReports()"
+      class="w-1/3 p-2 border rounded"
+    />
+    <div class="flex items-center">
+      <span class="mr-2">Registros por página:</span>
+      <select
+        [(ngModel)]="itemsPerPage"
+        (change)="changePage(1)"
+        class="border px-2 py-1 rounded"
+      >
+        <option *ngFor="let option of [5, 10, 15, 20]" [value]="option">
+          {{ option }}
+        </option>
+      </select>
+    </div>
+  </div>
 
-  <!-- Tabla de Reportes -->
   <div class="overflow-x-auto">
     <table *ngIf="!isLoading" class="w-full min-w-[640px] table-auto">
       <thead class="bg-gray-100">
         <tr>
-          <th class="border p-2 text-center">Detalles</th>
           <th class="border p-2 text-center">N° Reporte</th>
           <th class="border p-2 text-center">Fecha</th>
-          <th class="border p-2 text-center">Empresa</th>
           <th class="border p-2 text-center">Cliente</th>
-          <th class="border p-2 text-center">Persona</th>
-          <th class="border p-2 text-center">Equipo</th>
-          <th class="border p-2 text-center">Problema</th>
-          <th class="border p-2 text-center">Trabajo</th>
           <th class="border p-2 text-center">Monto</th>
           <th class="border p-2 text-center">Moneda</th>
-          <th class="border p-2 text-center">Observaciones</th>
+          <th class="border p-2 text-center">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let reporte of reportes" class="hover:bg-gray-100">
-          <td class="border p2">
-            <details
-              [open]="currentOpenReporteId === reporte.reporteId"
-              (click)="openDetails(reporte)"
-              class="open:border-black/10 open:bg-gray-100 ..."
+        <tr *ngFor="let reporte of visibleReportes" class="hover:bg-gray-100">
+          <td class="border p-2 text-center">{{ reporte.id }}</td>
+          <td class="border p-2 text-center">{{ reporte.fecha | date: 'shortDate' }}</td>
+          <td class="border p-2 text-center">{{ reporte.cliente }}</td>
+          <td class="border p-2 text-center">{{ reporte.monto | currency }}</td>
+          <td class="border p-2 text-center">{{ reporte.moneda }}</td>
+          <td class="border p-2 text-center">
+            <button
+              (click)="openModal(reporte)"
+              class="text-blue-500 hover:underline mr-2"
             >
-              <summary
-                class="text-sm leading-6 font-semibold text-gray-900 select-none"
-              ></summary>
-              <div class="mt-3 text-sm leading-6 text-gray-600">
-                <table
-                  class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400"
-                >
-                  <thead
-                    class="text-xs text-gray-700 uppercase bg-gray-100 dark:bg-gray-700 dark:text-gray-400"
-                  >
-                    <tr>
-                      <th scope="col" class="px-6 py-3 rounded-s-lg">
-                        Descripcion
-                      </th>
-                      <th scope="col" class="px-6 py-3">Cantidad</th>
-                      <th scope="col" class="px-6 py-3 rounded-e-lg">Precio</th>
-                      <th scope="col" class="px-6 py-3 rounded-e-lg">Total</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr
-                      *ngFor="let detalle of detalles"
-                      class="bg-white dark:bg-gray-800"
-                    >
-                      <th
-                        scope="row"
-                        class="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white"
-                      >
-                        {{ detalle.descripcion }}
-                      </th>
-                      <td class="px-6 py-4">
-                        {{ detalle.cantidad }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ detalle.precio }}
-                      </td>
-                      <td class="px-6 py-4">
-                        {{ detalle.total }}
-                      </td>
-                    </tr>
-                  </tbody>
-                  <tfoot>
-                    <tr class="font-semibold text-gray-900 dark:text-white">
-                      <th scope="row" class="px-6 py-3 text-base">Total</th>
-                      <td class="px-6 py-3">{{ totalCantidad }}</td>
-                      <td class="px-6 py-3"></td>
-                      <td class="px-6 py-3">{{ totalTotal }}</td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </details>
+              Ver
+            </button>
+            <button
+              (click)="deleteReport(reporte.id!)"
+              class="text-red-500 hover:underline"
+            >
+              Eliminar
+            </button>
           </td>
-          <td class="border p-2">{{ reporte.reporteId }}</td>
-          <td class="border p-2">{{ reporte.fecha }}</td>
-          <td class="border p-2">{{ reporte.empresa }}</td>
-          <td class="border p-2">{{ reporte.cliente }}</td>
-          <td class="border p-2">{{ reporte.persona }}</td>
-          <td class="border p-2">{{ reporte.equipo }}</td>
-          <td class="border p-2">{{ reporte.problema }}</td>
-          <td class="border p-2 truncate">{{ reporte.trabajo }}</td>
-          <td class="border p-2">{{ reporte.monto }}</td>
-          <td class="border p-2">{{ reporte.moneda }}</td>
-          <td class="border p-2">{{ reporte.observaciones }}</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Dropdown para seleccionar registros por página -->
-  <select
-    [(ngModel)]="pagination.totalRecordsPage"
-    (change)="changePage(1)"
-    class="border px-2 py-1 rounded"
-  >
-    <option *ngFor="let option of [5, 10, 15, 20]" [value]="option">
-      {{ option }} registros
-    </option>
-  </select>
-
-  <!-- Paginación -->
   <div class="flex justify-between items-center mt-4">
-    <p>Showing {{ pagination.page }} of {{ pagination.totalPages }} pages</p>
+    <p>Página {{ currentPage }} de {{ totalPages }}</p>
     <div class="flex space-x-2">
       <button
-        *ngFor="
-          let page of [].constructor(pagination.totalPages);
-          let i = index
-        "
-        (click)="changePage(i + 1)"
-        class="px-3 py-1 border rounded hover:bg-gray-200"
-        [class.bg-blue-500]="pagination.page === i + 1"
-        [class.text-white]="pagination.page === i + 1"
+        (click)="previousPage()"
+        [disabled]="currentPage === 1"
+        class="px-3 py-1 border rounded hover:bg-gray-200 disabled:opacity-50"
       >
-        {{ i + 1 }}
+        Anterior
+      </button>
+      <button
+        *ngFor="let page of totalPagesArray"
+        (click)="goToPage(page)"
+        class="px-3 py-1 border rounded hover:bg-gray-200"
+        [class.bg-blue-500]="currentPage === page"
+        [class.text-white]="currentPage === page"
+      >
+        {{ page }}
+      </button>
+      <button
+        (click)="nextPage()"
+        [disabled]="currentPage === totalPages"
+        class="px-3 py-1 border rounded hover:bg-gray-200 disabled:opacity-50"
+      >
+        Siguiente
+      </button>
+    </div>
+  </div>
+</div>
+
+<div
+  *ngIf="isModalOpen"
+  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 print:hidden"
+>
+  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
+    <div #reportContent>
+      <h2 class="text-2xl font-bold mb-4">Detalles del Reporte</h2>
+      <div *ngIf="selectedReport">
+        <div class="grid grid-cols-2 gap-4 mb-4">
+          <div>
+            <strong>N° Reporte:</strong> {{ selectedReport.id }}
+          </div>
+          <div><strong>Fecha:</strong> {{ selectedReport.fecha | date: 'fullDate' }}</div>
+          <div><strong>Cliente:</strong> {{ selectedReport.cliente }}</div>
+          <div><strong>Dirección:</strong> {{ selectedReport.clienteDireccion }}</div>
+          <div><strong>Equipo:</strong> {{ selectedReport.equipo }}</div>
+          <div>
+            <strong>Persona que recibe:</strong>
+            {{ selectedReport.personaRecibe }}
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <strong>Problema:</strong> {{ selectedReport.problema }}
+        </div>
+        <div class="mb-4">
+          <strong>Trabajo Realizado:</strong>
+          {{ selectedReport.trabajoRealizado }}
+        </div>
+
+        <h3 class="text-xl font-semibold mb-2">Detalles de cobro</h3>
+        <table class="w-full mb-4">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="border p-2">Cantidad</th>
+              <th class="border p-2">Descripción</th>
+              <th class="border p-2">Valor Unitario</th>
+              <th class="border p-2">Valor Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detalle of selectedReport.detalles">
+              <td class="border p-2">{{ detalle.cantidad }}</td>
+              <td class="border p-2">{{ detalle.descripcion }}</td>
+              <td class="border p-2">{{ detalle.valorUnitario | currency }}</td>
+              <td class="border p-2">{{ detalle.valorTotal | currency }}</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <div class="flex justify-end font-bold text-xl mb-4">
+          Subtotal: {{ selectedReport.monto | currency }}
+        </div>
+
+        <div class="mb-4">
+          <strong>Observaciones:</strong> {{ selectedReport.observaciones }}
+        </div>
+
+        <div class="mb-4">
+          <strong>Firma:</strong>
+          <img [src]="selectedReport.firma" alt="Firma" class="border mt-2 h-32" />
+        </div>
+      </div>
+    </div>
+    <div class="flex justify-end mt-4 print:hidden">
+      <button (click)="printReport()" class="bg-green-500 text-white px-4 py-2 rounded mr-2">
+        Imprimir
+      </button>
+      <button (click)="closeModal()" class="bg-gray-500 text-white px-4 py-2 rounded">
+        Cerrar
       </button>
     </div>
   </div>

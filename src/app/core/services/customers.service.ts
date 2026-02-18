@@ -1,53 +1,41 @@
 import { Injectable } from '@angular/core';
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { environment } from '../../../environments/environment';
-
-
-export interface Customer {
-  clienteId?: string;
-  empresaId: string;
-  clienteNombre: string;
-  clienteDireccion: string;
-  selected?: boolean; // Propiedad opcional
-}
-
-export interface CustomerRequest {
-  empresaId: string;
-  nombre: string;
-  direccion: string;
-}
+import { Firestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, where, DocumentData, CollectionReference } from '@angular/fire/firestore';
+import { Observable, from } from 'rxjs';
+import { map } from 'rxjs/operators';
+import { Customer, CustomerRequest } from '../models/customer.model';
 
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class CustomersService {
-    private customerUrl = `${environment.apiUrl}`;
-    
-    constructor(private http: HttpClient) {}
 
-    getClientes(userId: string): Observable<any> {
-      //const params = new HttpParams().set('userId', userId);
-      return this.http.get(`${this.customerUrl}/clientes/usuarios?userId=${userId}`);
-    }
+  private customersCollection: CollectionReference<DocumentData>;
 
-     // Crear un cliente
-  crearCliente(customer: CustomerRequest): Observable<CustomerRequest> {
-    return this.http.post<CustomerRequest>(`${this.customerUrl}/clientes`, customer);
+  constructor(private firestore: Firestore) {
+    this.customersCollection = collection(this.firestore, 'customers');
   }
 
-  // Actualizar un cliente
-  actualizarCliente(clienteId: string, customer: CustomerRequest): Observable<CustomerRequest> {
-    return this.http.put<CustomerRequest>(`${this.customerUrl}/clientes/${clienteId}`, customer);
+  getCustomers(): Observable<Customer[]> {
+    return from(getDocs(this.customersCollection)).pipe(
+      map(snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer)))
+    );
   }
 
-  // Eliminar un cliente
-  eliminarCliente(clienteId: string): Observable<any> {
-    return this.http.delete<CustomerRequest>(`${this.customerUrl}/clientes/${clienteId}`);
+  createCustomer(customer: CustomerRequest): Observable<any> {
+    return from(addDoc(this.customersCollection, customer));
   }
 
-  getNumeroClientes(){
-    return this.http.get(`${this.customerUrl}/clientes/numero/${environment.bussines.id}`);
+  updateCustomer(id: string, customer: CustomerRequest): Observable<void> {
+    const customerDoc = doc(this.firestore, `customers/${id}`);
+    return from(updateDoc(customerDoc, { ...customer }));
   }
 
+  deleteCustomer(id: string): Observable<void> {
+    const customerDoc = doc(this.firestore, `customers/${id}`);
+    return from(deleteDoc(customerDoc));
+  }
+
+  getNumeroClientes(): Promise<number> {
+    return getDocs(this.customersCollection).then(snapshot => snapshot.size);
+  }
 }

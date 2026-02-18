@@ -1,121 +1,168 @@
-import { ChangeDetectionStrategy, Component, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { ReportService } from '../../../core/services/report.service';
 import { CommonModule } from '@angular/common';
+import { Report } from '../../../core/models/report.model';
+import { ToastrService } from 'ngx-toastr';
 import { FormsModule } from '@angular/forms';
-
-
-interface Reporte {
-  reporteId: number;
-  fecha: string;
-  empresa: string;
-  cliente: string;
-  persona: string;
-  equipo: string;
-  problema: string;
-  trabajo: string;
-  monto: number;
-  moneda: string;
-  observaciones: string;
-  [key: string]: any; // Firma de índice
-}
-
-interface Detalle {
-  cantidad: number;
-  descripcion: string;
-  precio: number;
-  total: number;
-}
-
 
 @Component({
   selector: 'app-reportes-table',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './reportes-table.component.html',
-  styleUrl: './reportes-table.component.css',
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrls: ['./reportes-table.component.css'],
+  providers: [ReportService]
 })
-export default class ReportesTableComponent implements OnInit { 
+export class ReportesTableComponent implements OnInit {
+  reportes: Report[] = [];
+  visibleReportes: Report[] = [];
+  filteredReportes: Report[] = [];
+  searchTerm: string = '';
 
+  currentPage = 1;
+  itemsPerPage = 10;
+  totalPages = 0;
+
+  isModalOpen = false;
+  selectedReport: Report | null = null;
   isLoading = true;
-  reportes: Reporte[] = [];
-  detalles: Detalle[] = [];
-  currentOpenReporteId: any = null;
-  pagination = { totalPages: 1, totalRecordsPage: 10, totalRecords: 0, page: 1 };
-  searchTerm = '';
-  selectedReporte: any = null;
 
+  pagination = {
+    page: 1,
+    totalPages: 0,
+    totalRecordsPage: 10,
+  };
 
-  constructor(private reportService: ReportService, private cd: ChangeDetectorRef) {}
+  currentOpenReporteId: string | null = null;
+  detalles: any[] = [];
+  totalCantidad = 0;
+  totalTotal = 0;
 
-  ngOnInit() {
-    setTimeout(() => {
-      this.fetchReports();
-      this.isLoading = false;
-    }, 500);
+  constructor(
+    private reportService: ReportService,
+    private toastr: ToastrService
+  ) {}
+
+  ngOnInit(): void {
+    this.getReportes();
   }
 
-
-  fetchReports(page: number = 1) {
-    this.reportService.getReportes(page, this.pagination.totalRecordsPage).subscribe(response => {
-      if (response && response.reportes) {
-        this.reportes = response.reportes;
-        this.pagination = response.pagination;
-        this.pagination.page = page;
-      } else {
-        this.reportes = [];
-      }
-      this.cd.detectChanges();
-    }, error => {
-
-      console.error('Error al obtener reportes', error);
-    });
-  }
-
-
-  filterReports() {
-    this.fetchReports();
-  }
-
-  changePage(page: number) {
-    if (page >= 1 && page <= this.pagination.totalPages) {
-      this.pagination.page = page; 
-      this.fetchReports(page);
-    }
-  }
-
-  openDetails(reporte?: any){
-    if (!reporte) return;
-
-    // Si se hace clic en el reporte que ya está abierto, se cierra
-    if (this.currentOpenReporteId === reporte.reporteId) {
-      this.currentOpenReporteId = null;
-      this.detalles = [];
-      return;
-    }
-
-    // Se actualiza el reporte abierto
-    this.currentOpenReporteId = reporte.reporteId;
-
-    // Se obtienen los detalles del reporte seleccionado
-    this.reportService.getDetallesReporte(reporte.reporteId).subscribe({
-      next: (response) => {
-        this.detalles = response;
-        this.cd.detectChanges(); // Fuerza la actualización del DOM
+  getReportes(): void {
+    this.isLoading = true;
+    this.reportService.getReportes(null, 1000).subscribe(
+      (response: Report[]) => {
+        this.reportes = response;
+        this.filteredReportes = response;
+        this.totalPages = Math.ceil(this.filteredReportes.length / this.itemsPerPage);
+        this.pagination.totalPages = this.totalPages;
+        this.updateVisibleReportes();
+        this.isLoading = false;
       },
-      error: (error) => {
-        console.error('Error al obtener los detalles', error);
+      (error: any) => {
+        console.error('Error fetching reports:', error);
+        this.toastr.error('Error al cargar los reportes.');
+        this.isLoading = false;
       }
-    });
+    );
   }
 
-  get totalCantidad(): number {
-    return this.detalles.reduce((sum, detalle) => sum + Number(detalle.cantidad || 0), 0);
+  filterReportes(): void {
+    this.filteredReportes = this.reportes.filter(reporte =>
+      reporte.cliente.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+      (reporte.id && reporte.id.toString().includes(this.searchTerm.toLowerCase()))
+    );
+    this.totalPages = Math.ceil(this.filteredReportes.length / this.itemsPerPage);
+    this.pagination.totalPages = this.totalPages;
+    this.currentPage = 1;
+    this.pagination.page = 1;
+    this.updateVisibleReportes();
   }
 
-  get totalTotal(): number {
-    return this.detalles.reduce((sum, detalle) => sum + Number(detalle.total || 0), 0);
+  updateVisibleReportes(): void {
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.visibleReportes = this.filteredReportes.slice(startIndex, endIndex);
   }
 
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.pagination.page = page;
+      this.updateVisibleReportes();
+    }
+  }
 
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.pagination.page++;
+      this.updateVisibleReportes();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.pagination.page--;
+      this.updateVisibleReportes();
+    }
+  }
+
+  async openModal(reporte: Report): Promise<void> {
+    try {
+      this.isLoading = true;
+      const reportDetails = await this.reportService.getDetallesReporte(reporte.id!);
+      this.selectedReport = reportDetails;
+      this.isModalOpen = true;
+      this.isLoading = false;
+    } catch (error) {
+      console.error('Error fetching report details:', error);
+      this.toastr.error('Error al cargar los detalles del reporte.');
+      this.isLoading = false;
+    }
+  }
+
+  closeModal(): void {
+    this.isModalOpen = false;
+    this.selectedReport = null;
+  }
+
+  deleteReport(reporteId: string): void {
+    if (confirm('¿Estás seguro de que quieres eliminar este reporte?')) {
+      this.reportService.deleteReport(reporteId).subscribe(
+        () => {
+          this.toastr.success('Reporte eliminado exitosamente');
+          this.getReportes();
+        },
+        (error) => {
+          this.toastr.error('Error al eliminar el reporte');
+          console.error('Error deleting report:', error);
+        }
+      );
+    }
+  }
+
+  printReport() {
+    window.print();
+  }
+
+  get totalPagesArray(): number[] {
+    return Array(this.totalPages).fill(0).map((x, i) => i + 1);
+  }
+
+  changePage(page: number): void {
+    this.goToPage(page);
+  }
+
+  openDetails(reporte: Report): void {
+    if (this.currentOpenReporteId === reporte.id) {
+      this.currentOpenReporteId = null;
+    } else {
+      this.currentOpenReporteId = reporte.id!;
+    }
+  }
+
+  filterReports(): void {
+    this.filterReportes();
+  }
 }

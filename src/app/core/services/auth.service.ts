@@ -1,224 +1,98 @@
-import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
-import { Observable, tap, throwError, catchError } from 'rxjs';
-import { environment } from '../../../environments/environment';
-import { EncryptService } from '../../core/services/encrypt.service';
-
+import { Observable, from, of } from 'rxjs';
+import { map, switchMap, catchError, tap } from 'rxjs/operators';
+import {
+  Auth,
+  signInWithPopup,
+  GoogleAuthProvider,
+  UserCredential,
+  signOut,
+  User,
+  signInWithEmailAndPassword,
+  onAuthStateChanged,
+  getIdTokenResult,
+  sendPasswordResetEmail
+} from '@angular/fire/auth';
+import { Firestore, doc, setDoc, getDoc } from '@angular/fire/firestore';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class AuthService {
-  // private LOGIN_URL = 'http://localhost:8082/api/v1/auth/login';
-  //private LOGIN_URL = 'https://sn8gmljs-8082.usw3.devtunnels.ms/api/v1/auth/login';
-  private LOGIN_URL = `${environment.apiUrl}${environment.auth.loginUrl}`;
-  private tokenKey = 'authToken';
+  private auth: Auth = inject(Auth);
+  private firestore: Firestore = inject(Firestore);
+  public user$: Observable<User | null> = new Observable();
 
-  // private REFRESH_URL = 'http://localhost:8082/api/v1/auth/refresh';
-  private REFRESH_URL = `${environment.apiUrl}${environment.auth.refreshUrl}`;
-  private refreshTokenKey = 'refreshToken';
-
-  private USERGET = `${environment.apiUrl}${environment.users.usersUrl}`;
-
-  private inactivityTimeout = 2 * 60 * 60 * 1000; // 2 horas
-  private inactivityTimer: any;
-
-
-
-  constructor(private httpClient: HttpClient, private router: Router, private encryptService: EncryptService) {
-    this.setupInactivityTimer();
-   }
-
-   private setupInactivityTimer() {
-    this.resetInactivityTimer();
-
-    window.addEventListener('mousemove', () => this.resetInactivityTimer());
-    window.addEventListener('keydown', () => this.resetInactivityTimer());
-    window.addEventListener('click', () => this.resetInactivityTimer());
-    window.addEventListener('scroll', () => this.resetInactivityTimer());
+  constructor(private router: Router) {
+    this.user$ = new Observable(observer => {
+      const unsubscribe = onAuthStateChanged(this.auth, observer);
+      return unsubscribe;
+    });
   }
 
-
-  private resetInactivityTimer() {
-    clearTimeout(this.inactivityTimer);
-    this.inactivityTimer = setTimeout(() => this.handleInactivity(), this.inactivityTimeout);
-  }
-
-  private handleInactivity() {
-    console.warn('Sesión cerrada por inactividad');
-    this.logout();
-  }
-
-
-  login(username: string, password: string): Observable<any>{
-    return this.httpClient.post<any>(this.LOGIN_URL, {username, password}).pipe(
-      tap(response => {
-        localStorage.removeItem(this.tokenKey);
-        localStorage.removeItem(this.refreshTokenKey);
-        if(response.token){
-          this.setToken(response.token);
-          this.setRefreshToken(response.refreshToken)
-          this.autoRefreshToken();
-        }
-      })
-    )
-  }
-
-  private setToken(token: string): void {
-    localStorage.setItem(this.tokenKey, token);
-  }
-
-
-  private getToken(): string | null {
-    if(typeof window !== 'undefined'){
-      return localStorage.getItem(this.tokenKey);
-    }else {
-      return null;
-    }
-  }
-
-
-  private setRefreshToken(token: string): void {
-    localStorage.setItem(this.refreshTokenKey, token);
-  }
-
-  private getRefreshToken(): string | null {
-    if(typeof window !== 'undefined'){
-      return localStorage.getItem(this.refreshTokenKey);
-    }else {
-      return null;
-    }
-  }
-
-  public async getUserName(): Promise<{ name: string | null; colaborador: string | null } | null> {
-    const token = this.getToken();
-    const datos: {
-      name: string | null;
-      colaborador: string | null;
-      correo: string | null;
-      rol: string |null;
-      } =
-      {
-        name: null,
-        colaborador: null,
-        correo: null,
-        rol: null
-      };
-
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-
-        environment.users.id = payload.id;
-        const response = await this.httpClient.get<any>(`${this.USERGET}${environment.users.id}`).toPromise();
-
-        datos.name = response.resultado?.nombreCompleto || null;
-        datos.colaborador = response.resultado?.colaboradorId || null;
-        datos.correo = response.resultado?.username || null;
-        datos.rol = response.resultado?.roles|| null;
-        environment.bussines.id = response.resultado?.empresaId || null;
-        return datos;
-      } catch (error) {
-        console.error('Error al obtener el nombre del usuario', error);
-        return null;
-      }
-    }
-    return null;
-  }
-
-
-
-
-  refreshToken(): Observable<any> {
-    const refreshToken = this.getRefreshToken();
-    if (!refreshToken) {
-      console.error('No refresh token available');
-      return throwError(() => new Error('No refresh token available'));
-    }
-
-    return this.httpClient.post<any>(this.REFRESH_URL, { refreshToken }).pipe(
-      tap(response => {
-        if (response.token) {
-          this.setToken(response.token);
-          this.setRefreshToken(response.refreshToken);
-          this.autoRefreshToken();  // Reconfigura el auto-refresh después de obtener un nuevo token
-        }
+  loginWithGoogle(): Observable<void> {
+    const provider = new GoogleAuthProvider();
+    return from(signInWithPopup(this.auth, provider)).pipe(
+      switchMap((userCredential: UserCredential) => {
+        return this.checkAndCreateUser(userCredential.user);
       }),
-      catchError(error => {
-        console.error('Error refreshing token', error);
-        return throwError(() => new Error('Failed to refresh token'));
+      catchError((error) => {
+        console.error('Login failed:', error);
+        throw error;
       })
     );
   }
 
-  autoRefreshToken(): void {
-    const token = this.getToken();
-    if (!token) return;
-
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    // const exp = payload.exp * 1000;  // Convertir a milisegundos
-    // const timeout = exp - Date.now() - (60 * 1000);   60 segundos antes de la expiración
-    const expUtc = new Date(payload.exp * 1000).getTime();
-    const nowUtc = new Date().getTime();
-    const timeout = expUtc - nowUtc - (60 * 1000);
-
-    if (timeout > 0) {
-      setTimeout(() => {
-        this.refreshToken().subscribe({
-          next: () => console.log('Token refreshed successfully'),
-          error: (err) => {
-            console.error('Failed to refresh token', err);
-            this.logout(); // Cierra la sesión si no puede refrescar
-          },
-        });
-      }, timeout);
-    }
+  loginWithEmail(email: string, password: string):Observable<any>{
+    return from(signInWithEmailAndPassword(this.auth, email, password));
   }
 
-  isAuthenticated(): boolean {
-    const token = this.getToken();
-    if(!token){
-      return false;
-    }
-    const payload = JSON.parse(atob(token.split('.')[1]));
-    const exp = payload.exp * 1000;
-    return Date.now() < exp;
+  logout(): Observable<void> {
+    return from(signOut(this.auth)).pipe(
+      tap(() => this.router.navigate(['/login']))
+    );
   }
 
-  logout(): void{
-    localStorage.removeItem(this.tokenKey);
-    localStorage.removeItem(this.refreshTokenKey);
-    this.router.navigate(['/login']);
+  isAuthenticated(): Observable<boolean> {
+    return this.user$.pipe(map(user => user !== null));
   }
 
-  public getUserRole(): string | null {
-    const token = this.getToken();
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const role = this.encryptService.descifrarAes(payload.role);
-        return role;
-      } catch (error) {
-        console.error('Invalid token format', error);
-        return null;
-      }
-    }
-    return null;
+  getCurrentUserToken(): Observable<any> {
+    return this.user$.pipe(
+      switchMap(user => {
+        if (user) {
+          return from(getIdTokenResult(user));
+        }
+        return of(null);
+      })
+    );
   }
 
-  // Este método ya está definido en tu código
-public getTokenForInterceptor(): string | null {
-  return this.getToken();
-}
+  forgotPassword(email: string): Observable<void> {
+    return from(sendPasswordResetEmail(this.auth, email));
+  }
 
-  public isAuthenticatedWithToken(): { isAuthenticated: boolean, token: string | null } {
-    const token = this.getToken();
-    if (token) {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp * 1000;
-      return { isAuthenticated: Date.now() < exp, token };
-    }
-    return { isAuthenticated: false, token: null };
+  private checkAndCreateUser(user: User): Observable<void> {
+    const userRef = doc(this.firestore, `users/${user.uid}`);
+    return from(getDoc(userRef)).pipe(
+      switchMap((docSnap) => {
+        if (!docSnap.exists()) {
+          // User does not exist, create a new document
+          return from(
+            setDoc(userRef, {
+              email: user.email,
+              displayName: user.displayName,
+              photoURL: user.photoURL,
+              createdAt: new Date(),
+              role: 'user' // Default role
+            })
+          );
+        } else {
+          // User already exists
+          return of(undefined);
+        }
+      })
+    );
   }
 }

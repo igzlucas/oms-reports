@@ -1,20 +1,20 @@
-import { Injectable } from '@angular/core';
-import { CanActivate, Router } from '@angular/router';
+import { inject } from '@angular/core';
+import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { map } from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root'
-})
-export class RoleGuard implements CanActivate {
+export const roleGuard: CanActivateFn = (route, state) => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
 
-  constructor(private authService: AuthService, private router: Router) {}
-
-  canActivate(route: any): boolean {
-    const role = this.authService.getUserRole(); // Obtén el rol directamente
-    if (role && route.data?.roles?.includes(role)) {
-      return true;
-    }
-    this.router.navigate(['/unauthorized']);
-    return false;
-  }
-}
+  return authService.getCurrentUserToken().pipe(
+    map(token => {
+      if (token && token.claims['role'] === 'admin') {
+        return true;
+      } else {
+        router.navigate(['/dashboard']);
+        return false;
+      }
+    })
+  );
+};

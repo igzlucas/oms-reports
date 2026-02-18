@@ -1,74 +1,88 @@
 import { Component, OnInit } from '@angular/core';
 import { AuthService } from '../../../core/services/auth.service';
-import { Router } from '@angular/router';
-import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { EncryptService } from '../../../core/services/encrypt.service';
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [FormsModule, CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.css']
 })
-export default class LoginComponent implements OnInit {
-  user: string = '';
-  password: string = '';
-  errorMessage: string = '';
+export class LoginComponent implements OnInit {
   fecha: string = '';
-  constructor(private authService: AuthService, private router: Router, private encryptService: EncryptService) {}
+  email: string = '';
+  password: string = '';
+  rememberMe: boolean = false;
+  formMode: 'login' | 'forgotPassword' = 'login'; // Estado para controlar el formulario
 
-
-  ngOnInit(){
-    
+  constructor(private authService: AuthService, private router: Router) {
     this.fecha = new Date().getFullYear().toString();
-   
   }
 
-
-  login(): void {
-    // Validar que los campos no estén vacíos
-    if (!this.user.trim() || !this.password.trim()) {
-      this.showAlert('Por favor, complete todos los campos.');
-      return;
+  ngOnInit(): void {
+    if (localStorage.getItem('rememberMe') === 'true') {
+      this.email = localStorage.getItem('email') || '';
+      this.rememberMe = true;
     }
-    if (!this.isValidEmail(this.user)) {
-      this.showAlert('El usuario debe ser un correo electrónico válido.');
-      return;
+  }
 
-    }
-    
-    this.authService.login(this.encryptService.cifrarRsa(this.user), this.encryptService.cifrarRsa(this.password)).subscribe({
-      next: (response) => {
-        const token = response.token;
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        const role = this.encryptService.descifrarAes(payload.role);
-        if (role === 'ROLE_ADMIN') {
-          this.router.navigate(['/dashboard']);
-        } else {
-          this.router.navigate(['/profile']);
-        }
+  loginWithGoogle(): void {
+    this.authService.loginWithGoogle().subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard']);
       },
       error: (err) => {
-        if (err.status === 401) {
-          this.showAlert(err.error.detalles);
-        } else {
-          this.showAlert('Ocurrió un error. Intente nuevamente.');
-        }
+        console.error('Login failed', err);
       },
     });
   }
 
-  private showAlert(message: string): void {
-    this.errorMessage = message;
-    setTimeout(() => {
-      this.errorMessage = ''; // Oculta la alerta después de 3 segundos
-    }, 3000);
+  loginWithEmail(): void {
+    this.authService.loginWithEmail(this.email, this.password).subscribe({
+      next: () => {
+        if (this.rememberMe) {
+          localStorage.setItem('email', this.email);
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          localStorage.removeItem('email');
+          localStorage.removeItem('rememberMe');
+        }
+        this.router.navigate(['/dashboard']);
+      },
+      error: (err) => {
+        console.error('Login failed', err);
+        alert('Credenciales incorrectas. Por favor, inténtalo de nuevo.');
+      },
+    });
   }
 
-  private isValidEmail(email: string): boolean {
-    const emailRegex = /^[^@]+@[^@]+\.[a-zA-Z]{2,5}$/;
-    return emailRegex.test(email);
+  // Cambia al modo de recuperación de contraseña
+  showForgotPassword(): void {
+    this.formMode = 'forgotPassword';
+  }
+
+  // Vuelve al formulario de login
+  showLoginForm(): void {
+    this.formMode = 'login';
+  }
+
+  // Envía el correo de restablecimiento
+  async resetPassword(): Promise<void> {
+    if (!this.email) {
+      alert('Por favor, ingresa tu correo electrónico para restablecer la contraseña.');
+      return;
+    }
+
+    try {
+      await this.authService.forgotPassword(this.email).toPromise();
+      alert('Se ha enviado un correo para restablecer tu contraseña. Por favor, revisa tu bandeja de entrada.');
+      this.showLoginForm(); // Vuelve al login después de enviar
+    } catch (err) {
+      console.error('Password reset failed', err);
+      alert('Hubo un error al intentar restablecer la contraseña. Por favor, inténtalo de nuevo.');
+    }
   }
 }
