@@ -1,235 +1,138 @@
-<div
-  *ngIf="isLoading"
-  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
->
-  <svg
-    class="pl"
-    viewBox="0 0 160 160"
-    width="160px"
-    height="160px"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <defs>
-      <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#000"></stop>
-        <stop offset="100%" stop-color="#fff"></stop>
-      </linearGradient>
-      <mask id="mask1">
-        <rect x="0" y="0" width="160" height="160" fill="url(#grad)"></rect>
-      </mask>
-      <mask id="mask2">
-        <rect x="28" y="28" width="104" height="104" fill="url(#grad)"></rect>
-      </mask>
-    </defs>
+<div class="container mx-auto p-4 z-20">
+    <h1 class="text-2xl font-bold mb-4">Configuración</h1>
 
-    <g>
-      <g class="pl__ring-rotate">
-        <circle
-          class="pl__ring-stroke"
-          cx="80"
-          cy="80"
-          r="72"
-          fill="none"
-          stroke="hsl(223,90%,55%)"
-          stroke-width="16"
-          stroke-dasharray="452.39 452.39"
-          stroke-dashoffset="452"
-          stroke-linecap="round"
-          transform="rotate(-45,80,80)"
-        ></circle>
-      </g>
-    </g>
-    <g mask="url(#mask1)">
-      <g class="pl__ring-rotate">
-        <circle
-          class="pl__ring-stroke"
-          cx="80"
-          cy="80"
-          r="72"
-          fill="none"
-          stroke="hsl(193,90%,55%)"
-          stroke-width="16"
-          stroke-dasharray="452.39 452.39"
-          stroke-dashoffset="452"
-          stroke-linecap="round"
-          transform="rotate(-45,80,80)"
-        ></circle>
-      </g>
-    </g>
+    <!-- Tab Navigation -->
+    <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8">
+            <button (click)="switchTab('profile')" 
+                    [ngClass]="{'border-blue-500 text-blue-600': activeTab === 'profile', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'profile'}"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Perfil de Usuario
+            </button>
+            <button (click)="switchTab('empresa')" 
+                    [ngClass]="{'border-blue-500 text-blue-600': activeTab === 'empresa', 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300': activeTab !== 'empresa'}"
+                    class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm">
+                Empresa
+            </button>
+        </nav>
+    </div>
 
-    <g>
-      <g
-        stroke-width="4"
-        stroke-dasharray="12 12"
-        stroke-dashoffset="12"
-        stroke-linecap="round"
-        transform="translate(80,80)"
-      >
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(-135,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(-90,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(-45,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(0,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(45,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(90,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(135,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(180,0,0) translate(0,40)"
-        ></polyline>
-      </g>
-    </g>
-    <g mask="url(#mask1)">
-      <g
-        stroke-width="4"
-        stroke-dasharray="12 12"
-        stroke-dashoffset="12"
-        stroke-linecap="round"
-        transform="translate(80,80)"
-      >
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(-135,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(-90,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(-45,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(0,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(45,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(90,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(135,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(180,0,0) translate(0,40)"
-        ></polyline>
-      </g>
-    </g>
+    <!-- Tab Content -->
+    <div class="mt-6">
+        <!-- Profile Tab -->
+        <div *ngIf="activeTab === 'profile' && user">
+            <div class="bg-white p-6 rounded-lg shadow space-y-6">
+                <!-- User Info -->
+                <div>
+                    <h3 class="text-lg font-semibold">Información del Perfil</h3>
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <label for="displayName" class="block text-sm font-medium text-gray-700">Nombre de Usuario</label>
+                            <input type="text" id="displayName" [(ngModel)]="displayName" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                    </div>
+                </div>
 
-    <g>
-      <g transform="translate(64,28)">
-        <g class="pl__arrows" transform="rotate(45,16,52)">
-          <path
-            fill="hsl(3,90%,55%)"
-            d="M17.998,1.506l13.892,43.594c.455,1.426-.56,2.899-1.998,2.899H2.108c-1.437,0-2.452-1.473-1.998-2.899L14.002,1.506c.64-2.008,3.356-2.008,3.996,0Z"
-          ></path>
-          <path
-            fill="hsl(223,10%,90%)"
-            d="M14.009,102.499L.109,58.889c-.453-1.421,.559-2.889,1.991-2.889H29.899c1.433,0,2.444,1.468,1.991,2.889l-13.899,43.61c-.638,2.001-3.345,2.001-3.983,0Z"
-          ></path>
-        </g>
-      </g>
-    </g>
-    <g mask="url(#mask2)">
-      <g transform="translate(64,28)">
-        <g class="pl__arrows" transform="rotate(45,16,52)">
-          <path
-            fill="hsl(333,90%,55%)"
-            d="M17.998,1.506l13.892,43.594c.455,1.426-.56,2.899-1.998,2.899H2.108c-1.437,0-2.452-1.473-1.998-2.899L14.002,1.506c.64-2.008,3.356-2.008,3.996,0Z"
-          ></path>
-          <path
-            fill="hsl(223,90%,80%)"
-            d="M14.009,102.499L.109,58.889c-.453-1.421,.559-2.889,1.991-2.889H29.899c1.433,0,2.444,1.468,1.991,2.889l-13.899,43.61c-.638,2.001-3.345,2.001-3.983,0Z"
-          ></path>
-        </g>
-      </g>
-    </g>
-  </svg>
-</div>
+                <!-- Change Password -->
+                <div>
+                    <h3 class="text-lg font-semibold">Cambiar Contraseña</h3>
+                    <div class="mt-4 space-y-4">
+                        <div>
+                            <label for="currentPassword" class="block text-sm font-medium text-gray-700">Contraseña Actual</label>
+                            <input type="password" id="currentPassword" [(ngModel)]="passwordData.currentPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <div>
+                            <label for="newPassword" class="block text-sm font-medium text-gray-700">Nueva Contraseña</label>
+                            <input type="password" id="newPassword" [(ngModel)]="passwordData.newPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <div>
+                            <label for="confirmPassword" class="block text-sm font-medium text-gray-700">Confirmar Nueva Contraseña</label>
+                            <input type="password" id="confirmPassword" [(ngModel)]="passwordData.confirmPassword" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-<div class="p-4 sm:p-6 md:p-8">
-  <div class="bg-white rounded-lg shadow-md p-6">
-    <h2 class="text-2xl font-bold mb-6">Mi Perfil</h2>
-    <form>
-      <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="name">
-          Nombre
-        </label>
-        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-               id="name" type="text" [value]="name"  readonly/>
-      </div>
-      <div class="mb-4">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-          Correo
-        </label>
-        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-               id="email" type="text" [value]="correo"  readonly/>
-      </div>
-      <div class="mb-6">
-        <label class="block text-gray-700 text-sm font-bold mb-2" for="role">
-          Rol
-        </label>
-        <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-               id="role" type="text" [value]="rol"  readonly/>
-      </div>
-    </form>
-  </div>
+        <!-- Empresa Tab -->
+        <div *ngIf="activeTab === 'empresa' && empresa">
+            <div class="bg-white p-6 rounded-lg shadow space-y-8">
+                
+                <!-- Basic Info & Logo -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-2 space-y-4">
+                        <h3 class="text-lg font-semibold">Información de la Empresa</h3>
+                        <div>
+                            <label for="nombreEmpresa" class="block text-sm font-medium text-gray-700">Nombre</label>
+                            <input type="text" id="nombreEmpresa" name="nombreEmpresa" [(ngModel)]="empresa.nombre" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <div>
+                            <label for="direccionEmpresa" class="block text-sm font-medium text-gray-700">Dirección</label>
+                            <input type="text" id="direccionEmpresa" name="direccionEmpresa" [(ngModel)]="empresa.direccion" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                        <div>
+                            <label for="correoEmpresa" class="block text-sm font-medium text-gray-700">Correo</label>
+                            <input type="email" id="correoEmpresa" name="correoEmpresa" [(ngModel)]="empresa.correo" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-center">
+                        <label class="block text-sm font-medium text-gray-700 self-start">Logotipo</label>
+                        <img [src]="empresa.logoUrl || 'assets/images/default-logo.png'" alt="Logo" class="w-32 h-32 rounded-md border border-gray-300 mt-2 object-cover">
+                        <input type="file" accept="image/*" (change)="onFileSelected($event)" class="mt-4 text-sm">
+                    </div>
+                </div>
+
+                <!-- Telefonos -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Teléfonos</h3>
+                    <div class="flex items-center space-x-2 mb-2">
+                        <input type="text" [(ngModel)]="newTelefono" placeholder="Añadir teléfono" class="flex-grow px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                        <button (click)="addTelefono()" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Añadir</button>
+                    </div>
+                    <ul class="list-disc list-inside space-y-1">
+                        <li *ngFor="let tel of empresa.telefonos; let i = index" class="flex items-center justify-between">
+                            <span>{{ tel }}</span>
+                            <button (click)="removeTelefono(i)" class="text-red-500 hover:text-red-700 text-sm">Eliminar</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Cuentas Bancarias -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Cuentas Bancarias</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Banco</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Número de Cuenta</th>
+                                    <th class="w-10"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="bg-white divide-y divide-gray-200">
+                                <tr *ngFor="let cuenta of empresa.cuentasBancarias; let i = index">
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ cuenta.banco }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap">{{ cuenta.numero }}</td>
+                                    <td class="px-6 py-4"><button (click)="removeCuenta(i)" class="text-red-500 hover:text-red-700 text-sm">Eliminar</button></td>
+                                </tr>
+                                <!-- Form to add new account -->
+                                <tr>
+                                    <td class="px-6 py-4"><input [(ngModel)]="newCuenta.banco" placeholder="Nombre del Banco" class="w-full border-gray-300 rounded-md"></td>
+                                    <td class="px-6 py-4"><input [(ngModel)]="newCuenta.numero" placeholder="Número de Cuenta" class="w-full border-gray-300 rounded-md"></td>
+                                    <td class="px-6 py-4"><button (click)="addCuenta()" class="px-4 py-2 bg-blue-500 text-white rounded-md">Añadir</button></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Action Buttons -->
+    <div class="flex justify-end space-x-4 mt-6">
+        <button (click)="onCancel()" class="px-4 py-2 bg-gray-300 text-gray-800 rounded-md hover:bg-gray-400">Cancelar</button>
+        <button (click)="onSave()" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600">Guardar Cambios</button>
+    </div>
 </div>

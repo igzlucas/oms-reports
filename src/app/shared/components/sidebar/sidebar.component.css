@@ -1,4 +1,1 @@
-/* You can add custom styles for your sidebar here if necessary */
-.translate-x-0 {
-    transform: translateX(0);
-  }
+/* Los estilos de este componente ahora se gestionan con clases de Tailwind CSS en el archivo .html */

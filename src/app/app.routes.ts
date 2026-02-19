@@ -48,10 +48,10 @@ export const routes: Routes = [
           ),
       },
       {
-        path: 'new-report',
+        path: 'new-report', // <-- Ruta actualizada
         loadComponent: () =>
-          import('./business/pages/reporte/reporte.component').then(
-            (m) => m.ReporteComponent
+          import('./business/report-form/report-form.component').then(
+            (m) => m.ReportFormComponent
           ),
       },
       {

@@ -4,6 +4,7 @@ import { CommonModule } from '@angular/common';
 import { Report } from '../../../core/models/report.model';
 import { ToastrService } from 'ngx-toastr';
 import { FormsModule } from '@angular/forms';
+import { DomSanitizer } from '@angular/platform-browser';
 
 @Component({
   selector: 'app-reportes-table',
@@ -40,7 +41,8 @@ export class ReportesTableComponent implements OnInit {
 
   constructor(
     private reportService: ReportService,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    public sanitizer: DomSanitizer
   ) {}
 
   ngOnInit(): void {
@@ -67,9 +69,10 @@ export class ReportesTableComponent implements OnInit {
   }
 
   filterReportes(): void {
+    const searchTerm = this.searchTerm.toLowerCase();
     this.filteredReportes = this.reportes.filter(reporte =>
-      reporte.cliente.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
-      (reporte.id && reporte.id.toString().includes(this.searchTerm.toLowerCase()))
+      reporte.clienteId.toLowerCase().includes(searchTerm) ||
+      reporte.reporteId.toString().includes(searchTerm)
     );
     this.totalPages = Math.ceil(this.filteredReportes.length / this.itemsPerPage);
     this.pagination.totalPages = this.totalPages;
@@ -111,12 +114,12 @@ export class ReportesTableComponent implements OnInit {
   async openModal(reporte: Report): Promise<void> {
     try {
       this.isLoading = true;
-      const reportDetails = await this.reportService.getDetallesReporte(reporte.id!);
-      this.selectedReport = reportDetails;
+      // Asumiendo que el reporte que viene de la lista ya tiene todos los datos necesarios
+      this.selectedReport = reporte; 
       this.isModalOpen = true;
       this.isLoading = false;
     } catch (error) {
-      console.error('Error fetching report details:', error);
+      console.error('Error setting report details:', error);
       this.toastr.error('Error al cargar los detalles del reporte.');
       this.isLoading = false;
     }
@@ -132,7 +135,7 @@ export class ReportesTableComponent implements OnInit {
       this.reportService.deleteReport(reporteId).subscribe(
         () => {
           this.toastr.success('Reporte eliminado exitosamente');
-          this.getReportes();
+          this.getReportes(); // Recargar la lista
         },
         (error) => {
           this.toastr.error('Error al eliminar el reporte');

@@ -1,372 +1,135 @@
-<div
-  *ngIf="isLoading"
-  class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
->
-  <svg
-    class="pl"
-    viewBox="0 0 160 160"
-    width="160px"
-    height="160px"
-    xmlns="http://www.w3.org/2000/svg"
-  >
-    <defs>
-      <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
-        <stop offset="0%" stop-color="#000"></stop>
-        <stop offset="100%" stop-color="#fff"></stop>
-      </linearGradient>
-      <mask id="mask1">
-        <rect x="0" y="0" width="160" height="160" fill="url(#grad)"></rect>
-      </mask>
-      <mask id="mask2">
-        <rect x="28" y="28" width="104" height="104" fill="url(#grad)"></rect>
-      </mask>
-    </defs>
-
-    <g>
-      <g class="pl__ring-rotate">
-        <circle
-          class="pl__ring-stroke"
-          cx="80"
-          cy="80"
-          r="72"
-          fill="none"
-          stroke="hsl(223,90%,55%)"
-          stroke-width="16"
-          stroke-dasharray="452.39 452.39"
-          stroke-dashoffset="452"
-          stroke-linecap="round"
-          transform="rotate(-45,80,80)"
-        ></circle>
-      </g>
-    </g>
-    <g mask="url(#mask1)">
-      <g class="pl__ring-rotate">
-        <circle
-          class="pl__ring-stroke"
-          cx="80"
-          cy="80"
-          r="72"
-          fill="none"
-          stroke="hsl(193,90%,55%)"
-          stroke-width="16"
-          stroke-dasharray="452.39 452.39"
-          stroke-dashoffset="452"
-          stroke-linecap="round"
-          transform="rotate(-45,80,80)"
-        ></circle>
-      </g>
-    </g>
-
-    <g>
-      <g
-        stroke-width="4"
-        stroke-dasharray="12 12"
-        stroke-dashoffset="12"
-        stroke-linecap="round"
-        transform="translate(80,80)"
-      >
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(-135,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(-90,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(-45,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(0,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(45,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(90,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(135,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,10%,90%)"
-          points="0,2 0,14"
-          transform="rotate(180,0,0) translate(0,40)"
-        ></polyline>
-      </g>
-    </g>
-    <g mask="url(#mask1)">
-      <g
-        stroke-width="4"
-        stroke-dasharray="12 12"
-        stroke-dashoffset="12"
-        stroke-linecap="round"
-        transform="translate(80,80)"
-      >
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(-135,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(-90,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(-45,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(0,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(45,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(90,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(135,0,0) translate(0,40)"
-        ></polyline>
-        <polyline
-          class="pl__tick"
-          stroke="hsl(223,90%,80%)"
-          points="0,2 0,14"
-          transform="rotate(180,0,0) translate(0,40)"
-        ></polyline>
-      </g>
-    </g>
-
-    <g>
-      <g transform="translate(64,28)">
-        <g class="pl__arrows" transform="rotate(45,16,52)">
-          <path
-            fill="hsl(3,90%,55%)"
-            d="M17.998,1.506l13.892,43.594c.455,1.426-.56,2.899-1.998,2.899H2.108c-1.437,0-2.452-1.473-1.998-2.899L14.002,1.506c.64-2.008,3.356-2.008,3.996,0Z"
-          ></path>
-          <path
-            fill="hsl(223,10%,90%)"
-            d="M14.009,102.499L.109,58.889c-.453-1.421,.559-2.889,1.991-2.889H29.899c1.433,0,2.444,1.468,1.991,2.889l-13.899,43.61c-.638,2.001-3.345,2.001-3.983,0Z"
-          ></path>
-        </g>
-      </g>
-    </g>
-    <g mask="url(#mask2)">
-      <g transform="translate(64,28)">
-        <g class="pl__arrows" transform="rotate(45,16,52)">
-          <path
-            fill="hsl(333,90%,55%)"
-            d="M17.998,1.506l13.892,43.594c.455,1.426-.56,2.899-1.998,2.899H2.108c-1.437,0-2.452-1.473-1.998-2.899L14.002,1.506c.64-2.008,3.356-2.008,3.996,0Z"
-          ></path>
-          <path
-            fill="hsl(223,90%,80%)"
-            d="M14.009,102.499L.109,58.889c-.453-1.421,.559-2.889,1.991-2.889H29.899c1.433,0,2.444,1.468,1.991,2.889l-13.899,43.61c-.638,2.001-3.345,2.001-3.983,0Z"
-          ></path>
-        </g>
-      </g>
-    </g>
-  </svg>
-</div>
-
-<div class="p-4">
+<div class="reports-table-container">
+  <!-- Cabecera y Acciones -->
   <div class="flex justify-between items-center mb-4">
-    <input
-      type="text"
-      placeholder="Buscar..."
-      [(ngModel)]="searchTerm"
-      (input)="filterReports()"
-      class="w-1/3 p-2 border rounded"
-    />
-    <div class="flex items-center">
-      <span class="mr-2">Registros por página:</span>
-      <select
-        [(ngModel)]="itemsPerPage"
-        (change)="changePage(1)"
-        class="border px-2 py-1 rounded"
-      >
-        <option *ngFor="let option of [5, 10, 15, 20]" [value]="option">
-          {{ option }}
-        </option>
-      </select>
+    <h1 class="text-2xl font-bold">Tabla de Reportes</h1>
+    <div>
+      <input type="text" placeholder="Buscar..." class="p-2 border rounded" [(ngModel)]="searchTerm" (ngModelChange)="filterReportes()">
+      <button class="ml-2 p-2 bg-blue-500 text-white rounded">Exportar a Excel</button>
     </div>
   </div>
 
-  <div class="overflow-x-auto">
-    <table *ngIf="!isLoading" class="w-full min-w-[640px] table-auto">
-      <thead class="bg-gray-100">
+  <!-- Tabla de Reportes -->
+  <div class="overflow-x-auto shadow-lg rounded-lg">
+    <table class="min-w-full bg-white">
+      <thead class="bg-gray-200">
         <tr>
-          <th class="border p-2 text-center">N° Reporte</th>
-          <th class="border p-2 text-center">Fecha</th>
-          <th class="border p-2 text-center">Cliente</th>
-          <th class="border p-2 text-center">Monto</th>
-          <th class="border p-2 text-center">Moneda</th>
-          <th class="border p-2 text-center">Acciones</th>
+          <th class="p-3 text-left">Folio</th>
+          <th class="p-3 text-left">Fecha</th>
+          <th class="p-3 text-left">Cliente</th>
+          <th class="p-3 text-left">Monto Total</th>
+          <th class="p-3 text-left">Estatus</th>
+          <th class="p-3 text-center">Acciones</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let reporte of visibleReportes" class="hover:bg-gray-100">
-          <td class="border p-2 text-center">{{ reporte.id }}</td>
-          <td class="border p-2 text-center">{{ reporte.fecha | date: 'shortDate' }}</td>
-          <td class="border p-2 text-center">{{ reporte.cliente }}</td>
-          <td class="border p-2 text-center">{{ reporte.monto | currency }}</td>
-          <td class="border p-2 text-center">{{ reporte.moneda }}</td>
-          <td class="border p-2 text-center">
-            <button
-              (click)="openModal(reporte)"
-              class="text-blue-500 hover:underline mr-2"
-            >
-              Ver
-            </button>
-            <button
-              (click)="deleteReport(reporte.id!)"
-              class="text-red-500 hover:underline"
-            >
-              Eliminar
-            </button>
+        <tr *ngFor="let reporte of filteredReportes" class="border-b hover:bg-gray-50">
+          <td class="p-3">{{ reporte.reporteId }}</td>
+          <td class="p-3">{{ reporte.fecha | date:'dd/MM/yyyy' }}</td>
+          <td class="p-3">{{ reporte.clienteId }}</td> <!-- CAMBIADO -->
+          <td class="p-3">{{ reporte.montoTotal | currency:reporte.moneda }}</td> <!-- CAMBIADO -->
+          <td class="p-3"><span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Completado</span></td>
+          <td class="p-3 text-center">
+            <button (click)="openModal(reporte)" class="text-blue-500 hover:underline">Ver</button>
+            <button class="ml-2 text-red-500 hover:underline">Eliminar</button>
           </td>
+        </tr>
+        <tr *ngIf="filteredReportes.length === 0">
+            <td colspan="6" class="text-center p-4">No se encontraron reportes.</td>
         </tr>
       </tbody>
     </table>
   </div>
 
-  <div class="flex justify-between items-center mt-4">
-    <p>Página {{ currentPage }} de {{ totalPages }}</p>
-    <div class="flex space-x-2">
-      <button
-        (click)="previousPage()"
-        [disabled]="currentPage === 1"
-        class="px-3 py-1 border rounded hover:bg-gray-200 disabled:opacity-50"
-      >
-        Anterior
-      </button>
-      <button
-        *ngFor="let page of totalPagesArray"
-        (click)="goToPage(page)"
-        class="px-3 py-1 border rounded hover:bg-gray-200"
-        [class.bg-blue-500]="currentPage === page"
-        [class.text-white]="currentPage === page"
-      >
-        {{ page }}
-      </button>
-      <button
-        (click)="nextPage()"
-        [disabled]="currentPage === totalPages"
-        class="px-3 py-1 border rounded hover:bg-gray-200 disabled:opacity-50"
-      >
-        Siguiente
-      </button>
-    </div>
+  <!-- Paginación -->
+  <div class="flex justify-end items-center mt-4">
+    <button class="px-3 py-1 border rounded bg-gray-100">Anterior</button>
+    <span class="px-3">Página 1 de 10</span>
+    <button class="px-3 py-1 border rounded bg-gray-100">Siguiente</button>
   </div>
+
 </div>
 
-<div
-  *ngIf="isModalOpen"
-  class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 print:hidden"
->
-  <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl">
-    <div #reportContent>
-      <h2 class="text-2xl font-bold mb-4">Detalles del Reporte</h2>
-      <div *ngIf="selectedReport">
-        <div class="grid grid-cols-2 gap-4 mb-4">
-          <div>
-            <strong>N° Reporte:</strong> {{ selectedReport.id }}
-          </div>
-          <div><strong>Fecha:</strong> {{ selectedReport.fecha | date: 'fullDate' }}</div>
-          <div><strong>Cliente:</strong> {{ selectedReport.cliente }}</div>
-          <div><strong>Dirección:</strong> {{ selectedReport.clienteDireccion }}</div>
-          <div><strong>Equipo:</strong> {{ selectedReport.equipo }}</div>
-          <div>
-            <strong>Persona que recibe:</strong>
-            {{ selectedReport.personaRecibe }}
-          </div>
-        </div>
+<!-- Modal para ver el reporte -->
+<div *ngIf="isModalOpen && selectedReport" class="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center p-4">
+  <div class="bg-white rounded-lg shadow-2xl w-full max-w-4xl max-h-full overflow-y-auto">
+    <!-- Cabecera del Modal -->
+    <div class="flex justify-between items-center p-4 border-b">
+      <h2 class="text-xl font-bold">Detalle del Reporte #{{ selectedReport.reporteId }}</h2>
+      <button (click)="closeModal()" class="text-gray-500 hover:text-gray-800 text-3xl">&times;</button>
+    </div>
 
-        <div class="mb-4">
-          <strong>Problema:</strong> {{ selectedReport.problema }}
-        </div>
-        <div class="mb-4">
-          <strong>Trabajo Realizado:</strong>
-          {{ selectedReport.trabajoRealizado }}
-        </div>
+    <!-- Contenido del Modal -->
+    <div class="p-6">
+      <!-- Información General -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div><strong>Cliente:</strong> {{ selectedReport.clienteId }}</div> <!-- CAMBIADO -->
+        <div><strong>Fecha:</strong> {{ selectedReport.fecha | date:'fullDate' }}</div>
+        <div><strong>Equipo:</strong> {{ selectedReport.equipo }}</div>
+        <div><strong>Técnico:</strong> John Doe</div>
+      </div>
 
-        <h3 class="text-xl font-semibold mb-2">Detalles de cobro</h3>
-        <table class="w-full mb-4">
+      <!-- Problema y Trabajo Realizado -->
+      <div class="mb-6">
+        <h3 class="font-bold border-b mb-2 pb-1">Problema Reportado</h3>
+        <p>{{ selectedReport.problema }}</p>
+      </div>
+      <div class="mb-6">
+        <h3 class="font-bold border-b mb-2 pb-1">Trabajo Realizado</h3>
+        <div [innerHTML]="sanitizer.bypassSecurityTrustHtml(selectedReport.trabajoRealizado)"></div>
+      </div>
+
+      <!-- Detalles/Refacciones -->
+      <div class="mb-6">
+        <h3 class="font-bold border-b mb-2 pb-1">Refacciones y Mano de Obra</h3>
+        <table class="min-w-full border">
           <thead class="bg-gray-100">
             <tr>
               <th class="border p-2">Cantidad</th>
               <th class="border p-2">Descripción</th>
-              <th class="border p-2">Valor Unitario</th>
-              <th class="border p-2">Valor Total</th>
+              <th class="border p-2">Precio Unit.</th>
+              <th class="border p-2">Total</th>
             </tr>
           </thead>
           <tbody>
             <tr *ngFor="let detalle of selectedReport.detalles">
               <td class="border p-2">{{ detalle.cantidad }}</td>
               <td class="border p-2">{{ detalle.descripcion }}</td>
-              <td class="border p-2">{{ detalle.valorUnitario | currency }}</td>
-              <td class="border p-2">{{ detalle.valorTotal | currency }}</td>
+              <td class="border p-2">{{ detalle.precioUnitario | currency:selectedReport.moneda }}</td> <!-- CAMBIADO -->
+              <td class="border p-2">{{ detalle.total | currency:selectedReport.moneda }}</td> <!-- CAMBIADO -->
             </tr>
           </tbody>
         </table>
-
-        <div class="flex justify-end font-bold text-xl mb-4">
-          Subtotal: {{ selectedReport.monto | currency }}
-        </div>
-
-        <div class="mb-4">
-          <strong>Observaciones:</strong> {{ selectedReport.observaciones }}
-        </div>
-
-        <div class="mb-4">
-          <strong>Firma:</strong>
-          <img [src]="selectedReport.firma" alt="Firma" class="border mt-2 h-32" />
-        </div>
       </div>
+
+      <!-- Monto Total -->
+      <div class="text-right font-bold text-lg mb-6">
+        Monto Total: {{ selectedReport.montoTotal | currency:selectedReport.moneda }} <!-- CAMBIADO -->
+      </div>
+
+      <!-- Firma -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-4 border-t">
+          <div>
+              <h3 class="font-bold mb-2">Aceptación del Cliente</h3>
+              <p><strong>Nombre:</strong> {{ selectedReport.nombreFirmaCliente }}</p> <!-- CAMBIADO -->
+          </div>
+          <div>
+              <h3 class="font-bold mb-2">Firma</h3>
+              <div *ngIf="selectedReport.firmaBase64" class="border p-2 rounded-md">
+                  <img [src]="selectedReport.firmaBase64" alt="Firma del Cliente" class="mx-auto"> <!-- CAMBIADO -->
+              </div>
+              <div *ngIf="!selectedReport.firmaBase64" class="text-gray-500">
+                  (No se registró firma digital)
+              </div>
+          </div>
+      </div>
+
     </div>
-    <div class="flex justify-end mt-4 print:hidden">
-      <button (click)="printReport()" class="bg-green-500 text-white px-4 py-2 rounded mr-2">
-        Imprimir
-      </button>
-      <button (click)="closeModal()" class="bg-gray-500 text-white px-4 py-2 rounded">
-        Cerrar
-      </button>
+
+    <!-- Pie del Modal -->
+    <div class="flex justify-end items-center p-4 border-t bg-gray-50">
+      <button class="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300">Imprimir</button>
+      <button class="ml-2 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">Enviar por Email</button>
+      <button (click)="closeModal()" class="ml-2 px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">Cerrar</button>
     </div>
   </div>
 </div>

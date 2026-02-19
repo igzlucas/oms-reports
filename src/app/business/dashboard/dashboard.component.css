@@ -1,115 +1,193 @@
-/* From Uiverse.io by Nawsome */ 
-.pl {
-    display: flex;
-    width: auto;
-    height: auto;
+:root {
+  --primary-color: #007bff;
+  --background-color: #f4f7f6;
+  --card-background: #ffffff;
+  --text-color: #333;
+  --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-container {
+  padding: 2rem;
+  background-color: var(--background-color);
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dashboard-header h1 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.8rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: background-color 0.3s ease;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+}
+
+.stats-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background-color: var(--card-background);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.stat-icon {
+  font-size: 2.5rem;
+  padding: 1rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.report-icon {
+  color: #3498db;
+  background-color: #eaf5fc;
+}
+
+.client-icon {
+  color: #2ecc71;
+  background-color: #eafaf1;
+}
+
+.stat-info p {
+  margin: 0;
+  color: #555;
+}
+
+.stat-number {
+  font-size: 2rem;
+  font-weight: bold;
+  color: var(--text-color);
+}
+
+.main-content {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 1.5rem;
+}
+
+.recent-reports-card, .recent-activity-card {
+  background-color: var(--card-background);
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow);
+}
+
+h2 {
+  margin-top: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+/* Tabla */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  text-align: left;
+  padding-bottom: 1rem;
+  border-bottom: 2px solid #eee;
+  color: #777;
+  font-weight: 500;
+}
+
+tbody td {
+  padding: 1rem 0;
+  border-bottom: 1px solid #eee;
+  color: var(--text-color);
+}
+
+.no-data {
+  text-align: center;
+  padding: 2rem;
+  color: #888;
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #555;
+  font-size: 1.2rem;
+  margin-right: 0.5rem;
+}
+
+/* Actividad Reciente */
+.recent-activity-card ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.recent-activity-card li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.activity-icon {
+  font-size: 1.5rem;
+  color: var(--primary-color);
+}
+
+.activity-details p {
+  margin: 0;
+  font-weight: 500;
+}
+
+.activity-details span {
+  color: #777;
+  font-size: 0.9rem;
+}
+
+.dashboard-footer {
+  text-align: center;
+  margin-top: 1rem;
+  color: #888;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .main-content {
+    grid-template-columns: 1fr;
   }
-  
-  .pl__arrows,
-  .pl__ring-rotate,
-  .pl__ring-stroke,
-  .pl__tick {
-    animation-duration: 2s;
-    animation-timing-function: linear;
-    animation-iteration-count: infinite;
+}
+
+@media (max-width: 768px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
   }
-  
-  .pl__arrows {
-    animation-name: arrows42;
-    transform: rotate(45deg);
-    transform-origin: 16px 52px;
-  }
-  
-  .pl__ring-rotate,
-  .pl__ring-stroke {
-    transform-origin: 80px 80px;
-  }
-  
-  .pl__ring-rotate {
-    animation-name: ringRotate42;
-  }
-  
-  .pl__ring-stroke {
-    animation-name: ringStroke42;
-    transform: rotate(-45deg);
-  }
-  
-  .pl__tick {
-    animation-name: tick42;
-  }
-  
-  .pl__tick:nth-child(2) {
-    animation-delay: -1.75s;
-  }
-  
-  .pl__tick:nth-child(3) {
-    animation-delay: -1.5s;
-  }
-  
-  .pl__tick:nth-child(4) {
-    animation-delay: -1.25s;
-  }
-  
-  .pl__tick:nth-child(5) {
-    animation-delay: -1s;
-  }
-  
-  .pl__tick:nth-child(6) {
-    animation-delay: -0.75s;
-  }
-  
-  .pl__tick:nth-child(7) {
-    animation-delay: -0.5s;
-  }
-  
-  .pl__tick:nth-child(8) {
-    animation-delay: -0.25s;
-  }
-  
-  /* Animations */
-  @keyframes arrows42 {
-    from {
-      transform: rotate(45deg);
-    }
-  
-    to {
-      transform: rotate(405deg);
-    }
-  }
-  
-  @keyframes ringRotate42 {
-    from {
-      transform: rotate(0);
-    }
-  
-    to {
-      transform: rotate(720deg);
-    }
-  }
-  
-  @keyframes ringStroke42 {
-    from,
-      to {
-      stroke-dashoffset: 452;
-      transform: rotate(-45deg);
-    }
-  
-    50% {
-      stroke-dashoffset: 169.5;
-      transform: rotate(-180deg);
-    }
-  }
-  
-  @keyframes tick42 {
-    from,
-      3%,
-      47%,
-      to {
-      stroke-dashoffset: -12;
-    }
-  
-    14%,
-      36% {
-      stroke-dashoffset: 0;
-    }
-  }
+}

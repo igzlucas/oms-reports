@@ -1,16 +1,44 @@
-<!-- component -->
-<div class="min-h-screen bg-gray-50/50">
-    <app-sidebar/>
-    <div class="p-4 xl:ml-80">
-      <nav class="block w-full max-w-full bg-transparent text-white shadow-none rounded-xl transition-all px-0 py-1">
-        <app-header/>
-      </nav>
-      <div class="mt-12">
-        <router-outlet/>
-      </div>
-      <div class="text-blue-gray-600">
-        <app-footer/>
-      </div>
-    </div>
+<!-- Contenedor principal que organiza el layout -->
+<div class="relative min-h-screen lg:flex">
+
+  <!-- 
+    Overlay: se muestra en pantallas pequeñas cuando el sidebar está abierto.
+    Usa el async pipe para reaccionar a los cambios del servicio.
+  -->
+  <div 
+    *ngIf="isSidebarOpen$ | async" 
+    (click)="closeSidebar()" 
+    class="fixed inset-0 z-20 bg-black opacity-30 lg:hidden"
+    aria-hidden="true">
   </div>
-  
+
+  <!-- 
+    Sidebar: Siempre existe en el DOM, pero su clase cambia.
+    Usa el async pipe para añadir o quitar las clases que lo mueven.
+    Esto permite que las transiciones de CSS (ease-in/out) funcionen.
+  -->
+  <aside 
+    [ngClass]="{ 
+      'translate-x-0 ease-out': (isSidebarOpen$ | async),
+      '-translate-x-full ease-in': !(isSidebarOpen$ | async) 
+    }" 
+    class="fixed inset-y-0 left-0 z-30 w-64 overflow-y-auto bg-gray-800 transition-transform duration-300 transform lg:translate-x-0 lg:static lg:inset-0">
+    <app-sidebar></app-sidebar>
+  </aside>
+
+  <!-- Contenido principal: SIEMPRE VISIBLE -->
+  <div class="flex-1 flex flex-col">
+    
+    <!-- Header -->
+    <app-header></app-header>
+    
+    <!-- Área de contenido principal -->
+    <main class="flex-1 p-4 md:p-6 bg-gray-100 overflow-y-auto">
+      <router-outlet></router-outlet>
+    </main>
+    
+    <!-- Footer -->
+    <app-footer></app-footer>
+
+  </div>
+</div>

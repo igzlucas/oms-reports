@@ -1,11 +1,10 @@
-import { Component, OnInit, ViewChild, ElementRef, OnDestroy, ChangeDetectorRef, AfterViewInit } from '@angular/core';
-import { ReportService } from '../../../core/services/report.service';
-import { Report, initialReportData } from '../../../core/models/report.model';
-import { CustomersService } from '../../../core/services/customers.service';
-import { Customer } from '../../../core/models/customer.model';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ToastrService } from 'ngx-toastr';
+import { Report, ReportDetail, initialReportData } from '../../../core/models/report.model';
+import { Customer } from '../../../core/models/customer.model';
+import { ReportService } from '../../../core/services/report.service';
+import { CustomersService } from '../../../core/services/customers.service';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
@@ -16,130 +15,109 @@ import html2canvas from 'html2canvas';
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css'],
 })
-export class ReportsComponent implements OnInit, OnDestroy, AfterViewInit {
-  @ViewChild('reportContent') reportContent!: ElementRef;
-
-  report: Report = initialReportData();
-  customers: Customer[] = [];
+export class ReportsComponent implements OnInit {
   reports: Report[] = [];
-  selectedCustomer: string | null = null;
-  isLoading = false;
+  customers: Customer[] = [];
   isModalOpen = false;
-  isSaving = false;
-  currentReport: Report | null = null;
+  currentReport: Report | Partial<Report> = initialReportData();
+  newDetail: ReportDetail = { cantidad: 1, descripcion: '', precioUnitario: 0, total: 0 };
+  selectedCustomer: string | null = null;
 
   constructor(
     private reportService: ReportService,
-    private customerService: CustomersService,
-    private toastr: ToastrService,
-    private cdRef: ChangeDetectorRef
+    private customerService: CustomersService
   ) {}
 
   ngOnInit(): void {
-    this.customerService.getCustomers().subscribe(
-      (customers) => {
-        this.customers = customers;
-        if (customers.length > 0) {
-          this.selectedCustomer = customers[0].id;
-          this.loadReports();
-        }
-      },
-      (error: any) => {
-        this.toastr.error('Error al cargar los clientes.');
-        console.error(error);
+    this.loadInitialData();
+  }
+
+  loadInitialData() {
+    this.customerService.getCustomers().subscribe((customers) => {
+      this.customers = customers;
+      if (customers.length > 0) {
+        // Aseguramos que el id no sea undefined antes de asignarlo
+        this.selectedCustomer = customers[0].id ?? null;
       }
-    );
+    });
+    this.reportService.getReportes(null, 1000).subscribe((reports) => {
+      this.reports = reports;
+    });
   }
 
-  ngAfterViewInit(): void {
-    this.cdRef.detectChanges();
+  calculateTotal(): void {
+    if (this.currentReport.detalles) {
+      this.currentReport.montoTotal = this.currentReport.detalles.reduce(
+        (acc, detail) => acc + detail.total,
+        0
+      );
+    }
   }
 
-  loadReports(): void {
-    this.isLoading = true;
-    this.reportService.getReportes(this.selectedCustomer, 0).subscribe(
-      (reports) => {
-        this.reports = reports;
-        this.isLoading = false;
-      },
-      (error: any) => {
-        this.toastr.error('Error al cargar los reportes.');
-        console.error(error);
-        this.isLoading = false;
-      }
-    );
+  addDetail(): void {
+    if (!this.currentReport.detalles) {
+      this.currentReport.detalles = [];
+    }
+    this.currentReport.detalles.push({ ...this.newDetail, total: this.newDetail.cantidad * this.newDetail.precioUnitario });
+    this.newDetail = { cantidad: 1, descripcion: '', precioUnitario: 0, total: 0 }; // Reset
+    this.calculateTotal();
   }
 
-  onCustomerChange(event: any): void {
-    this.selectedCustomer = event.target.value;
-    this.loadReports();
+  removeDetail(index: number): void {
+    if (this.currentReport.detalles) {
+        this.currentReport.detalles.splice(index, 1);
+        this.calculateTotal();
+    }
   }
 
-  openModal(report: Report | null): void {
-    this.currentReport = report;
+  openModal(report: Report | Partial<Report>): void {
+    this.currentReport = JSON.parse(JSON.stringify(report)); // Deep copy
     this.isModalOpen = true;
   }
 
   closeModal(): void {
     this.isModalOpen = false;
-    this.currentReport = null;
+  }
+
+  createNewReport(): void {
+    const newReport = initialReportData();
+    if (this.selectedCustomer) {
+        newReport.clienteId = this.selectedCustomer;
+    }
+    this.openModal(newReport as Report); // Lo tratamos como Report para el modal
   }
 
   saveReport(): void {
-    this.isSaving = true;
-    if (this.currentReport) {
-      this.reportService.sendReport(this.currentReport).subscribe(
-        () => {
-          this.isSaving = false;
-          this.closeModal();
-          this.loadReports();
-          this.toastr.success('Reporte guardado con éxito.');
-        },
-        (error: any) => {
-          this.isSaving = false;
-          this.toastr.error('Error al guardar el reporte.');
-          console.error(error);
+    // Lógica para guardar el reporte, ya sea nuevo o existente
+    this.closeModal();
+  }
+
+  generatePDF(reportId: string): void {
+    const report = this.reports.find(r => r.id === reportId);
+    if (!report) return;
+
+    const data = document.getElementById(`report-content-${report.id}`);
+    if (data) {
+      html2canvas(data).then(canvas => {
+        const imgWidth = 208;
+        const pageHeight = 295;
+        const imgHeight = canvas.height * imgWidth / canvas.width;
+        let heightLeft = imgHeight;
+        let position = 0;
+        const contentDataURL = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+
+        pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+
+        while (heightLeft >= 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(contentDataURL, 'PNG', 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
         }
-      );
+        pdf.save(`reporte-${report.clienteId}.pdf`);
+      });
     }
   }
-
-  createReport(): void {
-    const newReport = initialReportData();
-    newReport.clienteId = this.selectedCustomer!;
-    this.openModal(newReport);
-  }
-
-  async generatePdf(report: Report): Promise<void> {
-    this.currentReport = report;
-    this.isModalOpen = true;
-    this.cdRef.detectChanges();
-
-    setTimeout(async () => {
-      try {
-        if (!this.reportContent) {
-          console.error('reportContent is not defined');
-          return;
-        }
-
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const content = this.reportContent.nativeElement;
-        const canvas = await html2canvas(content, { scale: 2 });
-        const imgData = canvas.toDataURL('image/png');
-        const imgProps = pdf.getImageProperties(imgData);
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
-
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`reporte-${report.cliente}.pdf`);
-      } catch (error) {
-        this.toastr.error('Error al generar el PDF.');
-        console.error('Error generating PDF', error);
-      } finally {
-        this.closeModal();
-      }
-    }, 1000);
-  }
-
-  ngOnDestroy(): void {}
 }

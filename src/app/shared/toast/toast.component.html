@@ -1,0 +1,11 @@
+<!-- El posicionamiento (fixed, top, right, z-index) ahora es manejado por el HostBinding en toast.component.ts -->
+<!-- Este template solo se encarga de renderizar los toasts que lleguen del servicio. -->
+<div *ngFor="let toast of toastService.toasts()" 
+     [ngClass]="{
+        'bg-green-500': toast.type === 'success',
+        'bg-red-500': toast.type === 'error',
+        'bg-blue-500': toast.type === 'info'
+     }" 
+     class="text-white p-4 rounded-md shadow-lg mb-2 animate-fade-in-down">
+  {{ toast.message }}
+</div>

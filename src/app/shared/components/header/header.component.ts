@@ -1,5 +1,5 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
-import { Subscription } from 'rxjs';
+import { Component } from '@angular/core';
+import { Observable } from 'rxjs';
 import { SidebarService } from '../../../core/services/sidebar.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
@@ -14,51 +14,29 @@ import { ClickOutsideDirective } from '../../../core/services/click-outside.dire
   templateUrl: './header.component.html',
   styleUrls: ['./header.component.css']
 })
-export class HeaderComponent implements OnInit, OnDestroy {
-  isSidebarVisible = false;
-  user: User | null = null;
-  private sidebarSubscription!: Subscription;
-  private userSubscription!: Subscription;
+export class HeaderComponent {
+  isSidebarOpen$: Observable<boolean>;
+  user$: Observable<User | null>;
   isDropdownOpen = false;
-  name = '';
 
   constructor(
     private sidebarService: SidebarService,
     private authService: AuthService,
     private router: Router
-  ) {}
-
-  ngOnInit() {
-    this.sidebarSubscription = this.sidebarService.sidebarVisible$.subscribe(
-      (isVisible: boolean) => {
-        this.isSidebarVisible = isVisible;
-      }
-    );
-    this.userSubscription = this.authService.user$.subscribe((user: User | null) => {
-      this.user = user;
-      if (user) {
-        this.name = user.displayName || user.email || '';
-      }
-    });
-  }
-
-  ngOnDestroy() {
-    if (this.sidebarSubscription) {
-      this.sidebarSubscription.unsubscribe();
-    }
-    if (this.userSubscription) {
-      this.userSubscription.unsubscribe();
-    }
+  ) {
+    this.isSidebarOpen$ = this.sidebarService.isSidebarOpen$;
+    this.user$ = this.authService.user$;
   }
 
   toggleSidebar() {
-    this.sidebarService.toggleSidebar();
+    this.sidebarService.toggleSidebar(); // Corregido de .toggle() a .toggleSidebar()
   }
 
   logout(): void {
     this.authService.logout().subscribe(() => {
       this.router.navigate(['/login']);
     });
+    this.closeDropdown();
   }
 
   toggleDropdown() {
@@ -69,17 +47,8 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.isDropdownOpen = false;
   }
 
-  redirectToConfiguracion() {
+  redirectToProfile() {
     this.router.navigate(['/profile']);
-    this.closeDropdown();
-  }
-
-  selectOption(option: string) {
-    if (option === 'profile') {
-      this.redirectToConfiguracion();
-    } else if (option === 'logout') {
-      this.logout();
-    }
     this.closeDropdown();
   }
 }

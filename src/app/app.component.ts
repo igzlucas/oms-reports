@@ -1,15 +1,23 @@
-import { Component, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { AsyncPipe, NgIf } from '@angular/common';
+import { SidebarComponent } from './shared/components/sidebar/sidebar.component';
+import { ToastComponent } from './shared/toast/toast.component';
+import { AuthService } from './core/services/auth.service';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterOutlet, SidebarComponent, ToastComponent, AsyncPipe, NgIf],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
-  title = 'ng-menu-dashboard';
+export class AppComponent {
+  title = 'Olmos-Marine-Reports';
+  isAuthenticated$: Observable<boolean>;
 
-  ngOnInit(): void {}
+  constructor(private authService: AuthService) {
+    this.isAuthenticated$ = this.authService.isAuthenticated();
+  }
 }

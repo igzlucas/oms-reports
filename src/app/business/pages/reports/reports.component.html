@@ -1,103 +1,94 @@
-<div class="p-4 bg-gray-100">
-    <div class="container mx-auto bg-white p-6 rounded-lg shadow-md">
-        <div class="flex justify-between items-center mb-4">
-            <h1 class="text-2xl font-bold">Reportes</h1>
-            <button (click)="createReport()" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Crear Reporte</button>
-        </div>
-
-        <div class="mb-4">
-            <label for="customer" class="block text-sm font-medium text-gray-700">Cliente</label>
-            <select id="customer" [(ngModel)]="selectedCustomer" (change)="onCustomerChange($event)" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                <option *ngFor="let customer of customers" [value]="customer.id">{{customer.nombre}}</option>
-            </select>
-        </div>
-
-        <div *ngIf="isLoading" class="flex justify-center items-center h-64">
-            <div class="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-32 w-32"></div>
-        </div>
-
-        <div class="overflow-x-auto" *ngIf="!isLoading">
-            <table class="min-w-full bg-white">
-                <thead>
-                    <tr>
-                        <th class="py-2 px-4 border-b">Fecha</th>
-                        <th class="py-2 px-4 border-b">Equipo</th>
-                        <th class="py-2 px-4 border-b">Problema</th>
-                        <th class="py-2 px-4 border-b">Monto</th>
-                        <th class="py-2 px-4 border-b">Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr *ngFor="let report of reports">
-                        <td class="py-2 px-4 border-b">{{report.fecha}}</td>
-                        <td class="py-2 px-4 border-b">{{report.equipo}}</td>
-                        <td class="py-2 px-4 border-b">{{report.problema}}</td>
-                        <td class="py-2 px-4 border-b">{{report.monto | currency}}</td>
-                        <td class="py-2 px-4 border-b">
-                            <button (click)="openModal(report)" class="text-blue-500 hover:underline">Ver</button>
-                            <button (click)="generatePdf(report)" class="text-green-500 hover:underline ml-2">PDF</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
+<div class="reports-page-container">
+  <header class="page-header">
+    <h1>Gestión de Reportes</h1>
+    <div class="header-actions">
+      <select class="form-control" [(ngModel)]="selectedCustomer">
+        <option *ngFor="let customer of customers" [value]="customer.id">{{customer.nombre}}</option>
+      </select>
+      <button class="btn btn-primary" (click)="createNewReport()" [disabled]="!selectedCustomer">+ Nuevo Reporte</button>
     </div>
-</div>
+  </header>
 
-<div *ngIf="isModalOpen" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50" (click)="closeModal()">
-    <div #reportContent class="bg-white p-6 rounded-lg shadow-lg w-3/4 max-h-screen overflow-y-auto" (click)="$event.stopPropagation()">
-        <div *ngIf="currentReport">
-            <h2 class="text-xl font-bold mb-4">Detalles del Reporte</h2>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <p><strong>Cliente:</strong> {{currentReport.cliente}}</p>
-                    <p><strong>Dirección:</strong> {{currentReport.clienteDireccion}}</p>
-                    <p><strong>Empresa:</strong> {{currentReport.empresa}}</p>
-                    <p><strong>Dirección Empresa:</strong> {{currentReport.empresaDireccion}}</p>
-                </div>
-                <div>
-                    <p><strong>Fecha:</strong> {{currentReport.fecha}}</p>
-                    <p><strong>Persona de Contacto:</strong> {{currentReport.persona}}</p>
-                    <p><strong>Equipo:</strong> {{currentReport.equipo}}</p>
-                </div>
-            </div>
-            <div class="mt-4">
-                <p><strong>Problema:</strong> {{currentReport.problema}}</p>
-                <p><strong>Trabajo Realizado:</strong> {{currentReport.trabajoRealizado}}</p>
-            </div>
-            <div class="mt-4">
-                <h3 class="text-lg font-bold">Detalles</h3>
-                <table class="min-w-full bg-white mt-2">
-                    <thead>
-                        <tr>
-                            <th class="py-2 px-4 border-b">Cantidad</th>
-                            <th class="py-2 px-4 border-b">Descripción</th>
-                            <th class="py-2 px-4 border-b">Valor Unitario</th>
-                            <th class="py-2 px-4 border-b">Valor Total</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let detail of currentReport.detalles">
-                            <td class="py-2 px-4 border-b">{{detail.cantidad}}</td>
-                            <td class="py-2 px-4 border-b">{{detail.descripcion}}</td>
-                            <td class="py-2 px-4 border-b">{{detail.valorUnitario | currency}}</td>
-                            <td class="py-2 px-4 border-b">{{detail.valorTotal | currency}}</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4">
-                <p><strong>Observaciones:</strong> {{currentReport.observaciones}}</p>
-            </div>
-            <div class="mt-4">
-                <p><strong>Monto Total:</strong> {{currentReport.monto | currency}}</p>
-            </div>
-            <div class="flex justify-end mt-6">
-                <button (click)="closeModal()" class="bg-gray-300 text-gray-800 px-4 py-2 rounded-lg mr-2">Cerrar</button>
-                <button (click)="saveReport()" class="bg-blue-500 text-white px-4 py-2 rounded-lg" [disabled]="isSaving">
-                    {{ isSaving ? 'Guardando...' : 'Guardar' }}
-                </button>
-            </div>
+  <div class="reports-list">
+    <div *ngFor="let report of reports" class="report-card">
+      <div class="report-card-header">
+        <span class="report-id">#{{report.reporteId}}</span>
+        <span class="report-date">{{report.fecha | date:'dd/MM/yyyy'}}</span>
+      </div>
+      <div class="report-card-body">
+        <p><strong>Cliente:</strong> {{report.clienteId}}</p>
+        <p><strong>Equipo:</strong> {{report.equipo}}</p>
+      </div>
+      <div class="report-card-footer">
+        <span class="report-total">{{report.montoTotal | currency}}</span>
+        <div class="report-actions">
+          <button class="btn-icon" (click)="openModal(report)">✏️</button>
+          <button class="btn-icon" (click)="generatePDF(report.id)">📄</button>
         </div>
+      </div>
     </div>
+  </div>
+
+  <!-- Modal para Crear/Editar Reporte -->
+  <div *ngIf="isModalOpen" class="modal-backdrop" id="report-modal">
+    <div class="modal-content" [attr.id]="'report-content-' + currentReport.id">
+      <h2>{{ currentReport.id ? 'Editar Reporte' : 'Nuevo Reporte' }}</h2>
+      
+      <!-- Información General -->
+      <div class="info-grid">
+        <p><strong>Cliente:</strong> {{currentReport.clienteId}}</p>
+        <p><strong>Fecha:</strong> {{currentReport.fecha | date:'fullDate'}}</p>
+      </div>
+
+      <div class="form-section">
+        <label>Equipo:</label>
+        <input type="text" class="form-control" [(ngModel)]="currentReport.equipo">
+        <label>Problema Reportado:</label>
+        <textarea class="form-control" [(ngModel)]="currentReport.problema"></textarea>
+        <label>Trabajo Realizado:</label>
+        <textarea class="form-control" [(ngModel)]="currentReport.trabajoRealizado"></textarea>
+      </div>
+      
+      <!-- Detalles -->
+      <div class="details-section">
+        <h3>Detalles / Refacciones</h3>
+        <table class="details-table">
+          <thead>
+            <tr><th>Cant.</th><th>Descripción</th><th>P. Unitario</th><th>Total</th><th>Acción</th></tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let detail of currentReport.detalles; let i = index">
+              <td>{{detail.cantidad}}</td>
+              <td>{{detail.descripcion}}</td>
+              <td>{{detail.precioUnitario | currency}}</td>
+              <td>{{detail.total | currency}}</td>
+              <td><button (click)="removeDetail(i)" class="btn-icon">❌</button></td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="add-detail-form">
+            <input type="number" [(ngModel)]="newDetail.cantidad" placeholder="Cant.">
+            <input type="text" [(ngModel)]="newDetail.descripcion" placeholder="Descripción">
+            <input type="number" [(ngModel)]="newDetail.precioUnitario" placeholder="P. Unitario">
+            <button (click)="addDetail()">+ Añadir</button>
+        </div>
+      </div>
+
+      <!-- Totales y Firma -->
+      <div class="totals-section">
+        <p><strong>Monto Total:</strong> {{currentReport.montoTotal | currency}}</p>
+        <div class="signature-area">
+            <label>Nombre Firma Cliente:</label>
+            <input type="text" class="form-control" [(ngModel)]="currentReport.nombreFirmaCliente">
+            <!-- Aquí iría el componente de firma -->
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
+        <button type="submit" class="btn btn-primary" (click)="saveReport()">Guardar Reporte</button>
+      </div>
+    </div>
+  </div>
+
 </div>

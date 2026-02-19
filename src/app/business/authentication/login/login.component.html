@@ -2,59 +2,91 @@
   <!-- Columna del formulario -->
   <div class="login-form-container">
     <div class="login-form">
-      <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-4">Bienvenido a Bordo</h2>
-      <p class="text-center text-gray-600 mb-8">Inicia sesión para gestionar tus reportes</p>
 
-      <form (ngSubmit)="loginWithEmail()" #form="ngForm">
-        <!-- Email -->
-        <div class="mb-4">
-          <label for="email" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
-          <input id="email" name="email" type="email" [(ngModel)]="email" required
-                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-        </div>
+      <!-- === FORMULARIO DE INICIO DE SESIÓN === -->
+      <div *ngIf="formMode === 'login'">
+        <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-4">Bienvenido a Bordo</h2>
+        <p class="text-center text-gray-600 mb-8">Inicia sesión para gestionar tus reportes</p>
 
-        <!-- Contraseña -->
-        <div class="mb-4">
-          <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
-          <input id="password" name="password" type="password" [(ngModel)]="password" required
-                 class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
-        </div>
-
-        <!-- Opciones extra -->
-        <div class="flex items-center justify-between mb-6">
-          <div class="flex items-center">
-            <input id="remember-me" name="remember-me" type="checkbox" [(ngModel)]="rememberMe"
-                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
-            <label for="remember-me" class="ml-2 block text-sm text-gray-900">Recordar</label>
+        <form (ngSubmit)="loginWithEmail()" #loginForm="ngForm">
+          <!-- Email -->
+          <div class="mb-4">
+            <label for="email-login" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+            <input id="email-login" name="email" type="email" [(ngModel)]="email" required
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
           </div>
-          <div class="text-sm">
-            <a href="#" (click)="forgotPassword(); $event.preventDefault()" class="font-medium text-blue-600 hover:text-blue-500">¿Olvidaste tu contraseña?</a>
+
+          <!-- Contraseña -->
+          <div class="mb-4">
+            <label for="password" class="block text-sm font-medium text-gray-700">Contraseña</label>
+            <input id="password" name="password" type="password" [(ngModel)]="password" required
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
           </div>
+
+          <!-- Opciones extra -->
+          <div class="flex items-center justify-between mb-6">
+            <div class="flex items-center">
+              <input id="remember-me" name="remember-me" type="checkbox" [(ngModel)]="rememberMe"
+                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+              <label for="remember-me" class="ml-2 block text-sm text-gray-900">Recordar</label>
+            </div>
+            <div class="text-sm">
+              <a href="#" (click)="showForgotPassword(); $event.preventDefault()" class="font-medium text-blue-600 hover:text-blue-500">¿Olvidaste tu contraseña?</a>
+            </div>
+          </div>
+
+          <!-- Botón de Login -->
+          <button type="submit" [disabled]="!loginForm.valid"
+                  class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400">
+            Iniciar Sesión
+          </button>
+        </form>
+
+        <!-- Separador -->
+        <div class="my-6 flex items-center justify-center">
+          <span class="px-2 bg-white text-sm text-gray-500">O continúa con</span>
         </div>
 
-        <!-- Botón de Login -->
-        <button type="submit" [disabled]="!form.valid"
-                class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400">
-          Iniciar Sesión
-        </button>
-      </form>
-
-      <!-- Separador -->
-      <div class="my-6 flex items-center justify-center">
-        <span class="px-2 bg-white text-sm text-gray-500">O continúa con</span>
+        <!-- Login con Google -->
+        <div>
+          <button (click)="loginWithGoogle()"
+                  class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <img class="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
+            Google
+          </button>
+        </div>
       </div>
 
-      <!-- Login con Google -->
-      <div>
-        <button (click)="loginWithGoogle()"
-                class="w-full inline-flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-          <img class="h-5 w-5 mr-2" src="https://www.svgrepo.com/show/475656/google-color.svg" alt="Google logo">
-          Google
-        </button>
+      <!-- === FORMULARIO DE RECUPERAR CONTRASEÑA === -->
+      <div *ngIf="formMode === 'forgotPassword'">
+        <h2 class="text-center text-3xl font-extrabold text-gray-900 mb-4">Recuperar Contraseña</h2>
+        <p class="text-center text-gray-600 mb-8">Ingresa tu correo y te enviaremos un enlace para restablecerla.</p>
+
+        <form (ngSubmit)="resetPassword()" #resetForm="ngForm">
+          <!-- Email -->
+          <div class="mb-6">
+            <label for="email-reset" class="block text-sm font-medium text-gray-700">Correo Electrónico</label>
+            <input id="email-reset" name="email" type="email" [(ngModel)]="email" required
+                  class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+          </div>
+
+          <!-- Botón de Enviar -->
+          <button type="submit" [disabled]="!resetForm.valid"
+                  class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400">
+            Enviar Correo de Recuperación
+          </button>
+        </form>
+
+        <!-- Volver a Login -->
+        <div class="text-center mt-6">
+          <a href="#" (click)="showLoginForm(); $event.preventDefault()" class="font-medium text-blue-600 hover:text-blue-500">
+            &larr; Volver a Iniciar Sesión
+          </a>
+        </div>
       </div>
 
       <p class="text-center text-gray-500 text-xs mt-8">
-        &copy; {{ fecha }} Olmos Marine Service. Todos los derechos reservados.
+        &copy; {{ fecha }} GLI. Todos los derechos reservados.
       </p>
     </div>
   </div>

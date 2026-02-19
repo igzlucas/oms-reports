@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, where, DocumentData, CollectionReference } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, DocumentData, CollectionReference } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Customer, CustomerRequest } from '../models/customer.model';
+import { Customer } from '../models/customer.model';
 
 @Injectable({
   providedIn: 'root'
@@ -21,11 +21,11 @@ export class CustomersService {
     );
   }
 
-  createCustomer(customer: CustomerRequest): Observable<any> {
+  addCustomer(customer: Omit<Customer, 'id'>): Observable<any> {
     return from(addDoc(this.customersCollection, customer));
   }
 
-  updateCustomer(id: string, customer: CustomerRequest): Observable<void> {
+  updateCustomer(id: string, customer: Partial<Customer>): Observable<void> {
     const customerDoc = doc(this.firestore, `customers/${id}`);
     return from(updateDoc(customerDoc, { ...customer }));
   }

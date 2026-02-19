@@ -1,0 +1,111 @@
+<div class="report-form-container">
+  <h1>Crear Nuevo Reporte de Trabajo</h1>
+
+  <form [formGroup]="reportForm" (ngSubmit)="onSubmit()">
+
+    <!-- Sección de Cabecera: Cliente y Equipo -->
+    <div class="card">
+      <div class="card-header">Información General</div>
+      <div class="card-body grid-col-2">
+        <div>
+          <label for="reporteId">N° de Reporte</label>
+          <input id="reporteId" type="number" formControlName="reporteId" class="form-control">
+        </div>
+        <div>
+          <label for="fecha">Fecha y Hora</label>
+          <input id="fecha" type="datetime-local" formControlName="fecha" class="form-control">
+        </div>
+        <div>
+          <label for="cliente">Cliente</label>
+          <select id="cliente" formControlName="clienteId" class="form-control" (change)="onCustomerChange($event)">
+            <option value="" disabled>Seleccione un cliente...</option>
+            <option *ngFor="let customer of customers" [value]="customer.id">{{ customer.nombre }}</option>
+          </select>
+        </div>
+        <div>
+          <label for="equipo">Equipo Reportado</label>
+          <select id="equipo" formControlName="equipo" class="form-control">
+            <option value="" disabled>Seleccione un equipo...</option>
+            <option *ngFor="let eq of filteredEquipments" [value]="eq.nombre">{{ eq.nombre }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sección del Problema -->
+    <div class="card">
+      <div class="card-header">Problema Detectado</div>
+      <div class="card-body">
+        <textarea formControlName="problema" rows="4" class="form-control"></textarea>
+      </div>
+    </div>
+
+    <!-- Sección de Trabajo Realizado con Editor de Texto Enriquecido -->
+    <div class="card">
+      <div class="card-header">Trabajo Realizado</div>
+      <div class="card-body">
+        <editor formControlName="trabajoRealizado" [init]="tinyMceConfig"></editor>
+      </div>
+    </div>
+
+    <!-- Sección de Refacciones (FormArray Dinámico) -->
+    <div class="card">
+      <div class="card-header">Refacciones y Mano de Obra</div>
+      <div class="card-body" formArrayName="detalles">
+        <div *ngFor="let detalle of detalles.controls; let i=index" [formGroupName]="i" class="detalle-row">
+          <input type="number" placeholder="Cantidad" formControlName="cantidad" class="form-control small">
+          <input type="text" placeholder="Descripción" formControlName="descripcion" class="form-control large">
+          <input type="number" placeholder="Precio Unitario" formControlName="precioUnitario" class="form-control medium">
+          <button type="button" class="btn btn-danger" (click)="removeDetalle(i)">Eliminar</button>
+        </div>
+        <button type="button" class="btn btn-secondary" (click)="addDetalle()">+ Añadir Línea</button>
+      </div>
+      <div class="card-footer grid-col-2">
+          <div>
+            <label for="moneda">Moneda</label>
+            <select id="moneda" formControlName="moneda" class="form-control">
+                <option value="USD">USD</option>
+                <option value="MXN">MXN</option>
+                <option value="EUR">EUR</option>
+            </select>
+          </div>
+          <div class="total-display">
+              <span>Monto Total:</span>
+              <strong>{{ reportForm.get('montoTotal')?.value | number:'1.2-2' }} {{ reportForm.get('moneda')?.value }}</strong>
+          </div>
+      </div>
+    </div>
+
+    <!-- Sección de Observaciones -->
+    <div class="card">
+        <div class="card-header">Observaciones Adicionales</div>
+        <div class="card-body">
+            <textarea formControlName="observaciones" rows="4" class="form-control"></textarea>
+        </div>
+    </div>
+
+    <!-- Sección de Firma -->
+    <div class="card">
+      <div class="card-header">Aceptación y Firma del Cliente</div>
+      <div class="card-body">
+        <p class="terms-text">{{ reportForm.get('terminosCondiciones')?.value }}</p>
+        <label for="nombreFirmaCliente">Nombre de quien acepta:</label>
+        <input id="nombreFirmaCliente" type="text" formControlName="nombreFirmaCliente" class="form-control">
+        <label>Firma:</label>
+        <div class="signature-pad-wrapper">
+            <canvas #signatureCanvas width="500" height="200"></canvas>
+        </div>
+        <div class="signature-pad-actions">
+            <button type="button" (click)="clearSignature()" class="btn btn-secondary">Limpiar Firma</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="form-actions">
+      <button type="button" class="btn btn-secondary">Guardar Borrador</button>
+      <button type="submit" class="btn btn-primary" [disabled]="!reportForm.valid">Finalizar y Guardar Reporte</button>
+    </div>
+
+  </form>
+</div>
