@@ -2,8 +2,20 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
     
+    // REGLA CORREGIDA: "empresa" a "empresas"
+    // Esta regla ahora coincide con la ruta que usa tu código y protege
+    // tanto los documentos de la empresa como sus subcolecciones (como 'metadata').
+    match /empresas/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
     // Regla para la colección de clientes
     match /clientes/{document=**} {
+      allow read, write: if request.auth != null;
+    }
+
+    // Regla para la colección de customers
+    match /customers/{document=**} {
       allow read, write: if request.auth != null;
     }
 
@@ -12,18 +24,13 @@ service cloud.firestore {
       allow read, write: if request.auth != null;
     }
 
-    // Regla para la colección de empresa
-    match /empresa/{document=**} {
-      allow read, write: if request.auth != null;
-    }
-
-    // ¡NUEVO! Regla para la colección de usuarios
+    // Regla para la colección de usuarios, es muy importante
     match /users/{userId} {
-      // Permite a un usuario leer y escribir en su propio documento
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
-    match /actividad/{document} {
+    // Regla para la actividad (si la usas en el futuro)
+    match /actividad/{document=**} {
       allow read, write: if request.auth != null;
     }
   }

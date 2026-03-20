@@ -1,139 +1,303 @@
-import { Component, AfterViewInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
-import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
+import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import SignaturePad from 'signature_pad';
+import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { Observable, of, Subscription } from 'rxjs';
+import { switchMap, take, tap } from 'rxjs/operators';
+import { Timestamp } from 'firebase/firestore';
 
-import { EditorModule } from '@tinymce/tinymce-angular';
+// Services
+import { ReportService } from '../../core/services/report.service';
+import { ClientService } from '../../core/services/client.service';
+import { EmpresaService } from '../../core/services/empresa.service';
 
-import { Report, ReportDetail, initialReportData } from '../../core/models/report.model';
-import { Customer } from '../../core/models/customer.model';
-import { Equipment } from '../../core/models/equipment.model';
+// Models
+import { Report } from '../../core/models/report.model';
+import { Client } from '../../core/models/client.model';
+
+// Components
+import { SignatureModalComponent } from '../../shared/signature-modal/signature-modal.component';
+import { EditorComponent } from '@tinymce/tinymce-angular';
 
 @Component({
   selector: 'app-report-form',
   standalone: true,
   imports: [
     CommonModule,
-    ReactiveFormsModule, // Para usar FormBuilder y FormGroup
-    EditorModule,      // El módulo del editor de texto enriquecido
+    ReactiveFormsModule,
+    RouterModule,
+    SignatureModalComponent,
+    EditorComponent
   ],
   templateUrl: './report-form.component.html',
   styleUrls: ['./report-form.component.css']
 })
-export class ReportFormComponent implements AfterViewInit {
-  @ViewChild('signatureCanvas', { static: false }) signatureCanvas!: ElementRef<HTMLCanvasElement>;
+export class ReportFormComponent implements OnInit, OnDestroy {
+  private fb = inject(FormBuilder);
+  private reportService = inject(ReportService);
+  private clientService = inject(ClientService);
+  private empresaService = inject(EmpresaService);
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  reportForm!: FormGroup;
+  clients: Client[] = [];
+  clients$!: Observable<Client[]>;
+  equipos: any[] = [];
+
+  isEditMode = false;
+  reportId?: string;
+  isLoading = true;
+  isSaving = false;
+  empresaId!: string;
+
+  showSignatureModal = false;
+  signatureDataUrl: string | null = null;
   
-  reportForm: FormGroup;
-  signaturePad!: SignaturePad;
+  private subscriptions = new Subscription();
 
-  // Datos de ejemplo - En un futuro vendrán de un servicio
-  customers: Customer[] = [
-    { id: '1', nombre: 'Cliente Ejemplo 1', email: 'c1@email.com', direccion: 'Direccion 1' },
-    { id: '2', nombre: 'Cliente Ejemplo 2', email: 'c2@email.com', direccion: 'Direccion 2' },
-  ];
-  equipments: Equipment[] = [
-    { id: 'e1', customerId: '1', nombre: 'Motor Principal' },
-    { id: 'e2', customerId: '1', nombre: 'Generador Babor' },
-    { id: 'e3', customerId: '2', nombre: 'Sistema de Navegación' },
-  ];
-  filteredEquipments: Equipment[] = [];
-
-  // Configuración del editor de texto
-  tinyMceConfig = {
-    base_url: '/tinymce',
-    suffix: '.min',
-    plugins: 'lists link autolink autoresize',
-    toolbar: 'undo redo | bold italic | bullist numlist | link',
+  public tinyMceConfig = {
+    height: 250,
     menubar: false,
-    height: 300,
-    autoresize_bottom_margin: 20
+    plugins: ['advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview', 'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen', 'insertdatetime', 'media', 'table', 'help', 'wordcount'],
+    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | help'
   };
 
-  constructor(private fb: FormBuilder, private cdr: ChangeDetectorRef) {
+  ngOnInit(): void {
+    this.initializeForm();
+    this.loadEmpresaAndClients();
+    this.setupConditionalValidation();
+    this.handleCostChanges();
+    this.onClientChange();
+  }
+
+  private initializeForm(): void {
     this.reportForm = this.fb.group({
-      id: [null],
-      reporteId: [null, Validators.required],
-      clienteId: ['', Validators.required],
-      equipo: ['', Validators.required],
-      fecha: [new Date().toISOString().substring(0, 16), Validators.required],
-      problema: ['', Validators.required],
-      trabajoRealizado: [initialReportData().trabajoRealizado, Validators.required],
+      reporteId: [null],
+      fecha: [this.formatDateToInput(new Date()), Validators.required],
+      clientId: [null, Validators.required],
+      equipo: [null, Validators.required], // Added equipo control
+      problema: [''],
+      trabajoRealizado: [''],
       observaciones: [''],
-      montoTotal: [0],
+      detalles: this.fb.array([]),
+      montoTotal: [{value: 0, disabled: true}],
       moneda: ['USD', Validators.required],
-      terminosCondiciones: [initialReportData().terminosCondiciones],
+      terminosCondiciones: [''],
       nombreFirmaCliente: [''],
-      detalles: this.fb.array([])
+      firma: [null]
     });
   }
 
-  ngAfterViewInit() {
-    if (this.signatureCanvas) {
-      this.signaturePad = new SignaturePad(this.signatureCanvas.nativeElement);
-      this.resizeCanvas();
-    } else {
-      console.error('El canvas de la firma no está disponible.');
+  private loadEmpresaAndClients(): void {
+    const empresaSub = this.empresaService.getEmpresa().pipe(take(1)).subscribe(empresa => {
+      if (empresa && empresa.id) {
+        this.empresaId = empresa.id;
+        this.clients$ = this.clientService.getClientsByEmpresa(this.empresaId).pipe(
+          tap(clients => this.clients = clients) // Store clients locally
+        );
+        this.setupEditMode();
+        if(!this.isEditMode) {
+            this.isLoading = false;
+        }
+      } else {
+        console.error("Empresa no encontrada");
+        this.isLoading = false;
+      }
+    });
+    this.subscriptions.add(empresaSub);
+  }
+
+  private setupEditMode(): void {
+    this.route.paramMap.pipe(take(1)).subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.isEditMode = true;
+        this.reportId = id;
+        this.loadReportData(id);
+      }
+    });
+  }
+
+  private loadReportData(id: string): void {
+    this.isLoading = true;
+    this.reportService.getReportById(id).pipe(take(1)).subscribe(report => {
+      if (report) {
+        // We need to wait for clients to be loaded before patching the value
+        this.clients$.pipe(take(1)).subscribe(() => {
+          this.reportForm.patchValue({
+            ...report,
+            fecha: report.fecha instanceof Timestamp ? this.formatDateToInput(report.fecha.toDate()) : this.formatDateToInput(new Date(report.fecha)),
+            clientId: report.clientId
+          });
+
+          // Manually trigger the client change to load the equipment
+          this.updateEquipos(report.clientId);
+          this.reportForm.get('equipo')?.setValue(report.equipo); // Set the equipment value
+
+          if (report.detalles) {
+            this.detalles.clear();
+            report.detalles.forEach(() => this.addDetalle());
+            this.detalles.patchValue(report.detalles);
+          }
+          
+          if(report.firma) {
+            this.signatureDataUrl = report.firma;
+            this.reportForm.get('firma')?.setValue(this.signatureDataUrl);
+          }
+          this.isLoading = false;
+        });
+
+      } else {
+        console.error("Reporte no encontrado");
+        this.isLoading = false;
+      }
+    });
+  }
+
+  private onClientChange(): void {
+    const sub = this.reportForm.get('clientId')?.valueChanges.subscribe(clientId => {
+      this.updateEquipos(clientId);
+    });
+    this.subscriptions.add(sub);
+  }
+
+  private updateEquipos(clientId: string | null): void {
+    this.reportForm.get('equipo')?.reset();
+    this.equipos = [];
+    if (clientId) {
+      const selectedClient = this.clients.find(c => c.id === clientId);
+      if (selectedClient && selectedClient.equipos) {
+        this.equipos = selectedClient.equipos;
+      }
     }
   }
 
-  // --- Lógica para el formulario ---
+
+  private handleCostChanges(): void {
+    const sub = this.detalles.valueChanges.subscribe(() => {
+        const total = this.calculateTotal();
+        this.reportForm.get('montoTotal')?.setValue(total, { emitEvent: false });
+    });
+    this.subscriptions.add(sub);
+  }
 
   get detalles(): FormArray {
     return this.reportForm.get('detalles') as FormArray;
   }
 
-  addDetalle() {
+  addDetalle(): void {
     const detalleForm = this.fb.group({
-      cantidad: [1, [Validators.required, Validators.min(1)]],
+      cantidad: [1, Validators.min(1)],
       descripcion: ['', Validators.required],
-      precioUnitario: [0, [Validators.required, Validators.min(0)]],
-      total: [0]
+      precioUnitario: [0, Validators.min(0)]
     });
     this.detalles.push(detalleForm);
   }
 
-  removeDetalle(index: number) {
+  removeDetalle(index: number): void {
     this.detalles.removeAt(index);
   }
+  
+  private setupConditionalValidation(): void {
+    const firmaControl = this.reportForm.get('firma');
+    const nombreFirmaControl = this.reportForm.get('nombreFirmaCliente');
 
-  onCustomerChange(event: Event) {
-    const customerId = (event.target as HTMLSelectElement).value;
-    this.filteredEquipments = this.equipments.filter(e => e.customerId === customerId);
-  }
-
-  // --- Lógica para la firma ---
-
-  resizeCanvas() {
-    const canvas = this.signatureCanvas.nativeElement;
-    const ratio = Math.max(window.devicePixelRatio || 1, 1);
-    canvas.width = canvas.offsetWidth * ratio;
-    canvas.height = canvas.offsetHeight * ratio;
-    canvas.getContext('2d')?.scale(ratio, ratio);
-    this.clearSignature();
-  }
-
-  clearSignature() {
-    this.signaturePad.clear();
-  }
-
-  getSignatureDataUrl(): string | undefined {
-    if (this.signaturePad.isEmpty()) {
-      return undefined;
+    if (firmaControl && nombreFirmaControl) {
+        const sub = firmaControl.valueChanges.subscribe(value => {
+            if (value) {
+                nombreFirmaControl.setValidators(Validators.required);
+            } else {
+                nombreFirmaControl.clearValidators();
+            }
+            nombreFirmaControl.updateValueAndValidity();
+        });
+        this.subscriptions.add(sub);
     }
-    return this.signaturePad.toDataURL(); // Devuelve la imagen en formato Base64
   }
 
-  onSubmit() {
-    if (this.reportForm.valid) {
-      const formData = this.reportForm.value;
-      const signature = this.getSignatureDataUrl();
-      
-      console.log('Formulario:', formData);
-      console.log('Firma (Base64):', signature);
-      // Aquí iría la lógica para guardar en Firestore
-    } else {
-      console.error('El formulario no es válido.');
+  openSignatureModal(): void {
+    this.showSignatureModal = true;
+  }
+
+  onModalClosed(): void {
+    this.showSignatureModal = false;
+  }
+
+  onSignatureSaved(signature: string): void {
+    this.signatureDataUrl = signature;
+    this.reportForm.get('firma')?.setValue(signature);
+    this.showSignatureModal = false;
+  }
+
+  clearSignature(): void {
+    this.signatureDataUrl = null;
+    this.reportForm.get('firma')?.setValue(null);
+  }
+
+  async onSubmit(): Promise<void> {
+    if (this.reportForm.invalid) {
       this.reportForm.markAllAsTouched();
+      console.error("Formulario inválido. Detalles:", this.getFormValidationErrors());
+      return;
     }
+    this.isSaving = true;
+
+    try {
+      const formValue = this.reportForm.getRawValue();
+      const reportData: Partial<Report> = {
+        ...formValue,
+        empresaId: this.empresaId,
+        fecha: new Date(formValue.fecha),
+        montoTotal: this.calculateTotal(),
+        firma: this.signatureDataUrl
+      };
+
+      if (this.isEditMode && this.reportId) {
+        await this.reportService.updateReport(this.reportId, reportData);
+      } else {
+        await this.reportService.addReport(reportData as Report);
+      }
+      this.router.navigate(['/dashboard']);
+    } catch (error) {
+      console.error("Error al guardar el reporte", error);
+    } finally {
+      this.isSaving = false;
+    }
+  }
+
+  private calculateTotal(): number {
+    return this.detalles.controls.reduce((acc, curr) => {
+      const qty = curr.get('cantidad')?.value || 0;
+      const price = curr.get('precioUnitario')?.value || 0;
+      return acc + (qty * price);
+    }, 0);
+  }
+
+  private formatDateToInput(date: Date): string {
+    try {
+        const pad = (n: number) => (n < 10 ? '0' + n : n);
+        const year = date.getFullYear();
+        const month = pad(date.getMonth() + 1); // getMonth() is 0-indexed
+        const day = pad(date.getDate());
+        return `${year}-${month}-${day}`;
+    } catch (e) {
+        return '';
+    }
+  }
+
+  getFormValidationErrors() {
+    const errors: any = {};
+    Object.keys(this.reportForm.controls).forEach(key => {
+      const controlErrors = this.reportForm.get(key)?.errors;
+      if (controlErrors != null) {
+        errors[key] = controlErrors;
+      }
+    });
+    return errors;
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
   }
 }

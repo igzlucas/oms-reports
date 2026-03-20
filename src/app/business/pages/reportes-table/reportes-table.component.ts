@@ -1,171 +1,74 @@
-import { Component, OnInit } from '@angular/core';
-import { ReportService } from '../../../core/services/report.service';
-import { CommonModule } from '@angular/common';
+import { Component, OnInit, inject } from '@angular/core';
+import { CommonModule, DatePipe } from '@angular/common';
+import { RouterModule } from '@angular/router';
 import { Report } from '../../../core/models/report.model';
-import { ToastrService } from 'ngx-toastr';
-import { FormsModule } from '@angular/forms';
-import { DomSanitizer } from '@angular/platform-browser';
+import { ReportService } from '../../../core/services/report.service';
+import { EmpresaService } from '../../../core/services/empresa.service';
+import { switchMap } from 'rxjs/operators';
+import { Timestamp } from 'firebase/firestore';
+import { Empresa } from '../../../core/models/empresa.model';
 
 @Component({
   selector: 'app-reportes-table',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, RouterModule],
   templateUrl: './reportes-table.component.html',
   styleUrls: ['./reportes-table.component.css'],
-  providers: [ReportService]
+  providers: [DatePipe]
 })
 export class ReportesTableComponent implements OnInit {
-  reportes: Report[] = [];
-  visibleReportes: Report[] = [];
-  filteredReportes: Report[] = [];
-  searchTerm: string = '';
+  private reportService = inject(ReportService);
+  private empresaService = inject(EmpresaService);
+  private datePipe = inject(DatePipe);
 
-  currentPage = 1;
-  itemsPerPage = 10;
-  totalPages = 0;
-
-  isModalOpen = false;
-  selectedReport: Report | null = null;
-  isLoading = true;
-
-  pagination = {
-    page: 1,
-    totalPages: 0,
-    totalRecordsPage: 10,
-  };
-
-  currentOpenReporteId: string | null = null;
-  detalles: any[] = [];
-  totalCantidad = 0;
-  totalTotal = 0;
-
-  constructor(
-    private reportService: ReportService,
-    private toastr: ToastrService,
-    public sanitizer: DomSanitizer
-  ) {}
+  reports: Report[] = [];
 
   ngOnInit(): void {
-    this.getReportes();
-  }
-
-  getReportes(): void {
-    this.isLoading = true;
-    this.reportService.getReportes(null, 1000).subscribe(
-      (response: Report[]) => {
-        this.reportes = response;
-        this.filteredReportes = response;
-        this.totalPages = Math.ceil(this.filteredReportes.length / this.itemsPerPage);
-        this.pagination.totalPages = this.totalPages;
-        this.updateVisibleReportes();
-        this.isLoading = false;
-      },
-      (error: any) => {
-        console.error('Error fetching reports:', error);
-        this.toastr.error('Error al cargar los reportes.');
-        this.isLoading = false;
-      }
-    );
-  }
-
-  filterReportes(): void {
-    const searchTerm = this.searchTerm.toLowerCase();
-    this.filteredReportes = this.reportes.filter(reporte =>
-      reporte.clienteId.toLowerCase().includes(searchTerm) ||
-      reporte.reporteId.toString().includes(searchTerm)
-    );
-    this.totalPages = Math.ceil(this.filteredReportes.length / this.itemsPerPage);
-    this.pagination.totalPages = this.totalPages;
-    this.currentPage = 1;
-    this.pagination.page = 1;
-    this.updateVisibleReportes();
-  }
-
-  updateVisibleReportes(): void {
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.visibleReportes = this.filteredReportes.slice(startIndex, endIndex);
-  }
-
-  goToPage(page: number): void {
-    if (page >= 1 && page <= this.totalPages) {
-      this.currentPage = page;
-      this.pagination.page = page;
-      this.updateVisibleReportes();
-    }
-  }
-
-  nextPage(): void {
-    if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.pagination.page++;
-      this.updateVisibleReportes();
-    }
-  }
-
-  previousPage(): void {
-    if (this.currentPage > 1) {
-      this.currentPage--;
-      this.pagination.page--;
-      this.updateVisibleReportes();
-    }
-  }
-
-  async openModal(reporte: Report): Promise<void> {
-    try {
-      this.isLoading = true;
-      // Asumiendo que el reporte que viene de la lista ya tiene todos los datos necesarios
-      this.selectedReport = reporte; 
-      this.isModalOpen = true;
-      this.isLoading = false;
-    } catch (error) {
-      console.error('Error setting report details:', error);
-      this.toastr.error('Error al cargar los detalles del reporte.');
-      this.isLoading = false;
-    }
-  }
-
-  closeModal(): void {
-    this.isModalOpen = false;
-    this.selectedReport = null;
-  }
-
-  deleteReport(reporteId: string): void {
-    if (confirm('¿Estás seguro de que quieres eliminar este reporte?')) {
-      this.reportService.deleteReport(reporteId).subscribe(
-        () => {
-          this.toastr.success('Reporte eliminado exitosamente');
-          this.getReportes(); // Recargar la lista
-        },
-        (error) => {
-          this.toastr.error('Error al eliminar el reporte');
-          console.error('Error deleting report:', error);
+    this.empresaService.getEmpresa().pipe(
+      switchMap((empresa: Empresa | null) => {
+        if (empresa && empresa.id) {
+          return this.reportService.getReportsByEmpresa(empresa.id);
         }
-      );
-    }
+        return [];
+      })
+    ).subscribe((reports: Report[]) => {
+      this.reports = reports;
+    });
   }
 
-  printReport() {
-    window.print();
+  getFormattedDate(date: any): string | null {
+    if (!date) return null;
+    const jsDate = date instanceof Timestamp ? date.toDate() : date;
+    return this.datePipe.transform(jsDate, 'dd/MM/yyyy');
   }
 
-  get totalPagesArray(): number[] {
-    return Array(this.totalPages).fill(0).map((x, i) => i + 1);
+  getShareableLink(report: Report): string {
+    const pin = report.pin || '';
+    const token = report.publicLinkToken || '';
+    return `${window.location.origin}/report-viewer/${token}/auth?pin=${pin}`;
   }
 
-  changePage(page: number): void {
-    this.goToPage(page);
+  copyToClipboard(input: HTMLInputElement): void {
+    input.select();
+    document.execCommand('copy');
+    input.setSelectionRange(0, 0);
+    // Considera añadir una notificación de que se ha copiado
   }
 
-  openDetails(reporte: Report): void {
-    if (this.currentOpenReporteId === reporte.id) {
-      this.currentOpenReporteId = null;
+  shareReport(report: Report): void {
+    const link = this.getShareableLink(report);
+    // Aquí podrías usar la API de Share si el navegador la soporta,
+    // o mostrar un modal con el enlace para copiar.
+    if (navigator.share) {
+      navigator.share({
+        title: `Reporte de Servicio #${report.reporteId}`,
+        text: `Accede al reporte de servicio para el cliente.`,
+        url: link,
+      })
+      .catch(console.error);
     } else {
-      this.currentOpenReporteId = reporte.id!;
+      // Fallback para navegadores que no soportan la API de Share
+      alert(`Copia este enlace para compartir: ${link}`);
     }
-  }
-
-  filterReports(): void {
-    this.filterReportes();
   }
 }

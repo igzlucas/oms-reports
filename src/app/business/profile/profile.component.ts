@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { Empresa, CuentaBancaria } from '../../core/models/empresa.model';
@@ -45,7 +45,8 @@ export class ProfileComponent implements OnInit {
   constructor(
     private authService: AuthService,
     private empresaService: EmpresaService,
-    private toastService: ToastService
+    private toastService: ToastService,
+    private cdr: ChangeDetectorRef // Inyectar ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -60,6 +61,7 @@ export class ProfileComponent implements OnInit {
 
   switchTab(tab: 'profile' | 'empresa'): void {
     this.activeTab = tab;
+    this.cdr.detectChanges(); // Forzar la detección de cambios
   }
 
   loadEmpresaData(): void {
@@ -72,6 +74,7 @@ export class ProfileComponent implements OnInit {
         };
         this.isNewEmpresa = false;
       }
+      this.cdr.detectChanges(); // Asegurarse de que la vista se actualice después de cargar datos
     });
   }
 
@@ -82,6 +85,7 @@ export class ProfileComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = () => {
         this.empresa.logoUrl = reader.result as string;
+        this.cdr.detectChanges(); // Actualizar la vista con la imagen previa
       };
       reader.readAsDataURL(file);
     }
@@ -134,7 +138,7 @@ export class ProfileComponent implements OnInit {
   }
   
   updateEmpresaData(): void {
-      if (this.empresa.id) { // ¡CORREGIDO!
+      if (this.empresa.id) {
         this.empresaService.updateEmpresa(this.empresa.id, this.empresa).subscribe(() => {
             this.toastService.show('¡Información de la empresa guardada!', 'success');
         }, () => {
@@ -153,7 +157,6 @@ export class ProfileComponent implements OnInit {
     await updatePassword(user, this.passwordData.newPassword);
   }
 
-  // --- Dynamic lists management ---
   addTelefono(): void {
     if (this.newTelefono.trim()) {
       this.empresa.telefonos.push(this.newTelefono.trim());

@@ -1,40 +1,37 @@
-export interface ReportDetail {
+import { Timestamp } from 'firebase/firestore';
+
+export interface Detalle {
   cantidad: number;
   descripcion: string;
   precioUnitario: number;
-  total: number;
 }
 
 export interface Report {
-  id: string; // ID del documento de Firestore
-  reporteId: number; // ID numérico del reporte (ej: 24001)
-  clienteId: string; // ID del cliente
+  id: string;
+  reporteId: number;
+  empresaId: string;
+  clientId: string;
   equipo: string;
-  fecha: string | Date;
+  fecha: Date | Timestamp;
   problema: string;
   trabajoRealizado: string;
-  observaciones?: string;
+  observaciones: string;
   montoTotal: number;
-  moneda: 'USD' | 'MXN' | 'EUR';
-  terminosCondiciones: string;
-  nombreFirmaCliente: string;
-  firmaBase64?: string; // Contendrá la imagen de la firma en formato Base64
-  detalles: ReportDetail[];
-}
+  moneda: 'USD' | 'MXN';
+  detalles: Detalle[];
+  status: 'borrador' | 'completado';
 
-export function initialReportData(): Partial<Report> {
-  return {
-    reporteId: 0,
-    clienteId: '',
-    equipo: '',
-    fecha: new Date(),
-    problema: '',
-    trabajoRealizado: '<p>A continuación se detalla el trabajo realizado:</p><ul><li>Inspección inicial.</li><li>Diagnóstico del problema.</li><li>Corrección de fallas.</li></ul>',
-    observaciones: '',
-    montoTotal: 0,
-    moneda: 'USD',
-    terminosCondiciones: 'El cliente acepta los trabajos y costos descritos en este reporte. La garantía de las refacciones es de 30 días contra defectos de fabricación.',
-    nombreFirmaCliente: '',
-    detalles: [],
-  };
+  // Campos de la firma y aceptación
+  nombreAcepta?: string;
+  firma?: string;
+
+  // Campos de la garantía
+  diasGarantia: number;
+  terminosCondiciones?: string;
+
+  // ---- CAMPOS PARA EL ENLACE PÚBLICO ----
+  publicLinkToken?: string;
+  publicLinkExpiresAt?: Timestamp;
+  pin?: string; // PIN de seguridad para el cliente
+  clientStatus?: 'pending' | 'approved' | 'rejected'; // Estado de aprobación del cliente
 }

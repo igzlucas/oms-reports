@@ -1,67 +1,159 @@
-<div class="customer-page-container">
-  <header class="page-header">
-    <h1>Gestión de Clientes</h1>
-    <button class="btn btn-primary" (click)="openModal(false)">+ Nuevo Cliente</button>
+<div class="customer-page-container bg-gray-50 font-sans p-4 md:p-8">
+
+  <!-- Header -->
+  <header class="page-header flex justify-between items-center mb-6">
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-800">Gestión de Clientes</h1>
+    <button class="btn btn-primary bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+      (click)="openModal(false)">
+      + Nuevo Cliente
+    </button>
   </header>
 
-  <div class="table-toolbar">
-    <input type="text" class="form-control search-input" placeholder="Buscar por nombre o email..." [(ngModel)]="searchTerm" (ngModelChange)="filterCustomers()">
-    <div class="actions">
-        <button class="btn btn-danger" [disabled]="selectedCustomerIds.size === 0" (click)="deleteSelectedCustomers()">Eliminar Seleccionados</button>
+  <!-- Toolbar -->
+  <div class="toolbar bg-white rounded-xl shadow-md p-4 mb-6 flex justify-between items-center">
+    <div class="search-wrapper w-full md:w-1/3">
+      <input type="text" class="form-control w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" 
+        placeholder="Buscar por nombre o email..." [(ngModel)]="searchTerm" (ngModelChange)="filterCustomers()">
+    </div>
+    <div class="actions-wrapper">
+      <button class="btn btn-danger bg-red-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
+        [disabled]="selectedCustomerIds.size === 0" (click)="deleteSelectedCustomers()">
+        Eliminar Seleccionados
+      </button>
     </div>
   </div>
 
-  <div class="table-responsive-wrapper">
-    <table class="data-table">
-      <thead>
-        <tr>
-          <th class="w-12 border-b"><input type="checkbox" (change)="toggleSelectAll($any($event.target).checked)"></th>
-          <th class="border-b">Nombre</th>
-          <th class="border-b">Dirección</th>
-          <th class="border-b">Email</th>
-          <th class="border-b">Acciones</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr *ngFor="let customer of filteredCustomers">
-          <td class="border-b"><input type="checkbox" [checked]="isCustomerSelected(customer.id)" (change)="toggleCustomerSelection(customer.id, $any($event.target).checked)"></td>
-          <td class="border-b">{{ customer.nombre }}</td>
-          <td class="border-b">{{ customer.direccion }}</td>
-          <td class="border-b">{{ customer.email }}</td>
-          <td class="border-b">
-            <button class="btn-icon btn-edit" (click)="openModal(true, customer)">Editar</button>
-            <button class="btn-icon btn-delete" (click)="deleteCustomer(customer.id)">Eliminar</button>
-          </td>
-        </tr>
-        <tr *ngIf="filteredCustomers.length === 0">
-            <td colspan="5" class="text-center p-4">No se encontraron clientes.</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- Customer Table -->
+  <div class="table-wrapper bg-white rounded-xl shadow-md overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="data-table w-full">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="p-4 w-12 text-left"><input type="checkbox" (change)="toggleSelectAll($any($event.target).checked)" class="form-checkbox h-5 w-5 text-indigo-600"></th>
+            <th class="p-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Nombre</th>
+            <th class="p-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Dirección</th>
+            <th class="p-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+            <th class="p-4 text-center text-sm font-semibold text-gray-600 uppercase tracking-wider">Acciones</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <tr *ngFor="let customer of filteredCustomers" class="hover:bg-gray-50">
+            <td class="p-4"><input type="checkbox" [checked]="isCustomerSelected(customer.id)" (change)="toggleCustomerSelection(customer.id, $any($event.target).checked)" class="form-checkbox h-5 w-5 text-indigo-600"></td>
+            <td class="p-4 text-sm text-gray-800">{{ customer.nombre }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ customer.direccion }}</td>
+            <td class="p-4 text-sm text-gray-600">{{ customer.email }}</td>
+            <td class="p-4 text-center space-x-2">
+              <button class="btn-icon btn-edit text-indigo-600 hover:text-indigo-900" (click)="openModal(true, customer)">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.5L16.732 3.732z"></path></svg>
+              </button>
+              <button class="btn-icon btn-delete text-red-600 hover:text-red-900" (click)="deleteCustomer(customer.id)">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </td>
+          </tr>
+          <tr *ngIf="filteredCustomers.length === 0">
+            <td colspan="5" class="text-center p-8 text-gray-500">
+              <div class="flex flex-col items-center">
+                <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p class="font-semibold">No se encontraron clientes.</p>
+                <p class="text-sm">Intente con otro término de búsqueda o agregue un nuevo cliente.</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 
   <!-- Modal para Crear/Editar Cliente -->
-  <div *ngIf="isModalOpen" class="modal-backdrop">
-    <div class="modal-content">
-      <h2>{{ isEditMode ? 'Editar Cliente' : 'Nuevo Cliente' }}</h2>
-      <form (ngSubmit)="saveCustomer()">
-        <div class="form-group">
-          <label>Nombre</label>
-          <input type="text" class="form-control" [(ngModel)]="currentCustomer.nombre" name="nombre" required>
+  <div *ngIf="isModalOpen" class="fixed inset-0 bg-gray-800 bg-opacity-75 flex items-center justify-center z-50 p-4" (click)="closeModal()">
+    <div class="modal-content bg-white rounded-lg shadow-xl w-full max-w-2xl mx-auto transform transition-all duration-300 ease-in-out" (click)="$event.stopPropagation()">
+
+      <div class="modal-header border-b border-gray-200 p-6">
+        <h2 class="text-2xl font-semibold text-gray-800">{{ isEditMode ? 'Editar Cliente' : 'Crear Cliente' }}</h2>
+      </div>
+
+      <form (ngSubmit)="saveCustomer()" class="p-6 space-y-6" novalidate>
+
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Información del Cliente</h3>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+
+            <!-- Nombre Completo -->
+            <div class="form-group md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700">Nombre Completo</label>
+              <input type="text" placeholder="Ej. John Doe" 
+                     class="form-control mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                     [class.border-red-500]="nombreError" 
+                     [(ngModel)]="currentCustomer.nombre" name="nombre" required>
+              <p *ngIf="nombreError" class="text-red-500 text-sm mt-1">{{ nombreError }}</p>
+            </div>
+
+            <!-- Correo Electrónico -->
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700">Correo Electrónico (Opcional)</label>
+              <input type="email" placeholder="Ej. john.doe@example.com" 
+                     class="form-control mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                     [class.border-red-500]="emailError"
+                     [(ngModel)]="currentCustomer.email" name="email">
+              <p *ngIf="emailError" class="text-red-500 text-sm mt-1">{{ emailError }}</p>
+            </div>
+
+            <!-- Teléfono -->
+            <div class="form-group">
+              <label class="block text-sm font-medium text-gray-700">Teléfono (Opcional)</label>
+              <input type="tel" placeholder="Ej. 5551234567" appNumberOnly
+                     class="form-control mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                     [class.border-red-500]="telefonoError"
+                     [(ngModel)]="currentCustomer.telefono" name="telefono">
+              <p *ngIf="telefonoError" class="text-red-500 text-sm mt-1">{{ telefonoError }}</p>
+            </div>
+
+            <!-- Dirección -->
+            <div class="form-group md:col-span-2">
+              <label class="block text-sm font-medium text-gray-700">Dirección</label>
+              <input type="text" placeholder="Ej. Av. Siempre Viva 742" 
+                     class="form-control mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                     [class.border-red-500]="direccionError" 
+                     [(ngModel)]="currentCustomer.direccion" name="direccion">
+              <p *ngIf="direccionError" class="text-red-500 text-sm mt-1">{{ direccionError }}</p>
+            </div>
+          </div>
         </div>
-        <div class="form-group">
-          <label>Dirección</label>
-          <input type="text" class="form-control" [(ngModel)]="currentCustomer.direccion" name="direccion">
+
+        <!-- Customer Equipment Section -->
+        <div>
+          <h3 class="text-lg font-medium text-gray-900 mb-4">Equipos del Cliente</h3>
+          <div class="space-y-4" *ngIf="currentCustomer.equipos && currentCustomer.equipos.length > 0">
+            <div *ngFor="let equipo of currentCustomer.equipos; let i = index" class="flex items-center space-x-3">
+              <div class="flex-grow">
+                <label class="block text-sm font-medium text-gray-700">Nombre del Equipo</label>
+                <input type="text" placeholder="Ej. Laptop, Impresora" 
+                       class="form-control mt-1 w-full px-3 py-2 border rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
+                       [class.border-red-500]="equipoErrors[i]" 
+                       [(ngModel)]="equipo.nombre" name="equipo-{{ i }}">
+                <p *ngIf="equipoErrors[i]" class="text-red-500 text-sm mt-1">{{ equipoErrors[i] }}</p>
+              </div>
+              <button type="button" (click)="removeEquipo(i)" class="text-red-500 hover:text-red-700 mt-6">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+              </button>
+            </div>
+          </div>
+          
+          <p *ngIf="generalEquipoError" class="text-red-500 text-sm mt-2">{{ generalEquipoError }}</p>
+
+          <button type="button" (click)="addEquipo()" class="btn btn-secondary bg-indigo-100 text-indigo-700 font-semibold py-2 px-4 rounded-lg hover:bg-indigo-200 mt-4">
+            + Agregar Equipo
+          </button>
         </div>
-        <div class="form-group">
-          <label>Email</label>
-          <input type="email" class="form-control" [(ngModel)]="currentCustomer.email" name="email">
-        </div>
-        <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
-          <button type="submit" class="btn btn-primary">Guardar</button>
+
+        <!-- Modal Actions -->
+        <div class="modal-actions flex justify-end pt-6 border-t border-gray-200 space-x-4">
+          <button type="button" class="btn btn-secondary bg-gray-200 text-gray-800 font-semibold py-2 px-4 rounded-lg hover:bg-gray-300" (click)="closeModal()">Cancelar</button>
+          <button type="submit" class="btn btn-primary bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-indigo-700">Guardar</button>
         </div>
       </form>
     </div>
   </div>
+
 </div>

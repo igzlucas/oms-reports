@@ -25,11 +25,16 @@ export class LoginComponent {
     private toastr: ToastrService
   ) {}
 
+  // Simplified login success handler
+  private handleLoginSuccess(): void {
+    this.toastr.success('¡Bienvenido!', 'Inicio de Sesión Exitoso');
+    this.router.navigate(['/dashboard']);
+  }
+
   loginWithGoogle(): void {
     this.authService.loginWithGoogle().subscribe({
       next: () => {
-        this.toastr.success('¡Bienvenido!', 'Inicio de Sesión Exitoso');
-        this.router.navigate(['/dashboard']);
+        this.handleLoginSuccess();
       },
       error: (error: any) => {
         console.error('Login error', error);
@@ -41,7 +46,7 @@ export class LoginComponent {
     });
   }
 
-  loginWithEmail(): void { // Renamed from loginWithEmailPassword
+  loginWithEmail(): void {
     if (!this.email || !this.password) {
       this.toastr.warning(
         'Por favor, ingresa tu correo y contraseña.',
@@ -52,8 +57,7 @@ export class LoginComponent {
 
     this.authService.loginWithEmail(this.email, this.password).subscribe({
       next: () => {
-        this.toastr.success('¡Bienvenido!', 'Inicio de Sesión Exitoso');
-        this.router.navigate(['/dashboard']);
+        this.handleLoginSuccess();
       },
       error: (error: any) => {
         console.error('Login error', error);

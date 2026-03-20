@@ -1,0 +1,26 @@
+<div class="modal-backdrop" (click)="close()">
+  <div class="modal-content" (click)="$event.stopPropagation()">
+    <div class="modal-header">
+      <h2>Firmar Documento</h2>
+      <button class="close-button" (click)="close()">&times;</button>
+    </div>
+    <div class="modal-body">
+      <canvas 
+        #signatureCanvas 
+        (mousedown)="startDrawing($event)" 
+        (touchstart)="startDrawing($event)"
+        (mousemove)="draw($event)"
+        (touchmove)="draw($event)"
+        (mouseup)="stopDrawing()" 
+        (touchend)="stopDrawing()"
+        (mouseleave)="stopDrawing()"
+        class="signature-canvas">
+      </canvas>
+      <p class="instructions">Dibuja tu firma en el recuadro de arriba.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" (click)="clearSignature()">Limpiar</button>
+      <button class="btn btn-primary" (click)="saveSignature()">Guardar Firma</button>
+    </div>
+  </div>
+</div>

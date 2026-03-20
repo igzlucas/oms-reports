@@ -1,64 +1,64 @@
-import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, query, where, DocumentData, CollectionReference } from '@angular/fire/firestore';
-import { Observable, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable, inject } from '@angular/core';
+import { Firestore, collection, collectionData, doc, getDoc, query, where, orderBy, limit, addDoc, updateDoc, increment } from '@angular/fire/firestore';
+import { Observable, from, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { Report } from '../models/report.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ReportService {
+  private firestore: Firestore = inject(Firestore);
 
-  private reportsCollection: CollectionReference<DocumentData>;
+  // CORREGIDO: La colección es 'reportes' (plural en español), no 'reports'
+  private reportsCollection = collection(this.firestore, 'reportes');
 
-  constructor(private firestore: Firestore) {
-    this.reportsCollection = collection(this.firestore, 'reports');
+  getReports(): Observable<Report[]> {
+    return collectionData(this.reportsCollection, { idField: 'id' }) as Observable<Report[]>;
   }
 
-  getReportes(clienteId: string | null, top: number): Observable<Report[]> {
-    let q = query(this.reportsCollection);
-    if (clienteId) {
-      q = query(this.reportsCollection, where('clienteId', '==', clienteId));
-    }
-    return from(getDocs(q)).pipe(
-      map(snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Report)))
+  getReportById(id: string): Observable<Report | null> {
+    const reportDoc = doc(this.firestore, `reportes/${id}`);
+    return from(getDoc(reportDoc)).pipe(
+      map(docSnap => docSnap.exists() ? { id: docSnap.id, ...docSnap.data() } as Report : null)
+    );
+  }
+  
+  getReportByToken(token: string): Observable<Report | null> {
+    const q = query(this.reportsCollection, where("publicLinkToken", "==", token));
+    return from(collectionData(q, { idField: 'id' })).pipe(
+      map(reports => reports.length > 0 ? reports[0] as Report : null)
     );
   }
 
-  createReport(report: Report): Observable<any> {
-    return from(addDoc(this.reportsCollection, report));
-  }
-
-  updateReport(reportId: string, report: Partial<Report>): Observable<void> {
-    const reportDoc = doc(this.firestore, `reports/${reportId}`);
-    return from(updateDoc(reportDoc, report));
-  }
-
-  deleteReport(reportId: string): Observable<void> {
-    const reportDoc = doc(this.firestore, `reports/${reportId}`);
-    return from(deleteDoc(reportDoc));
-  }
-
-  getDetallesReporte(reporteId: string): Promise<Report | null> {
-    const reportDoc = doc(this.firestore, `reports/${reporteId}`);
-    return getDoc(reportDoc).then(docSnap => {
-      if (docSnap.exists()) {
-        return { id: docSnap.id, ...docSnap.data() } as Report;
-      } else {
-        return null;
-      }
-    });
-  }
-
-  getNumeroReportes(): Promise<number> {
-    return getDocs(this.reportsCollection).then(snapshot => snapshot.size);
-  }
-
-  sendReport(report: Report): Observable<any> {
-    if (report.id) {
-      return this.updateReport(report.id, report);
-    } else {
-      return this.createReport(report);
+  getReportsByEmpresa(empresaId: string, count?: number): Observable<Report[]> {
+    let q = query(this.reportsCollection, where('empresaId', '==', empresaId));
+    if (count) {
+      q = query(q, limit(count));
     }
+    return collectionData(q, { idField: 'id' }) as Observable<Report[]>;
+  }
+
+  addReport(report: Report): Promise<any> {
+    return addDoc(this.reportsCollection, report);
+  }
+
+  updateReport(id: string, report: Partial<Report>): Promise<void> {
+    const reportDoc = doc(this.firestore, `reportes/${id}`);
+    return updateDoc(reportDoc, report);
+  }
+
+  getNextReportId(empresaId: string): Observable<number> {
+    // Esta ruta ya estaba bien, la dejamos como está.
+    const metadataDoc = doc(this.firestore, `empresas/${empresaId}/metadata/reports`);
+    return from(getDoc(metadataDoc)).pipe(
+        switchMap(docSnap => {
+            if (docSnap.exists()) {
+                return of(docSnap.data()['lastId'] + 1);
+            } else {
+                return of(1);
+            }
+        })
+    );
   }
 }

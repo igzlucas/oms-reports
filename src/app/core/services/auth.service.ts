@@ -2,20 +2,17 @@ import { Injectable, inject, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { Router } from '@angular/router';
 import { Observable, from, of } from 'rxjs';
-import { map, switchMap, catchError, tap } from 'rxjs/operators';
+import { map, catchError, tap, shareReplay } from 'rxjs/operators';
 import {
   Auth,
   signInWithPopup,
   GoogleAuthProvider,
-  UserCredential,
   signOut,
   signInWithEmailAndPassword,
   onAuthStateChanged,
-  getIdTokenResult,
   sendPasswordResetEmail,
 } from '@angular/fire/auth';
 import { User, updateProfile } from 'firebase/auth';
-import { Firestore, doc, setDoc, getDoc } from '@angular/fire/firestore';
 import { NotificationService } from '../services/notification.service';
 
 @Injectable({
@@ -23,7 +20,7 @@ import { NotificationService } from '../services/notification.service';
 })
 export class AuthService {
   private auth: Auth = inject(Auth);
-  private firestore: Firestore = inject(Firestore);
+
   public user$: Observable<User | null>;
 
   constructor(
@@ -32,10 +29,13 @@ export class AuthService {
     @Inject(PLATFORM_ID) private platformId: Object
   ) {
     if (isPlatformBrowser(this.platformId)) {
-      this.user$ = new Observable(observer => {
+      this.user$ = new Observable<User | null>(observer => {
         const unsubscribe = onAuthStateChanged(this.auth, observer);
         return unsubscribe;
-      });
+      }).pipe(
+        tap(user => console.log('[DEBUG] AuthService: user$ emitted ->', user ? user.email : 'null')),
+        shareReplay(1)
+      );
     } else {
       this.user$ = of(null);
     }
@@ -44,9 +44,7 @@ export class AuthService {
   loginWithGoogle(): Observable<void> {
     const provider = new GoogleAuthProvider();
     return from(signInWithPopup(this.auth, provider)).pipe(
-      switchMap((userCredential: UserCredential) => {
-        return this.checkAndCreateUser(userCredential.user);
-      }),
+      map(() => void 0), // We don't need to check and create user anymore.
       catchError((error) => {
         this.notificationService.show('Error de Autenticación: Hubo un problema al iniciar sesión con Google.', 'error');
         console.error('Login failed:', error);
@@ -85,17 +83,6 @@ export class AuthService {
     return this.user$.pipe(map(user => user !== null));
   }
 
-  getCurrentUserToken(): Observable<any> {
-    return this.user$.pipe(
-      switchMap(user => {
-        if (user) {
-          return from(getIdTokenResult(user));
-        }
-        return of(null);
-      })
-    );
-  }
-
   forgotPassword(email: string): Observable<void> {
     return from(sendPasswordResetEmail(this.auth, email)).pipe(
       tap(() => {
@@ -118,27 +105,5 @@ export class AuthService {
       return of(undefined);
     }
     return from(updateProfile(user, profile));
-  }
-
-
-  private checkAndCreateUser(user: User): Observable<void> {
-    const userRef = doc(this.firestore, `users/${user.uid}`);
-    return from(getDoc(userRef)).pipe(
-      switchMap((docSnap) => {
-        if (!docSnap.exists()) {
-          return from(
-            setDoc(userRef, {
-              email: user.email,
-              displayName: user.displayName,
-              photoURL: user.photoURL,
-              createdAt: new Date(),
-              role: 'user' // Default role
-            })
-          );
-        } else {
-          return of(undefined);
-        }
-      })
-    );
   }
 }

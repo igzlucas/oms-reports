@@ -1,111 +1,165 @@
-<div class="report-form-container">
-  <h1>Crear Nuevo Reporte de Trabajo</h1>
+<!-- Main Container -->
+<div class="form-container bg-gray-50 font-sans">
+  <div class="max-w-4xl mx-auto p-4 md:p-8">
+    <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-6 md:mb-8 text-center">{{ isEditMode ? 'Editar Reporte' : 'Crear Nuevo Reporte' }}</h1>
 
-  <form [formGroup]="reportForm" (ngSubmit)="onSubmit()">
-
-    <!-- Sección de Cabecera: Cliente y Equipo -->
-    <div class="card">
-      <div class="card-header">Información General</div>
-      <div class="card-body grid-col-2">
-        <div>
-          <label for="reporteId">N° de Reporte</label>
-          <input id="reporteId" type="number" formControlName="reporteId" class="form-control">
-        </div>
-        <div>
-          <label for="fecha">Fecha y Hora</label>
-          <input id="fecha" type="datetime-local" formControlName="fecha" class="form-control">
-        </div>
-        <div>
-          <label for="cliente">Cliente</label>
-          <select id="cliente" formControlName="clienteId" class="form-control" (change)="onCustomerChange($event)">
-            <option value="" disabled>Seleccione un cliente...</option>
-            <option *ngFor="let customer of customers" [value]="customer.id">{{ customer.nombre }}</option>
-          </select>
-        </div>
-        <div>
-          <label for="equipo">Equipo Reportado</label>
-          <select id="equipo" formControlName="equipo" class="form-control">
-            <option value="" disabled>Seleccione un equipo...</option>
-            <option *ngFor="let eq of filteredEquipments" [value]="eq.nombre">{{ eq.nombre }}</option>
-          </select>
-        </div>
-      </div>
+    <!-- Loading Spinner -->
+    <div *ngIf="isLoading" class="text-center py-16">
+      <p class="text-lg text-gray-600">Cargando datos del reporte...</p>
     </div>
 
-    <!-- Sección del Problema -->
-    <div class="card">
-      <div class="card-header">Problema Detectado</div>
-      <div class="card-body">
-        <textarea formControlName="problema" rows="4" class="form-control"></textarea>
-      </div>
-    </div>
+    <!-- Form -->
+    <form [formGroup]="reportForm" (ngSubmit)="onSubmit()" *ngIf="!isLoading" class="space-y-6">
 
-    <!-- Sección de Trabajo Realizado con Editor de Texto Enriquecido -->
-    <div class="card">
-      <div class="card-header">Trabajo Realizado</div>
-      <div class="card-body">
-        <editor formControlName="trabajoRealizado" [init]="tinyMceConfig"></editor>
-      </div>
-    </div>
-
-    <!-- Sección de Refacciones (FormArray Dinámico) -->
-    <div class="card">
-      <div class="card-header">Refacciones y Mano de Obra</div>
-      <div class="card-body" formArrayName="detalles">
-        <div *ngFor="let detalle of detalles.controls; let i=index" [formGroupName]="i" class="detalle-row">
-          <input type="number" placeholder="Cantidad" formControlName="cantidad" class="form-control small">
-          <input type="text" placeholder="Descripción" formControlName="descripcion" class="form-control large">
-          <input type="number" placeholder="Precio Unitario" formControlName="precioUnitario" class="form-control medium">
-          <button type="button" class="btn btn-danger" (click)="removeDetalle(i)">Eliminar</button>
+      <!-- General Information Card -->
+      <div class="card bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="card-header bg-gray-100 px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-700">Información General</h2>
         </div>
-        <button type="button" class="btn btn-secondary" (click)="addDetalle()">+ Añadir Línea</button>
-      </div>
-      <div class="card-footer grid-col-2">
-          <div>
-            <label for="moneda">Moneda</label>
-            <select id="moneda" formControlName="moneda" class="form-control">
-                <option value="USD">USD</option>
-                <option value="MXN">MXN</option>
-                <option value="EUR">EUR</option>
-            </select>
+        <div class="card-body p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+            <!-- Report ID -->
+            <div class="form-group">
+              <label for="reporteId" class="block text-sm font-medium text-gray-600 mb-1">Nº de Reporte</label>
+              <input id="reporteId" type="text" formControlName="reporteId" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <!-- Date -->
+            <div class="form-group">
+              <label for="fecha" class="block text-sm font-medium text-gray-600 mb-1">Fecha</label>
+              <input id="fecha" type="date" formControlName="fecha" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
           </div>
-          <div class="total-display">
-              <span>Monto Total:</span>
-              <strong>{{ reportForm.get('montoTotal')?.value | number:'1.2-2' }} {{ reportForm.get('moneda')?.value }}</strong>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Client -->
+            <div class="form-group">
+              <label for="clientId" class="block text-sm font-medium text-gray-600 mb-1">Cliente</label>
+              <select id="clientId" formControlName="clientId" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <option [ngValue]="null" disabled>Seleccione un cliente</option>
+                <option *ngFor="let client of clients$ | async" [ngValue]="client.id">{{ client.nombre }}</option>
+              </select>
+            </div>
+            <!-- Equipment -->
+            <div class="form-group">
+              <label for="equipo" class="block text-sm font-medium text-gray-600 mb-1">Equipo Reportado</label>
+              <select id="equipo" formControlName="equipo" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                <option [ngValue]="null" disabled>Seleccione un equipo</option>
+                <option *ngFor="let equipo of equipos" [ngValue]="equipo.nombre">{{ equipo.nombre }}</option>
+              </select>
+            </div>
           </div>
-      </div>
-    </div>
-
-    <!-- Sección de Observaciones -->
-    <div class="card">
-        <div class="card-header">Observaciones Adicionales</div>
-        <div class="card-body">
-            <textarea formControlName="observaciones" rows="4" class="form-control"></textarea>
-        </div>
-    </div>
-
-    <!-- Sección de Firma -->
-    <div class="card">
-      <div class="card-header">Aceptación y Firma del Cliente</div>
-      <div class="card-body">
-        <p class="terms-text">{{ reportForm.get('terminosCondiciones')?.value }}</p>
-        <label for="nombreFirmaCliente">Nombre de quien acepta:</label>
-        <input id="nombreFirmaCliente" type="text" formControlName="nombreFirmaCliente" class="form-control">
-        <label>Firma:</label>
-        <div class="signature-pad-wrapper">
-            <canvas #signatureCanvas width="500" height="200"></canvas>
-        </div>
-        <div class="signature-pad-actions">
-            <button type="button" (click)="clearSignature()" class="btn btn-secondary">Limpiar Firma</button>
         </div>
       </div>
+
+      <!-- Problem Card -->
+      <div class="card bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="card-header bg-gray-100 px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-700">Problema Detectado</h2>
+        </div>
+        <div class="card-body p-6">
+          <editor apiKey="YOUR_API_KEY" [init]="tinyMceConfig" formControlName="problema"></editor>
+        </div>
+      </div>
+      
+      <!-- Work Done Card -->
+      <div class="card bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="card-header bg-gray-100 px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-700">Trabajo Realizado</h2>
+        </div>
+        <div class="card-body p-6">
+          <editor apiKey="YOUR_API_KEY" [init]="tinyMceConfig" formControlName="trabajoRealizado"></editor>
+        </div>
+      </div>
+
+      <!-- Observations Card -->
+      <div class="card bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="card-header bg-gray-100 px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-700">Observaciones</h2>
+        </div>
+        <div class="card-body p-6">
+          <editor apiKey="YOUR_API_KEY" [init]="tinyMceConfig" formControlName="observaciones"></editor>
+        </div>
+      </div>
+
+      <!-- Parts and Costs Card -->
+      <div class="card bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="card-header bg-gray-100 px-6 py-4 border-b border-gray-200">
+          <h2 class="text-lg font-semibold text-gray-700">Refacciones y Mano de Obra</h2>
+        </div>
+        <div class="card-body p-6">
+          <div formArrayName="detalles" class="space-y-4">
+            <!-- Header for details -->
+            <div class="hidden md:grid grid-cols-12 gap-4 items-center mb-2 px-2">
+                <span class="col-span-2 text-sm font-medium text-gray-500">Cantidad</span>
+                <span class="col-span-6 text-sm font-medium text-gray-500">Descripción</span>
+                <span class="col-span-3 text-sm font-medium text-gray-500">Precio Unit.</span>
+                <span class="col-span-1"></span>
+            </div>
+            <!-- Dynamic Rows -->
+            <div *ngFor="let detalle of detalles.controls; let i=index" [formGroupName]="i" class="grid grid-cols-12 gap-4 items-center">
+              <input type="number" formControlName="cantidad" placeholder="Cant." class="col-span-12 md:col-span-2 form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+              <input type="text" formControlName="descripcion" placeholder="Descripción de la refacción o servicio" class="col-span-12 md:col-span-6 form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+              <input type="number" formControlName="precioUnitario" placeholder="P. Unit." class="col-span-12 md:col-span-3 form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+              <button type="button" (click)="removeDetalle(i)" class="col-span-12 md:col-span-1 btn-danger bg-red-500 text-white font-bold py-2 px-4 rounded hover:bg-red-600 flex justify-center items-center">
+                <span>&times;</span>
+              </button>
+            </div>
+          </div>
+          <button type="button" (click)="addDetalle()" class="btn-secondary mt-4 bg-gray-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-600">+ Añadir Línea</button>
+        </div>
+        <div class="card-footer bg-gray-100 px-6 py-4 flex justify-end items-center gap-4">
+          <span class="text-lg font-semibold text-gray-800">Monto Total:</span>
+          <select formControlName="moneda" class="form-control w-auto px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+            <option value="USD">USD</option>
+            <option value="MXN">MXN</option>
+          </select>
+          <span class="total-amount text-2xl font-bold text-gray-900">{{ reportForm.get('montoTotal')?.value | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
+      <!-- Signature and Terms Card -->
+      <div class="card bg-white rounded-xl shadow-md overflow-hidden">
+        <div class="card-header bg-gray-100 px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-700">Aceptación y Firma del Cliente</h2>
+        </div>
+        <div class="card-body p-6">
+            <div class="form-group mb-6">
+                <label class="block text-sm font-medium text-gray-600 mb-1">Términos y Condiciones</label>
+                <textarea formControlName="terminosCondiciones" rows="4" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"></textarea>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
+                <div class="form-group">
+                    <label for="nombreFirmaCliente" class="block text-sm font-medium text-gray-600 mb-1">Nombre de quien firma</label>
+                    <input id="nombreFirmaCliente" type="text" formControlName="nombreFirmaCliente" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+                </div>
+                <div class="signature-area">
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Firma del Cliente</label>
+                    <div class="signature-pad w-full h-40 border-2 border-dashed border-gray-300 rounded-md flex justify-center items-center bg-gray-50">
+                        <img *ngIf="signatureDataUrl" [src]="signatureDataUrl" alt="Firma del cliente" class="max-w-full max-h-full object-contain">
+                        <div *ngIf="!signatureDataUrl" class="signature-placeholder text-gray-500 italic">La firma aparecerá aquí</div>
+                    </div>
+                    <div class="signature-actions mt-3 flex gap-4">
+                        <button type="button" (click)="openSignatureModal()" class="btn-secondary bg-gray-600 text-white font-semibold py-2 px-4 rounded-md hover:bg-gray-700">{{ signatureDataUrl ? 'Firmar de Nuevo' : 'Capturar Firma' }}</button>
+                        <button type="button" (click)="clearSignature()" *ngIf="signatureDataUrl" class="btn-danger bg-red-500 text-white font-semibold py-2 px-4 rounded-md hover:bg-red-600">Borrar Firma</button>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Botones de Acción -->
-    <div class="form-actions">
-      <button type="button" class="btn btn-secondary">Guardar Borrador</button>
-      <button type="submit" class="btn btn-primary" [disabled]="!reportForm.valid">Finalizar y Guardar Reporte</button>
-    </div>
-
-  </form>
+      <!-- Form Actions -->
+      <div class="form-actions flex justify-end pt-4">
+        <button type="submit" class="btn-primary bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:bg-gray-400 disabled:cursor-not-allowed" [disabled]="isSaving || reportForm.invalid">
+          {{ isSaving ? 'Guardando...' : (isEditMode ? 'Actualizar Reporte' : 'Guardar Reporte') }}
+        </button>
+      </div>
+    </form>
+    
+  </div>
 </div>
+
+<!-- Signature Modal Component -->
+<app-signature-modal 
+  *ngIf="showSignatureModal" 
+  (modalClosed)="onModalClosed()" 
+  (signatureSaved)="onSignatureSaved($event)">
+</app-signature-modal>

@@ -21,7 +21,7 @@ export const environment = {
     firebaseConfig: {
       apiKey: "AIzaSyAD6TlHhsEfOm4sbw-EYdlMu-mkFXTGGjg",
       authDomain: "olmos-marine-services.firebaseapp.com",
-      databaseURL: "https://olmos-marine-services-default-rtdb.firebaseio.com",
+      // LA LÍNEA INCORRECTA HA SIDO ELIMINADA. ESTO FUERZA EL USO DE FIRESTORE.
       projectId: "olmos-marine-services",
       storageBucket: "olmos-marine-services.firebasestorage.app",
       messagingSenderId: "317835802386",

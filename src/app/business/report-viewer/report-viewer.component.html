@@ -1,0 +1,41 @@
+<div *ngIf="isPinValid && report; else loadingOrError">
+    <div *ngIf="!isLinkExpired; else linkExpiredTemplate">
+        <div class="report-container">
+            <header>
+                <h1>Reporte de Servicio</h1>
+                <div class="report-meta">
+                    <p><strong>Reporte ID:</strong> {{ report.reporteId }}</p>
+                    <p><strong>Fecha:</strong> {{ getFormattedDate(report.fecha) }}</p>
+                </div>
+            </header>
+
+            <!-- ... resto del contenido del reporte ... -->
+            <section class="client-actions">
+                <h2>Acciones del Cliente</h2>
+                <div *ngIf="report.clientStatus === 'pending'">
+                    <button (click)="approveReport()" class="btn btn-success">Aprobar</button>
+                    <button (click)="openSignatureModal()" class="btn btn-primary">Firmar</button>
+                </div>
+                <div *ngIf="report.clientStatus === 'approved'">
+                    <p class="badge badge-success">Reporte Aprobado</p>
+                </div>
+                <div *ngIf="report.firma">
+                    <h4>Firma:</h4>
+                    <img [src]="getSanitizedUrl(report.firma)" alt="Firma del Cliente">
+                </div>
+            </section>
+
+        </div>
+    </div>
+</div>
+
+<ng-template #loadingOrError>
+    <p>Verificando PIN o reporte no encontrado...</p>
+</ng-template>
+
+<ng-template #linkExpiredTemplate>
+    <div class="link-expired">
+        <h2>El enlace ha expirado</h2>
+        <p>Por favor, contacte al soporte para más información.</p>
+    </div>
+</ng-template>

@@ -12,7 +12,7 @@ export class CustomersService {
   private customersCollection: CollectionReference<DocumentData>;
 
   constructor(private firestore: Firestore) {
-    this.customersCollection = collection(this.firestore, 'customers');
+    this.customersCollection = collection(this.firestore, 'clientes');
   }
 
   getCustomers(): Observable<Customer[]> {
@@ -26,12 +26,12 @@ export class CustomersService {
   }
 
   updateCustomer(id: string, customer: Partial<Customer>): Observable<void> {
-    const customerDoc = doc(this.firestore, `customers/${id}`);
+    const customerDoc = doc(this.firestore, `clientes/${id}`);
     return from(updateDoc(customerDoc, { ...customer }));
   }
 
   deleteCustomer(id: string): Observable<void> {
-    const customerDoc = doc(this.firestore, `customers/${id}`);
+    const customerDoc = doc(this.firestore, `clientes/${id}`);
     return from(deleteDoc(customerDoc));
   }
 

@@ -12,6 +12,9 @@ import { getFirestore, provideFirestore } from '@angular/fire/firestore';
 import { getStorage, provideStorage } from '@angular/fire/storage';
 import { environment } from '../environments/environment';
 
+// CORRECTO: Importaciones para TinyMCE
+import { EditorModule, TINYMCE_SCRIPT_SRC } from '@tinymce/tinymce-angular';
+
 export const appConfig: ApplicationConfig = {
   providers: [
     provideRouter(routes),
@@ -23,5 +26,11 @@ export const appConfig: ApplicationConfig = {
     provideAuth(() => getAuth()),
     provideFirestore(() => getFirestore()),
     provideStorage(() => getStorage()),
+
+    // SOLUCIÓN DEFINITIVA PARA ARQUITECTURA STANDALONE
+    // 1. Importar los providers del EditorModule para que estén disponibles en toda la app.
+    importProvidersFrom(EditorModule),
+    // 2. Especificar la ruta local del script principal de TinyMCE.
+    { provide: TINYMCE_SCRIPT_SRC, useValue: 'tinymce/tinymce.min.js' }
   ],
 };

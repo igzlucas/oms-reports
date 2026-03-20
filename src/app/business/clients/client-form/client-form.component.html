@@ -1,0 +1,79 @@
+<div class="container mx-auto p-4 sm:p-6 lg:p-8">
+  <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
+    <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
+      <h1 class="text-2xl font-bold text-gray-800">{{ isEditMode ? 'Editar Cliente' : 'Crear Cliente' }}</h1>
+    </div>
+    <form [formGroup]="clientForm" (ngSubmit)="onSubmit()" class="p-6 space-y-8">
+      <!-- Client Information Section -->
+      <div>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Información del Cliente</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Name Field -->
+          <div class="col-span-1">
+            <label for="nombre" class="block text-sm font-medium text-gray-600 mb-1">Nombre Completo</label>
+            <input id="nombre" formControlName="nombre" placeholder="Ej. John Doe" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            <div *ngIf="clientForm.get('nombre')?.invalid && (clientForm.get('nombre')?.dirty || clientForm.get('nombre')?.touched)" class="text-red-500 text-sm mt-1">
+              <div *ngIf="clientForm.get('nombre')?.errors?.['required']">El nombre es requerido.</div>
+            </div>
+          </div>
+          <!-- Email Field -->
+          <div class="col-span-1">
+            <label for="email" class="block text-sm font-medium text-gray-600 mb-1">Correo Electrónico (Opcional)</label>
+            <input id="email" formControlName="email" type="email" placeholder="Ej. john.doe@example.com" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            <div *ngIf="clientForm.get('email')?.invalid && (clientForm.get('email')?.dirty || clientForm.get('email')?.touched)" class="text-red-500 text-sm mt-1">
+              <div *ngIf="clientForm.get('email')?.errors?.['email']">El formato del correo electrónico no es válido.</div>
+            </div>
+          </div>
+          <!-- Phone Field -->
+          <div class="col-span-1">
+            <label for="phone" class="block text-sm font-medium text-gray-600 mb-1">Teléfono (Opcional)</label>
+            <input id="phone" formControlName="phone" placeholder="Ej. 5551234567" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" maxlength="10" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+            <div *ngIf="clientForm.get('phone')?.invalid && (clientForm.get('phone')?.dirty || clientForm.get('phone')?.touched)" class="text-red-500 text-sm mt-1">
+              <div *ngIf="clientForm.get('phone')?.errors?.['pattern']">El teléfono debe contener 10 dígitos numéricos.</div>
+            </div>
+          </div>
+          <!-- Address Field -->
+          <div class="col-span-2">
+            <label for="address" class="block text-sm font-medium text-gray-600 mb-1">Dirección</label>
+            <input id="address" formControlName="address" placeholder="Ej. Av. Siempre Viva 742" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            <div *ngIf="clientForm.get('address')?.invalid && (clientForm.get('address')?.dirty || clientForm.get('address')?.touched)" class="text-red-500 text-sm mt-1">
+              <div *ngIf="clientForm.get('address')?.errors?.['required']">La dirección es requerida.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Client Equipment Section -->
+      <div>
+        <h2 class="text-xl font-semibold text-gray-700 mb-4">Equipos del Cliente</h2>
+        <div formArrayName="equipos" class="space-y-4">
+          <div *ngFor="let equipo of equipos.controls; let i = index" [formGroupName]="i" class="flex items-center gap-4 p-4 border border-gray-200 rounded-md">
+            <div class="flex-grow">
+              <label [for]="'equipo-nombre-' + i" class="block text-sm font-medium text-gray-600 mb-1">Nombre del Equipo</label>
+              <input [id]="'equipo-nombre-' + i" formControlName="nombre" placeholder="Ej. Laptop, Impresora" class="w-full p-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+              <div *ngIf="equipo.get('nombre')?.invalid && (equipo.get('nombre')?.dirty || equipo.get('nombre')?.touched)" class="text-red-500 text-sm mt-1">
+                <div *ngIf="equipo.get('nombre')?.errors?.['required']">El nombre del equipo es requerido.</div>
+              </div>
+            </div>
+            <button type="button" (click)="removeEquipo(i)" class="mt-5 self-center px-3 py-2 text-sm font-medium text-red-600 hover:text-red-800">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm4 0a1 1 0 012 0v6a1 1 0 11-2 0V8z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <button type="button" (click)="addEquipo()" class="mt-4 px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+          + Agregar Equipo
+        </button>
+      </div>
+
+      <!-- Form Actions -->
+      <div class="flex justify-end pt-4">
+        <button type="button" routerLink="/clients" class="mr-4 px-6 py-3 text-sm font-medium text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200">Cancelar</button>
+        <button type="submit" class="px-6 py-3 text-sm font-medium text-white bg-green-600 rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed">
+          {{ isEditMode ? 'Actualizar Cliente' : 'Guardar Cliente' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

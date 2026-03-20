@@ -1,0 +1,196 @@
+/* Estilos generales del contenedor del reporte */
+.report-viewer-container {
+  font-family: 'Helvetica Neue', Arial, sans-serif;
+  max-width: 800px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+/* Encabezado con logo y datos de la empresa */
+.report-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding-bottom: 1.5rem;
+  border-bottom: 3px solid #111827;
+  margin-bottom: 1rem;
+}
+
+.header-logo {
+  flex: 1;
+}
+
+.header-logo img {
+  width: 120px;
+  height: auto;
+}
+
+.header-company-details {
+  flex: 2;
+  text-align: center;
+}
+
+.company-name {
+  font-size: 1.75rem;
+  font-weight: bold;
+  margin: 0;
+  color: #111827;
+}
+
+.header-company-details p {
+  margin: 0.25rem 0;
+  font-size: 0.9rem;
+  color: #4b5563;
+}
+
+.header-report-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.info-box {
+  border: 1px solid #9ca3af;
+  padding: 0.5rem;
+  text-align: center;
+}
+
+.info-box label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #4b5563;
+}
+
+.info-box p {
+  margin: 0;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.report-title {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background-color: #f3f4f6;
+  border-radius: 6px;
+}
+
+/* Secciones del reporte (Cliente, Problema, etc.) */
+.report-section {
+  border: 1px solid #9ca3af;
+  margin-top: 1.5rem;
+  border-radius: 6px;
+}
+
+.section-header {
+  font-weight: bold;
+  padding: 0.6rem 1rem;
+  background-color: #f3f4f6;
+  border-bottom: 1px solid #d1d5db;
+  border-top-left-radius: 6px;
+  border-top-right-radius: 6px;
+}
+
+.section-content {
+  padding: 1rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.section-content-full {
+    padding: 1rem;
+}
+
+.section-content .field {
+  display: flex;
+}
+
+.section-content .field .label {
+  font-weight: bold;
+  margin-right: 0.5rem;
+}
+
+/* Tablas para detalles y refacciones */
+.details-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.details-table th, .details-table td {
+  border: 1px solid #9ca3af;
+  padding: 0.75rem;
+  text-align: left;
+}
+
+.details-table th {
+  background-color: #f3f4f6;
+  font-weight: 600;
+}
+
+.details-table .text-right {
+  text-align: right;
+}
+
+.total-summary {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f3f4f6;
+    border-top: 2px solid #111827;
+}
+
+.total-summary strong {
+    font-size: 1.1rem;
+}
+
+.total-summary span {
+    font-size: 1.25rem;
+    font-weight: bold;
+}
+
+/* Sección de la firma */
+.signature-section {
+  margin-top: 3rem;
+  padding-top: 2rem;
+  border-top: 2px solid #d1d5db;
+  display: flex;
+  justify-content: space-around;
+  align-items: flex-end;
+}
+
+.signature-block {
+  text-align: center;
+}
+
+.signature-block img {
+  max-width: 250px;
+  height: auto;
+  margin-bottom: 0.5rem;
+}
+
+.signature-line {
+  border-top: 1px solid #4b5563;
+  padding-top: 0.5rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Para el contenido HTML de TinyMCE */
+.html-content {
+    padding: 1rem;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    min-height: 100px;
+}

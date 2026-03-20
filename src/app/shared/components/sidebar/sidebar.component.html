@@ -1,6 +1,6 @@
-<!-- El div principal ahora es flexible y hereda el tamaño de su contenedor padre <aside> -->
+<!-- Contenedor principal del sidebar -->
 <div class="flex flex-col h-full bg-gray-800 text-white">
-  
+
   <!-- Logo -->
   <div class="flex items-center justify-center h-20 shadow-md" *ngIf="empresa$ | async as empresa">
     <img [src]="empresa?.logoUrl || 'assets/images/logo.png'" alt="Logo" class="h-12">
@@ -8,27 +8,37 @@
 
   <!-- Menú de Navegación -->
   <nav class="flex-grow mt-5">
+    
+    <!-- Enlace a Dashboard -->
     <a routerLink="/dashboard" routerLinkActive="bg-gray-700" (click)="closeSidebar()" class="flex items-center px-4 py-3 transition-colors duration-200 hover:bg-gray-700">
       <i class="fas fa-tachometer-alt w-6 text-center"></i>
       <span class="mx-4">Dashboard</span>
     </a>
+
+    <!-- Enlace a Customers -->
     <a routerLink="/customers" routerLinkActive="bg-gray-700" (click)="closeSidebar()" class="flex items-center px-4 py-3 mt-2 transition-colors duration-200 hover:bg-gray-700">
-      <i class="fas fa-users w-6 text-center"></i>
-      <span class="mx-4">Clientes</span>
+      <i class="fas fa-users-cog w-6 text-center"></i>
+      <span class="mx-4">Gestion de Clientes</span>
     </a>
+
+    <!-- Enlace a Nuevo Reporte -->
     <a routerLink="/new-report" routerLinkActive="bg-gray-700" (click)="closeSidebar()" class="flex items-center px-4 py-3 mt-2 transition-colors duration-200 hover:bg-gray-700">
       <i class="fas fa-plus-circle w-6 text-center"></i>
       <span class="mx-4">Nuevo Reporte</span>
     </a>
-    <a routerLink="/history" routerLinkActive="bg-gray-700" (click)="closeSidebar()" class="flex items-center px-4 py-3 mt-2 transition-colors duration-200 hover:bg-gray-700">
+
+    <!-- Enlace a Historial -->
+    <a routerLink="/reports-table" routerLinkActive="bg-gray-700" (click)="closeSidebar()" class="flex items-center px-4 py-3 mt-2 transition-colors duration-200 hover:bg-gray-700">
       <i class="fas fa-history w-6 text-center"></i>
       <span class="mx-4">Historial</span>
     </a>
+
   </nav>
 
   <!-- Perfil de Usuario -->
   <div class="border-t border-gray-700 p-4" *ngIf="user$ | async as user">
     <div class="flex items-center">
+      <!-- RUTA CORREGIDA DEL AVATAR -->
       <img [src]="user.photoURL || 'assets/default-avatar.png'" alt="Avatar" class="h-10 w-10 rounded-full object-cover">
       <div class="ml-3">
         <p class="text-sm font-medium">{{ user.displayName || 'Usuario' }}</p>
@@ -39,4 +49,5 @@
       </button>
     </div>
   </div>
+
 </div>

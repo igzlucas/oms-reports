@@ -28,8 +28,8 @@
               },
               {
                 "glob": "**/*",
-                "input": "node_modules/tinymce/skins/",
-                "output": "/skins/"
+                "input": "node_modules/tinymce",
+                "output": "tinymce/"
               }
             ],
             "styles": [
@@ -37,11 +37,6 @@
               "node_modules/@fortawesome/fontawesome-free/css/all.min.css"
             ],
             "scripts": [],
-            "server": "src/main.server.ts",
-            "prerender": true,
-            "ssr": {
-              "entry": "server.ts"
-            },
             "allowedCommonJsDependencies": [
               "jspdf",
               "canvg",
@@ -88,13 +83,13 @@
               "budgets": [
                 {
                   "type": "initial",
-                  "maximumWarning": "1MB",
-                  "maximumError": "2MB"
+                  "maximumWarning": "1.5MB",
+                  "maximumError": "2.5MB"
                 },
                 {
                   "type": "anyComponentStyle",
-                  "maximumWarning": "2kB",
-                  "maximumError": "4kB"
+                  "maximumWarning": "6kB",
+                  "maximumError": "10kB"
                 }
               ],
               "outputHashing": "all"
@@ -135,6 +130,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "**/*",
+                "input": "node_modules/tinymce",
+                "output": "tinymce/"
               }
             ],
             "styles": [

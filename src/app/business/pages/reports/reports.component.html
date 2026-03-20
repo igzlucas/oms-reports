@@ -1,94 +1,124 @@
-<div class="reports-page-container">
-  <header class="page-header">
-    <h1>Gestión de Reportes</h1>
-    <div class="header-actions">
-      <select class="form-control" [(ngModel)]="selectedCustomer">
-        <option *ngFor="let customer of customers" [value]="customer.id">{{customer.nombre}}</option>
-      </select>
-      <button class="btn btn-primary" (click)="createNewReport()" [disabled]="!selectedCustomer">+ Nuevo Reporte</button>
-    </div>
-  </header>
-
-  <div class="reports-list">
-    <div *ngFor="let report of reports" class="report-card">
-      <div class="report-card-header">
-        <span class="report-id">#{{report.reporteId}}</span>
-        <span class="report-date">{{report.fecha | date:'dd/MM/yyyy'}}</span>
-      </div>
-      <div class="report-card-body">
-        <p><strong>Cliente:</strong> {{report.clienteId}}</p>
-        <p><strong>Equipo:</strong> {{report.equipo}}</p>
-      </div>
-      <div class="report-card-footer">
-        <span class="report-total">{{report.montoTotal | currency}}</span>
-        <div class="report-actions">
-          <button class="btn-icon" (click)="openModal(report)">✏️</button>
-          <button class="btn-icon" (click)="generatePDF(report.id)">📄</button>
-        </div>
-      </div>
-    </div>
+<div class="report-form-container">
+  <div class="header">
+    <h1>{{ isEditMode ? 'Editar' : 'Crear Nuevo' }} Reporte de Trabajo</h1>
   </div>
 
-  <!-- Modal para Crear/Editar Reporte -->
-  <div *ngIf="isModalOpen" class="modal-backdrop" id="report-modal">
-    <div class="modal-content" [attr.id]="'report-content-' + currentReport.id">
-      <h2>{{ currentReport.id ? 'Editar Reporte' : 'Nuevo Reporte' }}</h2>
-      
-      <!-- Información General -->
-      <div class="info-grid">
-        <p><strong>Cliente:</strong> {{currentReport.clienteId}}</p>
-        <p><strong>Fecha:</strong> {{currentReport.fecha | date:'fullDate'}}</p>
-      </div>
-
-      <div class="form-section">
-        <label>Equipo:</label>
-        <input type="text" class="form-control" [(ngModel)]="currentReport.equipo">
-        <label>Problema Reportado:</label>
-        <textarea class="form-control" [(ngModel)]="currentReport.problema"></textarea>
-        <label>Trabajo Realizado:</label>
-        <textarea class="form-control" [(ngModel)]="currentReport.trabajoRealizado"></textarea>
-      </div>
-      
-      <!-- Detalles -->
-      <div class="details-section">
-        <h3>Detalles / Refacciones</h3>
-        <table class="details-table">
-          <thead>
-            <tr><th>Cant.</th><th>Descripción</th><th>P. Unitario</th><th>Total</th><th>Acción</th></tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let detail of currentReport.detalles; let i = index">
-              <td>{{detail.cantidad}}</td>
-              <td>{{detail.descripcion}}</td>
-              <td>{{detail.precioUnitario | currency}}</td>
-              <td>{{detail.total | currency}}</td>
-              <td><button (click)="removeDetail(i)" class="btn-icon">❌</button></td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="add-detail-form">
-            <input type="number" [(ngModel)]="newDetail.cantidad" placeholder="Cant.">
-            <input type="text" [(ngModel)]="newDetail.descripcion" placeholder="Descripción">
-            <input type="number" [(ngModel)]="newDetail.precioUnitario" placeholder="P. Unitario">
-            <button (click)="addDetail()">+ Añadir</button>
+  <form #reportForm="ngForm" (ngSubmit)="saveReport(reportForm)">
+    <div class="card">
+      <h2 class="section-title">Información General</h2>
+      <div class="form-grid">
+        <div class="form-field">
+          <label for="reporteId">N° de Reporte</label>
+          <input type="text" id="reporteId" name="reporteId" [(ngModel)]="currentReport.reporteId" disabled>
         </div>
-      </div>
 
-      <!-- Totales y Firma -->
-      <div class="totals-section">
-        <p><strong>Monto Total:</strong> {{currentReport.montoTotal | currency}}</p>
-        <div class="signature-area">
-            <label>Nombre Firma Cliente:</label>
-            <input type="text" class="form-control" [(ngModel)]="currentReport.nombreFirmaCliente">
-            <!-- Aquí iría el componente de firma -->
+        <div class="form-field">
+          <label for="fecha">Fecha y Hora</label>
+          <input type="text" id="fecha" name="fecha" [value]="getFormattedDate(currentReport.fecha)" disabled>
         </div>
-      </div>
 
-      <div class="modal-actions">
-        <button type="button" class="btn btn-secondary" (click)="closeModal()">Cancelar</button>
-        <button type="submit" class="btn btn-primary" (click)="saveReport()">Guardar Reporte</button>
+        <div class="form-field">
+          <label for="clientId">Cliente</label>
+          <select id="clientId" name="clientId" [(ngModel)]="currentReport.clientId" (ngModelChange)="onClientChange($event)" required>
+            <option [ngValue]="null" disabled>Seleccione un cliente</option>
+            <option *ngFor="let client of clients" [value]="client.id">{{ client.name }}</option>
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label for="equipo">Equipo Reportado</label>
+          <select id="equipo" name="equipo" [(ngModel)]="currentReport.equipo" required>
+            <option [ngValue]="null" disabled>Seleccione un equipo</option>
+            <option *ngFor="let equipment of equipments" [value]="equipment.nombre">{{ equipment.nombre }}</option>
+          </select>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="problema">Problema Detectado</label>
+          <textarea id="problema" name="problema" [(ngModel)]="currentReport.problema" rows="4"></textarea>
+        </div>
+
+        <div class="form-field full-width">
+          <label for="trabajoRealizado">Trabajo Realizado</label>
+          <textarea id="trabajoRealizado" name="trabajoRealizado" [(ngModel)]="currentReport.trabajoRealizado" rows="4"></textarea>
+        </div>
       </div>
     </div>
-  </div>
 
+    <div class="card">
+      <h3 class="section-title">Detalles y Refacciones</h3>
+      <div class="details-table">
+        <div class="table-header">
+          <div class="col-cantidad">Cantidad</div>
+          <div class="col-descripcion">Descripción</div>
+          <div class="col-precio">Precio Unitario</div>
+          <div class="col-total">Total</div>
+          <div class="col-accion">Acción</div>
+        </div>
+        <div class="table-body">
+          <div *ngFor="let detalle of currentReport.detalles; let i = index" class="table-row">
+            <input type="number" [(ngModel)]="detalle.cantidad" (ngModelChange)="calculateTotal()" [name]="'cantidad_' + i" class="col-cantidad">
+            <input type="text" [(ngModel)]="detalle.descripcion" [name]="'descripcion_' + i" class="col-descripcion">
+            <input type="number" [(ngModel)]="detalle.precioUnitario" (ngModelChange)="calculateTotal()" [name]="'precioUnitario_' + i" class="col-precio">
+            <span class="col-total">{{ (detalle.cantidad * detalle.precioUnitario) | currency:currentReport.moneda }}</span>
+            <button type="button" (click)="removeDetail(i)" class="btn-danger col-accion">Eliminar</button>
+          </div>
+          <div class="table-row add-detail-row">
+            <input type="number" placeholder="1" [(ngModel)]="newDetail.cantidad" name="newDetailCantidad" class="col-cantidad">
+            <input type="text" placeholder="Descripción" [(ngModel)]="newDetail.descripcion" name="newDetailDescripcion" class="col-descripcion">
+            <input type="number" placeholder="0" [(ngModel)]="newDetail.precioUnitario" name="newDetailPrecioUnitario" class="col-precio">
+            <span class="col-total"></span>
+            <button type="button" (click)="addDetail()" class="btn-primary col-accion">Añadir Detalle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+        <h2 class="section-title">Aceptación y Firma del Cliente</h2>
+        <p class="acceptance-text">
+            El cliente acepta los trabajos y costos descritos en este reporte. La garantía de las refacciones es de 30 días contra defectos de fabricación.
+        </p>
+        <div class="form-grid">
+            <div class="form-field">
+                <label for="nombreAcepta">Nombre de quien acepta:</label>
+                <input type="text" id="nombreAcepta" name="nombreAcepta" [(ngModel)]="currentReport.nombreAcepta">
+            </div>
+            <div class="form-field">
+                <label>Firma:</label>
+                <button type="button" (click)="openSignatureModal()" class="btn btn-primary">Abrir Panel de Firma</button>
+                <div *ngIf="currentReport.firma">
+                    <img [src]="currentReport.firma" alt="Firma del cliente" width="200">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" *ngIf="isEditMode && currentReport.pin">
+      <h2 class="section-title">Información de Acceso del Cliente</h2>
+      <div class="form-grid">
+        <div class="form-field">
+          <label>PIN de Acceso:</label>
+          <span class="pin-display">{{ currentReport.pin }}</span>
+        </div>
+        <div class="form-field">
+          <label>Enlace Público:</label>
+          <a [href]="'/report-viewer/' + currentReport.publicLinkToken" target="_blank">Ver Reporte Público</a>
+        </div>
+      </div>
+    </div>
+
+
+    <div class="footer-actions">
+      <div class="action-buttons">
+        <button type="submit" class="btn btn-secondary" [disabled]="reportForm.invalid">Guardar Borrador</button>
+        <button type="button" (click)="saveReport(reportForm, true)" class="btn btn-primary" [disabled]="reportForm.invalid">Finalizar y Guardar Reporte</button>
+      </div>
+    </div>
+
+  </form>
+
+  <footer class="app-footer">
+    <p>&copy; 2025, made with by IGL</p>
+  </footer>
 </div>

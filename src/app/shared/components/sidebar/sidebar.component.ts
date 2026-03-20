@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Observable } from 'rxjs';
@@ -17,16 +17,16 @@ import { Empresa } from '../../../core/models/empresa.model';
 })
 export class SidebarComponent implements OnInit {
 
-  isSidebarOpen$: Observable<boolean>;
-  user$: Observable<User | null>;
-  empresa$!: Observable<Empresa | null>;
+  private sidebarService = inject(SidebarService);
+  private authService = inject(AuthService);
+  private empresaService = inject(EmpresaService);
+  private router = inject(Router);
 
-  constructor(
-    private sidebarService: SidebarService,
-    private authService: AuthService,
-    private empresaService: EmpresaService,
-    private router: Router
-  ) {
+  public isSidebarOpen$: Observable<boolean>;
+  public user$: Observable<User | null>;
+  public empresa$!: Observable<Empresa | null>;
+
+  constructor() {
     this.isSidebarOpen$ = this.sidebarService.isSidebarOpen$;
     this.user$ = this.authService.user$;
   }
@@ -45,8 +45,7 @@ export class SidebarComponent implements OnInit {
 
   logout() {
     this.authService.logout().subscribe(() => {
-      this.router.navigate(['/login']);
-      this.closeSidebar(); // Ensure sidebar is closed on logout
+      this.closeSidebar();
     });
   }
 }
