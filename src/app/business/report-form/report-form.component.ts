@@ -2,8 +2,8 @@ import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { Observable, of, Subscription } from 'rxjs';
-import { switchMap, take, tap } from 'rxjs/operators';
+import { of, Subscription, forkJoin } from 'rxjs';
+import { switchMap, take, map, catchError } from 'rxjs/operators';
 import { Timestamp } from 'firebase/firestore';
 
 // Services
@@ -42,7 +42,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
 
   reportForm!: FormGroup;
   clients: Client[] = [];
-  clients$!: Observable<Client[]>;
   equipos: any[] = [];
 
   isEditMode = false;
@@ -65,7 +64,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.initializeForm();
-    this.loadEmpresaAndClients();
+    this.loadInitialData();
     this.setupConditionalValidation();
     this.handleCostChanges();
     this.onClientChange();
@@ -73,10 +72,10 @@ export class ReportFormComponent implements OnInit, OnDestroy {
 
   private initializeForm(): void {
     this.reportForm = this.fb.group({
-      reporteId: [null],
+      reporteId: [{value: null, disabled: true}],
       fecha: [this.formatDateToInput(new Date()), Validators.required],
       clientId: [null, Validators.required],
-      equipo: [null, Validators.required], // Added equipo control
+      equipo: [null, Validators.required],
       problema: [''],
       trabajoRealizado: [''],
       observaciones: [''],
@@ -84,75 +83,83 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       montoTotal: [{value: 0, disabled: true}],
       moneda: ['USD', Validators.required],
       terminosCondiciones: [''],
+      diasVigencia: [0, [Validators.required, Validators.min(0)]],
       nombreFirmaCliente: [''],
       firma: [null]
     });
   }
 
-  private loadEmpresaAndClients(): void {
-    const empresaSub = this.empresaService.getEmpresa().pipe(take(1)).subscribe(empresa => {
-      if (empresa && empresa.id) {
-        this.empresaId = empresa.id;
-        this.clients$ = this.clientService.getClientsByEmpresa(this.empresaId).pipe(
-          tap(clients => this.clients = clients) // Store clients locally
-        );
-        this.setupEditMode();
-        if(!this.isEditMode) {
-            this.isLoading = false;
-        }
-      } else {
-        console.error("Empresa no encontrada");
-        this.isLoading = false;
-      }
-    });
-    this.subscriptions.add(empresaSub);
-  }
-
-  private setupEditMode(): void {
-    this.route.paramMap.pipe(take(1)).subscribe(params => {
-      const id = params.get('id');
-      if (id) {
-        this.isEditMode = true;
-        this.reportId = id;
-        this.loadReportData(id);
-      }
-    });
-  }
-
-  private loadReportData(id: string): void {
+  private loadInitialData(): void {
     this.isLoading = true;
-    this.reportService.getReportById(id).pipe(take(1)).subscribe(report => {
-      if (report) {
-        // We need to wait for clients to be loaded before patching the value
-        this.clients$.pipe(take(1)).subscribe(() => {
-          this.reportForm.patchValue({
-            ...report,
-            fecha: report.fecha instanceof Timestamp ? this.formatDateToInput(report.fecha.toDate()) : this.formatDateToInput(new Date(report.fecha)),
-            clientId: report.clientId
-          });
 
-          // Manually trigger the client change to load the equipment
-          this.updateEquipos(report.clientId);
-          this.reportForm.get('equipo')?.setValue(report.equipo); // Set the equipment value
+    this.route.paramMap.pipe(
+      take(1),
+      map(params => params.get('id')),
+      switchMap(id => {
+        this.isEditMode = !!id;
+        this.reportId = id ?? undefined;
+        return this.empresaService.getEmpresa().pipe(take(1));
+      }),
+      switchMap(empresa => {
+        if (!empresa || !empresa.id) throw new Error("Empresa no encontrada");
+        this.empresaId = empresa.id;
 
-          if (report.detalles) {
-            this.detalles.clear();
-            report.detalles.forEach(() => this.addDetalle());
-            this.detalles.patchValue(report.detalles);
+        const clients$ = this.clientService.getClientsByEmpresa(this.empresaId).pipe(take(1));
+
+        if (this.isEditMode && this.reportId) {
+          const report$ = this.reportService.getReportById(this.reportId).pipe(take(1));
+          return forkJoin({ clients: clients$, report: report$, mode: of('edit') });
+        } else {
+          const nextId$ = this.reportService.getNextReportId(this.empresaId).pipe(take(1));
+          return forkJoin({ clients: clients$, nextId: nextId$, mode: of('new') });
+        }
+      }),
+      catchError(error => {
+        console.error("Error crítico al cargar datos iniciales:", error);
+        return of(null); // Emit null to signal an error state.
+      })
+    ).subscribe(result => {
+      if (result && result.clients) {
+        this.clients = result.clients;
+        
+        if (result.mode === 'edit') {
+          const report = (result as any).report;
+          if (report) {
+            this.patchFormWithReportData(report);
+          } else {
+            console.error(`No se encontró el reporte con ID: ${this.reportId}`);
           }
-          
-          if(report.firma) {
-            this.signatureDataUrl = report.firma;
-            this.reportForm.get('firma')?.setValue(this.signatureDataUrl);
-          }
-          this.isLoading = false;
-        });
-
-      } else {
-        console.error("Reporte no encontrado");
-        this.isLoading = false;
-      }
+        } else {
+          const nextId = (result as any).nextId;
+          this.reportForm.get('reporteId')?.setValue(nextId);
+        }
+      } 
+      // This will now reliably execute, hiding the spinner.
+      this.isLoading = false;
     });
+  }
+
+  
+  private patchFormWithReportData(report: Report): void {
+    this.reportForm.patchValue({
+        ...report,
+        fecha: report.fecha instanceof Timestamp ? this.formatDateToInput(report.fecha.toDate()) : this.formatDateToInput(new Date(report.fecha)),
+        clientId: report.clientId
+    });
+
+    this.updateEquipos(report.clientId);
+    this.reportForm.get('equipo')?.setValue(report.equipo);
+
+    if (report.detalles) {
+        this.detalles.clear();
+        report.detalles.forEach(() => this.addDetalle());
+        this.detalles.patchValue(report.detalles);
+    }
+    
+    if(report.firma) {
+        this.signatureDataUrl = report.firma;
+        this.reportForm.get('firma')?.setValue(this.signatureDataUrl);
+    }
   }
 
   private onClientChange(): void {
@@ -172,7 +179,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       }
     }
   }
-
 
   private handleCostChanges(): void {
     const sub = this.detalles.valueChanges.subscribe(() => {
@@ -247,6 +253,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       const formValue = this.reportForm.getRawValue();
       const reportData: Partial<Report> = {
         ...formValue,
+        reporteId: this.isEditMode ? formValue.reporteId : this.reportForm.get('reporteId')?.value,
         empresaId: this.empresaId,
         fecha: new Date(formValue.fecha),
         montoTotal: this.calculateTotal(),
@@ -278,7 +285,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     try {
         const pad = (n: number) => (n < 10 ? '0' + n : n);
         const year = date.getFullYear();
-        const month = pad(date.getMonth() + 1); // getMonth() is 0-indexed
+        const month = pad(date.getMonth() + 1);
         const day = pad(date.getDate());
         return `${year}-${month}-${day}`;
     } catch (e) {

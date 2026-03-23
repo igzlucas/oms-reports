@@ -26,7 +26,7 @@ export interface Report {
   firma?: string;
 
   // Campos de la garantía
-  diasGarantia: number;
+  diasVigencia: number;
   terminosCondiciones?: string;
 
   // ---- CAMPOS PARA EL ENLACE PÚBLICO ----

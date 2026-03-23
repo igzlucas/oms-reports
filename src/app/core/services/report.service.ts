@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, collectionData, doc, getDoc, query, where, orderBy, limit, addDoc, updateDoc, increment } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, getDoc, query, where, addDoc, updateDoc, runTransaction, limit } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Report } from '../models/report.model';
@@ -10,7 +10,6 @@ import { Report } from '../models/report.model';
 export class ReportService {
   private firestore: Firestore = inject(Firestore);
 
-  // CORREGIDO: La colección es 'reportes' (plural en español), no 'reports'
   private reportsCollection = collection(this.firestore, 'reportes');
 
   getReports(): Observable<Report[]> {
@@ -39,8 +38,22 @@ export class ReportService {
     return collectionData(q, { idField: 'id' }) as Observable<Report[]>;
   }
 
-  addReport(report: Report): Promise<any> {
-    return addDoc(this.reportsCollection, report);
+  async addReport(report: Report): Promise<any> {
+    const metadataRef = doc(this.firestore, `empresa/${report.empresaId}/metadata/reports`);
+
+    return runTransaction(this.firestore, async (transaction) => {
+      const metadataDoc = await transaction.get(metadataRef);
+      const lastId = metadataDoc.exists() ? metadataDoc.data()['lastId'] : 0;
+      const newReportId = lastId + 1;
+
+      report.reporteId = newReportId;
+
+      const newReportRef = doc(collection(this.firestore, 'reportes'));
+      transaction.set(newReportRef, report);
+      transaction.set(metadataRef, { lastId: newReportId }, { merge: true });
+
+      return newReportRef;
+    });
   }
 
   updateReport(id: string, report: Partial<Report>): Promise<void> {
@@ -49,14 +62,13 @@ export class ReportService {
   }
 
   getNextReportId(empresaId: string): Observable<number> {
-    // Esta ruta ya estaba bien, la dejamos como está.
-    const metadataDoc = doc(this.firestore, `empresas/${empresaId}/metadata/reports`);
+    const metadataDoc = doc(this.firestore, `empresa/${empresaId}/metadata/reports`);
     return from(getDoc(metadataDoc)).pipe(
         switchMap(docSnap => {
             if (docSnap.exists()) {
                 return of(docSnap.data()['lastId'] + 1);
             } else {
-                return of(1);
+                return of(1); // If no reports exist, start at 1
             }
         })
     );

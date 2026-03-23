@@ -1,0 +1,122 @@
+<div class="report-viewer-container bg-gray-100 min-h-screen font-sans p-4 md:p-8">
+  <div class="max-w-4xl mx-auto">
+
+    <!-- Cabecera -->
+    <header class="text-center mb-8">
+      <h1 class="text-3xl md:text-4xl font-bold text-gray-800">Detalle de Reporte de Servicio</h1>
+      <p class="text-md text-gray-600 mt-1">Gracias por su confianza.</p>
+    </header>
+
+    <!-- Contenedor Principal -->
+    <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+
+      <!-- Estado de Carga -->
+      <div *ngIf="isLoading" class="p-8 text-center">
+        <p class="text-lg text-gray-600">Cargando reporte...</p>
+      </div>
+
+      <!-- Mensaje de Error -->
+      <div *ngIf="error" class="p-8 text-center bg-red-50 border-l-4 border-red-500">
+        <p class="text-xl font-semibold text-red-700">{{ error }}</p>
+        <p class="text-gray-600 mt-2">Por favor, contacte a soporte si cree que esto es un error.</p>
+      </div>
+
+      <!-- Contenido del Reporte (una vez cargado y sin error) -->
+      <div *ngIf="!isLoading && !error && reportData">
+
+        <!-- Verificación de PIN -->
+        <div *ngIf="!pinVerified" class="pin-verification-container p-8 md:p-12 text-center">
+          <h2 class="text-2xl font-bold text-gray-700 mb-4">Verificación Requerida</h2>
+          <p class="text-gray-600 mb-6">Para proteger su información, por favor ingrese el PIN de 4 dígitos que le fue proporcionado.</p>
+          <form [formGroup]="pinForm" (ngSubmit)="verifyPin()" class="max-w-xs mx-auto">
+            <input formControlName="pin" type="text" maxlength="4" class="form-control text-center text-3xl tracking-widest w-full px-3 py-3 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500" placeholder="_ _ _ _">
+            <div *ngIf="pinError" class="text-red-600 mt-3">{{ pinError }}</div>
+            <button type="submit" class="btn-primary w-full mt-6 bg-indigo-600 text-white font-bold py-3 px-6 rounded-lg shadow-md hover:bg-indigo-700">Verificar</button>
+          </form>
+        </div>
+
+        <!-- Vista del Reporte (una vez verificado el PIN) -->
+        <div *ngIf="pinVerified" class="report-content-container p-6 md:p-8">
+
+          <!-- Información General -->
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-8 text-sm">
+            <div class="info-item">
+              <span class="font-semibold text-gray-500 block">No. de Reporte:</span>
+              <span class="text-gray-800 text-lg font-bold">{{ reportData.reporteId }}</span>
+            </div>
+            <div class="info-item">
+              <span class="font-semibold text-gray-500 block">Fecha del Reporte:</span>
+              <span class="text-gray-800 text-lg">{{ formatDate(reportData.fecha) }}</span>
+            </div>
+            <div class="info-item">
+              <span class="font-semibold text-gray-500 block">Equipo:</span>
+              <span class="text-gray-800 text-lg">{{ reportData.equipo }}</span>
+            </div>
+            <div class="info-item">
+              <span class="font-semibold text-gray-500 block">Estado:</span>
+              <span class="py-1 px-3 rounded-full text-white font-semibold" 
+                    [ngClass]="{'bg-green-500': reportData.status === 'completado', 'bg-yellow-500': reportData.status === 'borrador'}">
+                {{ reportData.status | titlecase }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Secciones del Reporte -->
+          <div class="space-y-6">
+            <div *ngIf="reportData.problema" class="report-section">
+              <h3 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-3">Problema Detectado</h3>
+              <div [innerHTML]="reportData.problema | safeHtml" class="prose max-w-none"></div>
+            </div>
+            <div *ngIf="reportData.trabajoRealizado" class="report-section">
+              <h3 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-3">Trabajo Realizado</h3>
+              <div [innerHTML]="reportData.trabajoRealizado | safeHtml" class="prose max-w-none"></div>
+            </div>
+            <div *ngIf="reportData.observaciones" class="report-section">
+              <h3 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-3">Observaciones</h3>
+              <div [innerHTML]="reportData.observaciones | safeHtml" class="prose max-w-none"></div>
+            </div>
+          </div>
+
+          <!-- Detalles de Costos -->
+          <div *ngIf="reportData.detalles && reportData.detalles.length > 0" class="mt-8">
+            <h3 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Detalle de Costos</h3>
+            <div class="overflow-x-auto">
+              <table class="min-w-full text-left text-sm">
+                <thead class="bg-gray-50 text-gray-600">
+                  <tr>
+                    <th class="px-4 py-2 font-medium">Cant.</th>
+                    <th class="px-4 py-2 font-medium">Descripción</th>
+                    <th class="px-4 py-2 font-medium text-right">P. Unitario</th>
+                    <th class="px-4 py-2 font-medium text-right">Importe</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  <tr *ngFor="let item of reportData.detalles">
+                    <td class="px-4 py-2">{{ item.cantidad }}</td>
+                    <td class="px-4 py-2">{{ item.descripcion }}</td>
+                    <td class="px-4 py-2 text-right">{{ item.precioUnitario | number:'1.2-2' }}</td>
+                    <td class="px-4 py-2 text-right font-semibold">{{ (item.cantidad * item.precioUnitario) | number:'1.2-2' }}</td>
+                  </tr>
+                </tbody>
+                <tfoot class="bg-gray-50">
+                  <tr>
+                    <td colspan="3" class="px-4 py-3 text-right font-bold text-gray-700">Monto Total:</td>
+                    <td class="px-4 py-3 text-right text-xl font-bold text-gray-800">{{ reportData.montoTotal | number:'1.2-2' }} {{ reportData.moneda }}</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+          
+        </div>
+
+      </div>
+    </div>
+    
+    <!-- Pie de página -->
+    <footer class="text-center mt-8 text-sm text-gray-500">
+      <p>&copy; {{ getYear(reportData?.fecha) }} - Reporte generado por su proveedor de servicios.</p>
+    </footer>
+
+  </div>
+</div>

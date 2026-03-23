@@ -35,7 +35,7 @@
               <label for="clientId" class="block text-sm font-medium text-gray-600 mb-1">Cliente</label>
               <select id="clientId" formControlName="clientId" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
                 <option [ngValue]="null" disabled>Seleccione un cliente</option>
-                <option *ngFor="let client of clients$ | async" [ngValue]="client.id">{{ client.nombre }}</option>
+                <option *ngFor="let client of clients" [ngValue]="client.id">{{ client.nombre }}</option>
               </select>
             </div>
             <!-- Equipment -->
@@ -122,6 +122,13 @@
             <h2 class="text-lg font-semibold text-gray-700">Aceptación y Firma del Cliente</h2>
         </div>
         <div class="card-body p-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+              <!-- Validity Days -->
+              <div class="form-group">
+                  <label for="diasVigencia" class="block text-sm font-medium text-gray-600 mb-1">Días de Vigencia de Reporte</label>
+                  <input id="diasVigencia" type="number" formControlName="diasVigencia" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
+              </div>
+          </div>
             <div class="form-group mb-6">
                 <label class="block text-sm font-medium text-gray-600 mb-1">Términos y Condiciones</label>
                 <textarea formControlName="terminosCondiciones" rows="4" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"></textarea>
