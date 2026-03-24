@@ -11,4 +11,5 @@ export interface Empresa {
   correo: string;
   logoUrl?: string;
   cuentasBancarias: CuentaBancaria[];
+  terminosCondicionesPorDefecto?: string; // Propiedad añadida
 }

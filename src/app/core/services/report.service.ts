@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { Firestore, collection, collectionData, doc, getDoc, query, where, addDoc, updateDoc, runTransaction, limit } from '@angular/fire/firestore';
+import { Firestore, collection, collectionData, doc, getDoc, query, where, addDoc, updateDoc, runTransaction, limit, getCountFromServer } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
 import { map, switchMap } from 'rxjs/operators';
 import { Report } from '../models/report.model';
@@ -36,6 +36,13 @@ export class ReportService {
       q = query(q, limit(count));
     }
     return collectionData(q, { idField: 'id' }) as Observable<Report[]>;
+  }
+
+  getReportsCountByEmpresa(empresaId: string): Observable<number> {
+    const q = query(this.reportsCollection, where('empresaId', '==', empresaId));
+    return from(getCountFromServer(q)).pipe(
+      map(snapshot => snapshot.data().count)
+    );
   }
 
   async addReport(report: Report): Promise<any> {

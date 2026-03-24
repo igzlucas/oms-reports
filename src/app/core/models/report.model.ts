@@ -1,10 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-
-export interface Detalle {
-  cantidad: number;
-  descripcion: string;
-  precioUnitario: number;
-}
+import { Detalle } from './detalle.model'; // Importa la definición correcta
 
 export interface Report {
   id: string;
@@ -18,7 +13,7 @@ export interface Report {
   observaciones: string;
   montoTotal: number;
   moneda: 'USD' | 'MXN';
-  detalles: Detalle[];
+  detalles: Detalle[]; // Ahora usa la definición importada y correcta
   status: 'borrador' | 'completado';
 
   // Campos de la firma y aceptación

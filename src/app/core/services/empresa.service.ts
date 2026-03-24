@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Firestore, collection, doc, updateDoc, addDoc, getDoc, DocumentReference } from '@angular/fire/firestore';
 import { Observable, from, of } from 'rxjs';
-import { switchMap } from 'rxjs/operators';
+import { switchMap, take } from 'rxjs/operators';
 import { Empresa } from '../models/empresa.model';
 import { AuthService } from './auth.service';
 import { User } from 'firebase/auth';
@@ -13,9 +13,10 @@ export class EmpresaService {
 
   constructor(private firestore: Firestore, private authService: AuthService) { }
 
-  // Obtiene la empresa asociada al usuario logueado usando un enfoque más directo
+  // Obtiene la empresa asociada al usuario logueado
   getEmpresa(): Observable<Empresa | null> {
     return this.authService.user$.pipe(
+      take(1), // Toma el primer valor emitido y se completa.
       switchMap(async (user: User | null) => {
         if (!user) {
           return null;
@@ -26,6 +27,7 @@ export class EmpresaService {
         const userDocSnap = await getDoc(userDocRef);
 
         if (!userDocSnap.exists() || !userDocSnap.data()['empresaId']) {
+          console.error('El documento del usuario no tiene un empresaId asociado.');
           return null;
         }
 
@@ -36,10 +38,11 @@ export class EmpresaService {
         const empresaDocSnap = await getDoc(empresaDocRef);
 
         if (!empresaDocSnap.exists()) {
+          console.error(`No se encontró una empresa con el ID: ${empresaId}`);
           return null;
         }
 
-        // 3. Devolver el objeto de empresa completo y bien tipado
+        // 3. Devolver el objeto de empresa completo
         return { id: empresaDocSnap.id, ...empresaDocSnap.data() } as Empresa;
       })
     );
@@ -54,7 +57,7 @@ export class EmpresaService {
   // Actualiza una empresa existente
   updateEmpresa(id: string, empresa: Partial<Empresa>): Observable<void> {
     const empresaDocRef = doc(this.firestore, `empresa/${id}`);
-    const updateData = { ...empresa }; // Clonar para evitar modificar el objeto original
+    const updateData = { ...empresa };
     return from(updateDoc(empresaDocRef, updateData));
   }
 

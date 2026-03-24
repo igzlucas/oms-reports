@@ -1,23 +1,19 @@
-import { Component, OnInit, OnDestroy, inject } from '@angular/core';
+
+import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
-import { of, Subscription, forkJoin } from 'rxjs';
-import { switchMap, take, map, catchError } from 'rxjs/operators';
-import { Timestamp } from 'firebase/firestore';
-
-// Services
-import { ReportService } from '../../core/services/report.service';
-import { ClientService } from '../../core/services/client.service';
-import { EmpresaService } from '../../core/services/empresa.service';
-
-// Models
+import { forkJoin, of, throwError, Observable, Subscription } from 'rxjs';
+import { switchMap, catchError, finalize, take } from 'rxjs/operators';
 import { Report } from '../../core/models/report.model';
-import { Client } from '../../core/models/client.model';
-
-// Components
-import { SignatureModalComponent } from '../../shared/signature-modal/signature-modal.component';
+import { Customer } from '../../core/models/customer.model'; // <-- MODELO CORRECTO
+import { Detalle } from '../../core/models/detalle.model';
+import { ReportService } from '../../core/services/report.service';
+import { CustomersService } from '../../core/services/customers.service'; // <-- SERVICIO CORRECTO
+import { EmpresaService } from '../../core/services/empresa.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
+import { SignaturePadModule } from 'angular2-signaturepad';
+import { SignatureModalComponent } from '../../shared/signature-modal/signature-modal.component';
 
 @Component({
   selector: 'app-report-form',
@@ -25,286 +21,209 @@ import { EditorComponent } from '@tinymce/tinymce-angular';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterModule,
-    SignatureModalComponent,
-    EditorComponent
+    EditorComponent,
+    SignaturePadModule,
+    SignatureModalComponent
   ],
   templateUrl: './report-form.component.html',
   styleUrls: ['./report-form.component.css']
 })
 export class ReportFormComponent implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private fb = inject(FormBuilder);
   private reportService = inject(ReportService);
-  private clientService = inject(ClientService);
+  private customersService = inject(CustomersService); // <-- INYECCIÓN CORRECTA
   private empresaService = inject(EmpresaService);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  private cdr = inject(ChangeDetectorRef);
 
-  reportForm!: FormGroup;
-  clients: Client[] = [];
-  equipos: any[] = [];
-
+  reportForm: FormGroup;
   isEditMode = false;
-  reportId?: string;
+  reportId: string | null = null;
+  clients: Customer[] = []; // <-- TIPO CORRECTO
+  equipos: any[] = [];
+  empresaId: string | null = null;
+  initializationError: string | null = null;
   isLoading = true;
   isSaving = false;
-  empresaId!: string;
-
-  showSignatureModal = false;
   signatureDataUrl: string | null = null;
-  
+  showSignatureModal = false;
   private subscriptions = new Subscription();
 
-  public tinyMceConfig = {
-    height: 250,
-    menubar: false,
-    plugins: ['advlist', 'autolink', 'lists', 'link', 'image', 'charmap', 'preview', 'anchor', 'searchreplace', 'visualblocks', 'code', 'fullscreen', 'insertdatetime', 'media', 'table', 'help', 'wordcount'],
-    toolbar: 'undo redo | blocks | bold italic | alignleft aligncenter alignright | bullist numlist outdent indent | help'
+  tinyMceConfig = {
+    base_url: '/tinymce',
+    suffix: '.min',
+    plugins: 'lists link image table code help wordcount',
+    menubar: false
   };
 
-  ngOnInit(): void {
-    this.initializeForm();
-    this.loadInitialData();
-    this.setupConditionalValidation();
-    this.handleCostChanges();
-    this.onClientChange();
-  }
-
-  private initializeForm(): void {
+  constructor() {
     this.reportForm = this.fb.group({
-      reporteId: [{value: null, disabled: true}],
-      fecha: [this.formatDateToInput(new Date()), Validators.required],
-      clientId: [null, Validators.required],
-      equipo: [null, Validators.required],
+      reporteId: [{ value: '', disabled: true }],
+      fecha: [new Date().toISOString().substring(0, 10), Validators.required],
+      clientId: ['', Validators.required],
+      equipo: [''],
       problema: [''],
       trabajoRealizado: [''],
       observaciones: [''],
-      detalles: this.fb.array([]),
-      montoTotal: [{value: 0, disabled: true}],
-      moneda: ['USD', Validators.required],
       terminosCondiciones: [''],
-      diasVigencia: [0, [Validators.required, Validators.min(0)]],
+      moneda: ['MXN', Validators.required],
+      montoTotal: [0, [Validators.required, Validators.min(0)]],
+      status: ['pendiente', Validators.required],
+      detalles: this.fb.array([]),
+      diasVigencia: [0],
       nombreFirmaCliente: [''],
-      firma: [null]
+      firma: ['']
     });
   }
 
-  private loadInitialData(): void {
+  ngOnInit(): void {
+    this.loadInitialData();
+    this.setupClientChangeListener();
+  }
+
+  ngOnDestroy(): void {
+    this.subscriptions.unsubscribe();
+  }
+
+  loadInitialData(): void {
     this.isLoading = true;
+    this.reportId = this.route.snapshot.paramMap.get('id');
+    this.isEditMode = !!this.reportId;
 
-    this.route.paramMap.pipe(
-      take(1),
-      map(params => params.get('id')),
-      switchMap(id => {
-        this.isEditMode = !!id;
-        this.reportId = id ?? undefined;
-        return this.empresaService.getEmpresa().pipe(take(1));
-      }),
+    const dataSub = this.empresaService.getEmpresa().pipe(
       switchMap(empresa => {
-        if (!empresa || !empresa.id) throw new Error("Empresa no encontrada");
-        this.empresaId = empresa.id;
-
-        const clients$ = this.clientService.getClientsByEmpresa(this.empresaId).pipe(take(1));
-
-        if (this.isEditMode && this.reportId) {
-          const report$ = this.reportService.getReportById(this.reportId).pipe(take(1));
-          return forkJoin({ clients: clients$, report: report$, mode: of('edit') });
-        } else {
-          const nextId$ = this.reportService.getNextReportId(this.empresaId).pipe(take(1));
-          return forkJoin({ clients: clients$, nextId: nextId$, mode: of('new') });
+        if (!empresa || !empresa.id) {
+          return throwError(() => new Error('Empresa no encontrada. No se puede continuar.'));
         }
+        this.empresaId = empresa.id;
+        this.reportForm.patchValue({ terminosCondiciones: empresa.terminosCondicionesPorDefecto || '' });
+
+        // --- LA CORRECCIÓN FINAL ---
+        const clients$ = this.customersService.getCustomers().pipe(take(1));
+        
+        const reportData$: Observable<Report | number | null> = this.isEditMode && this.reportId
+          ? this.reportService.getReportById(this.reportId)
+          : this.reportService.getNextReportId(this.empresaId);
+
+        return forkJoin({ clients: clients$, reportData: reportData$ });
       }),
       catchError(error => {
-        console.error("Error crítico al cargar datos iniciales:", error);
-        return of(null); // Emit null to signal an error state.
+        this.initializationError = `Error al cargar datos iniciales: ${error.message}`;
+        return of(null);
+      }),
+      finalize(() => {
+        this.isLoading = false;
+        this.cdr.detectChanges();
       })
     ).subscribe(result => {
-      if (result && result.clients) {
-        this.clients = result.clients;
-        
-        if (result.mode === 'edit') {
-          const report = (result as any).report;
-          if (report) {
-            this.patchFormWithReportData(report);
-          } else {
-            console.error(`No se encontró el reporte con ID: ${this.reportId}`);
+      if (!result) return;
+
+      this.clients = result.clients;
+
+      if (this.isEditMode) {
+        const report = result.reportData as Report;
+        if (report) {
+          this.detalles.clear();
+          this.reportForm.patchValue(report);
+          if (report.detalles) {
+            report.detalles.forEach(d => this.addDetalle(d));
           }
-        } else {
-          const nextId = (result as any).nextId;
-          this.reportForm.get('reporteId')?.setValue(nextId);
         }
-      } 
-      // This will now reliably execute, hiding the spinner.
-      this.isLoading = false;
-    });
-  }
-
-  
-  private patchFormWithReportData(report: Report): void {
-    this.reportForm.patchValue({
-        ...report,
-        fecha: report.fecha instanceof Timestamp ? this.formatDateToInput(report.fecha.toDate()) : this.formatDateToInput(new Date(report.fecha)),
-        clientId: report.clientId
-    });
-
-    this.updateEquipos(report.clientId);
-    this.reportForm.get('equipo')?.setValue(report.equipo);
-
-    if (report.detalles) {
-        this.detalles.clear();
-        report.detalles.forEach(() => this.addDetalle());
-        this.detalles.patchValue(report.detalles);
-    }
-    
-    if(report.firma) {
-        this.signatureDataUrl = report.firma;
-        this.reportForm.get('firma')?.setValue(this.signatureDataUrl);
-    }
-  }
-
-  private onClientChange(): void {
-    const sub = this.reportForm.get('clientId')?.valueChanges.subscribe(clientId => {
-      this.updateEquipos(clientId);
-    });
-    this.subscriptions.add(sub);
-  }
-
-  private updateEquipos(clientId: string | null): void {
-    this.reportForm.get('equipo')?.reset();
-    this.equipos = [];
-    if (clientId) {
-      const selectedClient = this.clients.find(c => c.id === clientId);
-      if (selectedClient && selectedClient.equipos) {
-        this.equipos = selectedClient.equipos;
+      } else {
+        const nextReportId = result.reportData as number;
+        if (nextReportId > 0) {
+          this.reportForm.get('reporteId')?.setValue(nextReportId);
+        }
       }
-    }
-  }
-
-  private handleCostChanges(): void {
-    const sub = this.detalles.valueChanges.subscribe(() => {
-        const total = this.calculateTotal();
-        this.reportForm.get('montoTotal')?.setValue(total, { emitEvent: false });
     });
-    this.subscriptions.add(sub);
+    this.subscriptions.add(dataSub);
+  }
+  
+  private setupClientChangeListener(): void {
+    const clientChangesSub = this.reportForm.get('clientId')!.valueChanges.subscribe(clientId => {
+      this.equipos = [];
+      this.reportForm.get('equipo')!.setValue('');
+
+      if (clientId) {
+        const selectedClient = this.clients.find(client => client.id === clientId);
+        if (selectedClient && selectedClient.equipos) {
+          this.equipos = selectedClient.equipos;
+        }
+      }
+      this.cdr.detectChanges();
+    });
+    this.subscriptions.add(clientChangesSub);
   }
 
   get detalles(): FormArray {
     return this.reportForm.get('detalles') as FormArray;
   }
 
-  addDetalle(): void {
+  addDetalle(detalle?: Detalle): void {
     const detalleForm = this.fb.group({
-      cantidad: [1, Validators.min(1)],
       descripcion: ['', Validators.required],
-      precioUnitario: [0, Validators.min(0)]
+      cantidad: [1, [Validators.required, Validators.min(1)]],
+      precioUnitario: [0, [Validators.required, Validators.min(0)]]
     });
+    if (detalle) {
+      detalleForm.patchValue(detalle);
+    }
     this.detalles.push(detalleForm);
   }
 
   removeDetalle(index: number): void {
     this.detalles.removeAt(index);
   }
-  
-  private setupConditionalValidation(): void {
-    const firmaControl = this.reportForm.get('firma');
-    const nombreFirmaControl = this.reportForm.get('nombreFirmaCliente');
 
-    if (firmaControl && nombreFirmaControl) {
-        const sub = firmaControl.valueChanges.subscribe(value => {
-            if (value) {
-                nombreFirmaControl.setValidators(Validators.required);
-            } else {
-                nombreFirmaControl.clearValidators();
-            }
-            nombreFirmaControl.updateValueAndValidity();
-        });
-        this.subscriptions.add(sub);
+  onSubmit(): void {
+    if (this.reportForm.invalid) {
+      this.reportForm.markAllAsTouched();
+      return;
     }
-  }
+    if (!this.empresaId) {
+      this.initializationError = 'Error: No se ha podido identificar la empresa.';
+      return;
+    }
+    this.isSaving = true;
 
+    const reportData: Partial<Report> = {
+      ...this.reportForm.getRawValue(),
+      empresaId: this.empresaId,
+      firma: this.signatureDataUrl || ''
+    };
+    
+    const savePromise = this.isEditMode && this.reportId
+      ? this.reportService.updateReport(this.reportId, reportData)
+      : this.reportService.addReport(reportData as Report);
+
+    savePromise
+      .then(() => this.router.navigate(['/reports-table']))
+      .catch(error => {
+        console.error('Error saving report:', error);
+        this.initializationError = 'Hubo un error al guardar el reporte. Intente de nuevo.';
+      })
+      .finally(() => {
+        this.isSaving = false;
+        this.cdr.detectChanges();
+      });
+  }
+  
   openSignatureModal(): void {
     this.showSignatureModal = true;
+  }
+
+  clearSignature(): void {
+    this.signatureDataUrl = null;
   }
 
   onModalClosed(): void {
     this.showSignatureModal = false;
   }
 
-  onSignatureSaved(signature: string): void {
-    this.signatureDataUrl = signature;
-    this.reportForm.get('firma')?.setValue(signature);
+  onSignatureSaved(data: string): void {
+    this.signatureDataUrl = data;
     this.showSignatureModal = false;
-  }
-
-  clearSignature(): void {
-    this.signatureDataUrl = null;
-    this.reportForm.get('firma')?.setValue(null);
-  }
-
-  async onSubmit(): Promise<void> {
-    if (this.reportForm.invalid) {
-      this.reportForm.markAllAsTouched();
-      console.error("Formulario inválido. Detalles:", this.getFormValidationErrors());
-      return;
-    }
-    this.isSaving = true;
-
-    try {
-      const formValue = this.reportForm.getRawValue();
-      const reportData: Partial<Report> = {
-        ...formValue,
-        reporteId: this.isEditMode ? formValue.reporteId : this.reportForm.get('reporteId')?.value,
-        empresaId: this.empresaId,
-        fecha: new Date(formValue.fecha),
-        montoTotal: this.calculateTotal(),
-        firma: this.signatureDataUrl
-      };
-
-      if (this.isEditMode && this.reportId) {
-        await this.reportService.updateReport(this.reportId, reportData);
-      } else {
-        await this.reportService.addReport(reportData as Report);
-      }
-      this.router.navigate(['/dashboard']);
-    } catch (error) {
-      console.error("Error al guardar el reporte", error);
-    } finally {
-      this.isSaving = false;
-    }
-  }
-
-  private calculateTotal(): number {
-    return this.detalles.controls.reduce((acc, curr) => {
-      const qty = curr.get('cantidad')?.value || 0;
-      const price = curr.get('precioUnitario')?.value || 0;
-      return acc + (qty * price);
-    }, 0);
-  }
-
-  private formatDateToInput(date: Date): string {
-    try {
-        const pad = (n: number) => (n < 10 ? '0' + n : n);
-        const year = date.getFullYear();
-        const month = pad(date.getMonth() + 1);
-        const day = pad(date.getDate());
-        return `${year}-${month}-${day}`;
-    } catch (e) {
-        return '';
-    }
-  }
-
-  getFormValidationErrors() {
-    const errors: any = {};
-    Object.keys(this.reportForm.controls).forEach(key => {
-      const controlErrors = this.reportForm.get(key)?.errors;
-      if (controlErrors != null) {
-        errors[key] = controlErrors;
-      }
-    });
-    return errors;
-  }
-
-  ngOnDestroy(): void {
-    this.subscriptions.unsubscribe();
+    this.cdr.detectChanges();
   }
 }

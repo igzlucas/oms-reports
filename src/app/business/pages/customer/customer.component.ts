@@ -1,10 +1,11 @@
-
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { take } from 'rxjs/operators';
+
 import { Customer } from '../../../core/models/customer.model';
 import { CustomersService } from '../../../core/services/customers.service';
-import { FormsModule } from '@angular/forms';
-import { Equipment } from '../../../core/models/equipment.model';
+import { EmpresaService } from '../../../core/services/empresa.service';
 import { NumberOnlyDirective } from '../../../core/directives/number-only.directive';
 
 @Component({
@@ -15,24 +16,26 @@ import { NumberOnlyDirective } from '../../../core/directives/number-only.direct
   styleUrls: ['./customer.component.css'],
 })
 export class CustomerComponent implements OnInit {
+  private customersService = inject(CustomersService);
+  private empresaService = inject(EmpresaService);
+
   customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
   isModalOpen: boolean = false;
-  currentCustomer: Omit<Customer, 'id'> = { nombre: '', direccion: '', email: '', telefono: '', equipos: [] };
+  
+  currentCustomer: any = { nombre: '', direccion: '', email: '', telefono: '', equipos: [] };
+  
   isEditMode: boolean = false;
   currentCustomerId: string = '';
   searchTerm: string = '';
   selectedCustomerIds = new Set<string>();
 
-  // Validation errors
   nombreError: string | null = null;
   direccionError: string | null = null;
   emailError: string | null = null;
   telefonoError: string | null = null;
   equipoErrors: { [index: number]: string | null } = {};
   generalEquipoError: string | null = null;
-
-  constructor(private customersService: CustomersService) {}
 
   ngOnInit(): void {
     this.loadCustomers();
@@ -47,9 +50,15 @@ export class CustomerComponent implements OnInit {
 
   openModal(isEdit: boolean, customer?: Customer): void {
     this.isEditMode = isEdit;
-    this.resetErrors(); // Reset errors when opening modal
+    this.resetErrors();
     if (isEdit && customer) {
-      this.currentCustomer = { ...customer, equipos: customer.equipos ? [...customer.equipos] : [] };
+      this.currentCustomer = {
+        nombre: customer.nombre,
+        direccion: customer.address, 
+        email: customer.email,
+        telefono: customer.phone, 
+        equipos: customer.equipos ? [...customer.equipos] : []
+      };
       this.currentCustomerId = customer.id ?? '';
     } else {
       this.currentCustomer = { nombre: '', direccion: '', email: '', telefono: '', equipos: [] };
@@ -93,7 +102,7 @@ export class CustomerComponent implements OnInit {
       this.generalEquipoError = 'Debe registrar al menos un equipo.';
       isValid = false;
     } else {
-        this.currentCustomer.equipos.forEach((equipo, index) => {
+        this.currentCustomer.equipos.forEach((equipo: any, index: number) => {
             if (!equipo.nombre) {
                 this.equipoErrors[index] = 'El nombre del equipo es requerido.';
                 isValid = false;
@@ -115,26 +124,40 @@ export class CustomerComponent implements OnInit {
 
   saveCustomer(): void {
     if (!this.validateForm()) {
-      return; // Stop if form is invalid
+      return;
     }
 
-    if (this.isEditMode) {
-      this.customersService
-        .updateCustomer(this.currentCustomerId, this.currentCustomer)
-        .subscribe(() => {
+    this.empresaService.getEmpresa().pipe(take(1)).subscribe(empresa => {
+      if (!empresa || !empresa.id) {
+        console.error("Error Crítico: No se pudo obtener la empresa.");
+        return;
+      }
+
+      const customerData: Omit<Customer, 'id'> = {
+        empresaId: empresa.id,
+        nombre: this.currentCustomer.nombre,
+        address: this.currentCustomer.direccion, 
+        email: this.currentCustomer.email,
+        phone: this.currentCustomer.telefono,   
+        equipos: this.currentCustomer.equipos.map((e: any) => ({ nombre: e.nombre })) 
+      };
+
+      if (this.isEditMode) {
+        this.customersService.updateCustomer(this.currentCustomerId, customerData).subscribe(() => {
           this.loadCustomers();
           this.closeModal();
         });
-    } else {
-      this.customersService.addCustomer(this.currentCustomer).subscribe(() => {
-        this.loadCustomers();
-        this.closeModal();
-      });
-    }
+      } else {
+        this.customersService.addCustomer(customerData).subscribe(() => {
+          this.loadCustomers();
+          this.closeModal();
+        });
+      }
+    });
   }
 
   deleteCustomer(id: string): void {
-    this.customersService.deleteCustomer(id).subscribe(() => {
+     this.customersService.deleteCustomer(id).subscribe(() => {
       this.loadCustomers();
     });
   }
@@ -151,20 +174,24 @@ export class CustomerComponent implements OnInit {
     if (!this.currentCustomer.equipos) {
       this.currentCustomer.equipos = [];
     }
-    this.currentCustomer.equipos.push({ nombre: '', customerId: this.currentCustomerId });
+    this.currentCustomer.equipos.push({ nombre: '' });
   }
 
   removeEquipo(index: number): void {
     this.currentCustomer.equipos?.splice(index, 1);
   }
-
+  
   isCustomerSelected(customerId: string): boolean {
     return this.selectedCustomerIds.has(customerId);
   }
 
   toggleSelectAll(checked: boolean): void {
     if (checked) {
-      this.filteredCustomers.forEach(c => this.selectedCustomerIds.add(c.id));
+      this.filteredCustomers.forEach(c => {
+        if (c.id) { // Solo añadir si el ID existe
+          this.selectedCustomerIds.add(c.id);
+        }
+      });
     } else {
       this.selectedCustomerIds.clear();
     }

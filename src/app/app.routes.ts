@@ -10,7 +10,7 @@ import { LoginComponent } from './business/authentication/login/login.component'
 import { LayoutComponent } from './shared/components/layout/layout.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { CustomerComponent } from './business/pages/customer/customer.component';
-import { ProfileComponent } from './business/profile/profile.component'; // Importa el componente de perfil
+import { ProfileComponent } from './business/profile/profile.component';
 
 export const routes: Routes = [
     // Rutas públicas
@@ -26,7 +26,7 @@ export const routes: Routes = [
         children: [
             { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
             { path: 'dashboard', component: DashboardComponent },
-            { path: 'profile', component: ProfileComponent }, // <-- RUTA AÑADIDA
+            { path: 'profile', component: ProfileComponent },
             { path: 'customers', component: CustomerComponent },
             { path: 'customers/:id', component: CustomerComponent },
             

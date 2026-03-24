@@ -7,7 +7,7 @@ import { ClientService } from '../../core/services/client.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { Timestamp } from 'firebase/firestore';
 import { Observable, forkJoin, of } from 'rxjs';
-import { map, catchError, take } from 'rxjs/operators';
+import { map, catchError, take, switchMap } from 'rxjs/operators';
 
 interface ReportWithClientName extends Report {
   clientName: string;
@@ -31,39 +31,47 @@ export class DashboardComponent implements OnInit {
   private reportService = inject(ReportService);
   private clientService = inject(ClientService);
   private empresaService = inject(EmpresaService);
-  // VOLVEMOS A HACERLO PRIVADO. Es la forma correcta.
   private router = inject(Router);
   private datePipe = inject(DatePipe);
 
   stats$!: Observable<{ totalReports: number; totalClients: number; }>;
   recentReports$!: Observable<ReportWithClientName[]>;
   
-  recentActivity: ActivityItem[] = [
-    { description: 'Nuevo reporte para Cliente A', time: 'Hace 5 minutos', icon: 'assets/images/report-icon.svg' },
-    { description: 'Nuevo cliente: Cliente B', time: 'Hace 2 horas', icon: 'assets/images/client-icon.svg' },
-  ];
+  recentActivity: ActivityItem[] = []; // Inicializamos vacío
   currentYear: number = new Date().getFullYear();
 
   ngOnInit(): void {
-    this.empresaService.getEmpresa().pipe(take(1)).subscribe(empresa => {
-      if (empresa && empresa.id) {
-        const empresaId = empresa.id;
-        this.loadStats(empresaId);
-        this.loadRecentReports(empresaId);
-      }
-    });
+    // Usamos switchMap para una cadena más limpia y segura
+    this.empresaService.getEmpresa().pipe(
+      switchMap(empresa => {
+        if (empresa && empresa.id) {
+          const empresaId = empresa.id;
+          // Disparamos la carga de todas las estadísticas y reportes
+          this.loadStats(empresaId);
+          this.loadRecentReports(empresaId);
+        }
+        return of(null); // Evita que la cadena se rompa si no hay empresa
+      }),
+      catchError(err => {
+        console.error('Error al obtener la empresa en el Dashboard:', err);
+        return of(null);
+      })
+    ).subscribe(); // La suscripción es necesaria para que el pipe se ejecute
   }
 
   loadStats(empresaId: string): void {
+    // Usamos los nuevos métodos de conteo directo para eficiencia y precisión
     this.stats$ = forkJoin({
-      totalReports: this.reportService.getReportsByEmpresa(empresaId).pipe(take(1), map(r => r.length), catchError(() => of(0))),
-      totalClients: this.clientService.getClientsByEmpresa(empresaId).pipe(take(1), map(c => c.length), catchError(() => of(0)))
+      totalReports: this.reportService.getReportsCountByEmpresa(empresaId).pipe(catchError(() => of(0))),
+      totalClients: this.clientService.getClientsCountByEmpresa(empresaId).pipe(catchError(() => of(0)))
     });
   }
 
   loadRecentReports(empresaId: string): void {
     this.recentReports$ = forkJoin({
+        // Tomamos los 5 reportes más recientes
         reports: this.reportService.getReportsByEmpresa(empresaId, 5).pipe(take(1)),
+        // Obtenemos todos los clientes para mapear nombres
         clients: this.clientService.getClientsByEmpresa(empresaId).pipe(take(1))
       }).pipe(
         map(({ reports, clients }) => {
@@ -73,7 +81,7 @@ export class DashboardComponent implements OnInit {
             clientName: clientMap.get(report.clientId) || 'Cliente Desconocido'
           }));
         }),
-        catchError(() => of([]))
+        catchError(() => of([])) // En caso de error, devolvemos una lista vacía
       );
   }
 
@@ -83,14 +91,12 @@ export class DashboardComponent implements OnInit {
     return this.datePipe.transform(jsDate, 'dd/MM/yyyy');
   }
 
-  // Método para la navegación que ya existía
   goToReportDetail(reportId: string): void {
     if (reportId) {
       this.router.navigate(['/reports', reportId]);
     }
   }
 
-  // MÉTODO PÚBLICO CORRECTO para que el template lo pueda llamar
   goToNewReport(): void {
     this.router.navigate(['/reports/new']);
   }

@@ -1,13 +1,13 @@
+
 import { Component, OnInit, OnDestroy, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, FormArray, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Subscription } from 'rxjs';
+import { take } from 'rxjs/operators';
 import { ClientService } from '../../../core/services/client.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
-import { ReportService } from '../../../core/services/report.service';
 import { Client, Equipment } from '../../../core/models/client.model';
-import { Report } from '../../../core/models/report.model';
 
 @Component({
   selector: 'app-client-form',
@@ -32,8 +32,8 @@ export class ClientFormComponent implements OnInit, OnDestroy {
     this.clientForm = this.fb.group({
       nombre: ['', Validators.required],
       email: ['', Validators.email],
-      phone: ['', [Validators.pattern('^[0-9]{10}$')]],
-      address: ['', Validators.required],
+      telefono: ['', [Validators.pattern('^[0-9]*$')]],
+      direccion: ['', Validators.required],
       equipos: this.fb.array([])
     });
   }
@@ -43,10 +43,16 @@ export class ClientFormComponent implements OnInit, OnDestroy {
     this.isEditMode = !!this.clientId;
 
     if (this.isEditMode && this.clientId) {
-      const clientSub = this.clientService.getClientById(this.clientId).subscribe(client => {
+      const clientSub = this.clientService.getClientById(this.clientId).pipe(take(1)).subscribe(client => {
         if (client) {
-          this.clientForm.patchValue(client);
+          const formData = {
+            ...client,
+            telefono: client.phone, 
+            direccion: client.address 
+          };
+          this.clientForm.patchValue(formData);
           if (client.equipos) {
+            this.equipos.clear();
             client.equipos.forEach(equipo => this.addEquipo(equipo));
           }
         }
@@ -63,6 +69,8 @@ export class ClientFormComponent implements OnInit, OnDestroy {
     return this.clientForm.get('equipos') as FormArray;
   }
 
+  // SOLUCIÓN FINAL AL PROBLEMA DE 'customerId'
+  // Esta función ahora SOLO crea un control para 'nombre'.
   addEquipo(equipo?: Equipment): void {
     this.equipos.push(this.fb.group({
       nombre: [equipo?.nombre || '', Validators.required]
@@ -79,21 +87,32 @@ export class ClientFormComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const empresaSub = this.empresaService.getEmpresa().subscribe(empresa => {
+    const empresaSub = this.empresaService.getEmpresa().pipe(take(1)).subscribe(empresa => {
       if (!empresa || !empresa.id) {
-        console.error("No se pudo obtener la empresa.");
+        console.error("Error Crítico: No se pudo obtener la empresa. El cliente no puede ser guardado.");
         return;
       }
 
-      const clientData = { ...this.clientForm.value, empresaId: empresa.id };
+      const formValue = this.clientForm.getRawValue();
+
+      const clientData = {
+        empresaId: empresa.id,
+        nombre: formValue.nombre,
+        email: formValue.email,
+        phone: formValue.telefono,
+        address: formValue.direccion,
+        equipos: formValue.equipos || []
+      };
 
       if (this.isEditMode && this.clientId) {
-        this.clientService.updateClient(this.clientId, clientData).subscribe(() => {
-          this.router.navigate(['/clients']);
+        this.clientService.updateClient(this.clientId, clientData).pipe(take(1)).subscribe({
+          next: () => this.router.navigate(['/clients']),
+          error: (err) => console.error('Error al actualizar el cliente:', err)
         });
       } else {
-        this.clientService.addClient(clientData).subscribe(() => {
-          this.router.navigate(['/clients']);
+        this.clientService.addClient(clientData).pipe(take(1)).subscribe({
+          next: () => this.router.navigate(['/clients']),
+          error: (err) => console.error('Error al añadir el cliente:', err)
         });
       }
     });

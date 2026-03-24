@@ -1,6 +1,6 @@
 import { inject, Injectable } from '@angular/core';
 import {
-  Firestore, collection, collectionData, doc, getDoc, query, where, addDoc, updateDoc, deleteDoc, DocumentReference
+  Firestore, collection, collectionData, doc, getDoc, getDocs, query, where, addDoc, updateDoc, deleteDoc, DocumentReference, getCountFromServer, documentId
 } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -12,24 +12,44 @@ import { Client } from '../models/client.model';
 export class ClientService {
   private firestore: Firestore = inject(Firestore);
 
-  // Obtiene todos los clientes de una empresa
   getClientsByEmpresa(empresaId: string): Observable<Client[]> {
     const clientsRef = collection(this.firestore, 'clientes');
     const q = query(clientsRef, where('empresaId', '==', empresaId));
     return collectionData(q, { idField: 'id' }) as Observable<Client[]>;
   }
 
-  // Obtiene múltiples clientes por sus IDs
+  getClientsByEmpresaOnce(empresaId: string): Observable<Client[]> {
+    const clientsRef = collection(this.firestore, 'clientes');
+    const q = query(clientsRef, where('empresaId', '==', empresaId));
+    return from(getDocs(q)).pipe(
+      map(querySnapshot => {
+        const clients: Client[] = [];
+        querySnapshot.forEach(doc => {
+          clients.push({ id: doc.id, ...doc.data() } as Client);
+        });
+        return clients;
+      })
+    );
+  }
+
+  getClientsCountByEmpresa(empresaId: string): Observable<number> {
+    const clientsRef = collection(this.firestore, 'clientes');
+    const q = query(clientsRef, where('empresaId', '==', empresaId));
+    return from(getCountFromServer(q)).pipe(
+      map(snapshot => snapshot.data().count)
+    );
+  }
+
+  // CORRECCIÓN FINAL: Se usa documentId() para filtrar por el ID del documento.
   getClientsByIds(ids: string[]): Observable<Client[]> {
     if (ids.length === 0) {
         return from([]);
     }
     const clientsRef = collection(this.firestore, 'clientes');
-    const q = query(clientsRef, where('id', 'in', ids));
+    const q = query(clientsRef, where(documentId(), 'in', ids));
     return collectionData(q, { idField: 'id' }) as Observable<Client[]>;
   }
 
-  // Obtiene un cliente específico por su ID
   getClientById(id: string): Observable<Client | undefined> {
     const clientDocRef = doc(this.firestore, 'clientes', id);
     return from(getDoc(clientDocRef)).pipe(
@@ -42,19 +62,16 @@ export class ClientService {
     );
   }
 
-  // Añade un nuevo cliente
   addClient(client: Partial<Client>): Observable<DocumentReference> {
     const clientsRef = collection(this.firestore, 'clientes');
     return from(addDoc(clientsRef, client));
   }
 
-  // Actualiza un cliente existente
   updateClient(id: string, client: Partial<Client>): Observable<void> {
     const clientDocRef = doc(this.firestore, 'clientes', id);
     return from(updateDoc(clientDocRef, client));
   }
 
-  // Elimina un cliente
   deleteClient(id: string): Observable<void> {
     const clientDocRef = doc(this.firestore, 'clientes', id);
     return from(deleteDoc(clientDocRef));
