@@ -2,7 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
-import { switchMap, catchError } from 'rxjs/operators';
+import { switchMap, catchError, take } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 import { Timestamp } from 'firebase/firestore';
 
@@ -13,6 +13,7 @@ import { Customer } from '../../core/models/customer.model';
 import { ReportService } from '../../core/services/report.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { CustomersService } from '../../core/services/customers.service';
+import { AuthService } from '../../core/services/auth.service'; // Importa AuthService
 
 @Component({
   selector: 'app-report-viewer',
@@ -31,6 +32,7 @@ export class ReportViewerComponent implements OnInit {
   private customersService = inject(CustomersService);
   private sanitizer = inject(DomSanitizer);
   private datePipe = inject(DatePipe);
+  private authService = inject(AuthService); // Inyecta AuthService
 
   // Estado del componente
   report: Report | null = null;
@@ -38,8 +40,22 @@ export class ReportViewerComponent implements OnInit {
   cliente: Customer | null = null;
   isLoading = true;
   errorMessage: string | null = null;
+  profileUserName: string = ''; // Variable para el nombre de perfil
 
   ngOnInit(): void {
+    this.loadCurrentUserProfile(); // Carga el perfil del usuario primero
+    this.loadReportData();
+  }
+
+  private loadCurrentUserProfile(): void {
+    this.authService.user$.pipe(take(1)).subscribe(user => {
+      if (user && user.displayName) {
+        this.profileUserName = user.displayName;
+      }
+    });
+  }
+
+  private loadReportData(): void {
     const token = this.route.snapshot.paramMap.get('token') || '';
     const pin = this.route.snapshot.queryParamMap.get('pin') || '';
 
@@ -60,8 +76,6 @@ export class ReportViewerComponent implements OnInit {
         }
         this.report = report;
 
-        // --- CORRECCIÓN FINAL Y DEFINITIVA ---
-        // Usamos la nueva función para obtener la empresa por su ID, sin depender de un usuario
         const empresa$ = this.empresaService.getEmpresaById(report.empresaId);
         const cliente$ = this.customersService.getCustomerById(report.clientId);
 

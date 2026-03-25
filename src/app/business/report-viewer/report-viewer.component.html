@@ -8,8 +8,8 @@
     <div class="company-details">
       <h1 class="company-name">{{ empresa.nombre }}</h1>
       <p>{{ empresa.direccion }}</p>
-      <p>{{ empresa.telefonos[0] }}</p> 
-      <p>{{ empresa.correo }}</p> 
+      <p>{{ empresa.telefonos[0] }}</p>
+      <p>{{ empresa.correo }}</p>
     </div>
     <div class="report-info-box">
       <table class="info-table">
@@ -23,7 +23,7 @@
         </tr>
         <tr>
           <td class="label">Persona Quien Reporta</td>
-          <td class="value">{{ report.personaQuienReporta || 'N/A' }}</td> 
+          <td class="value">{{ report.personaQuienReporta || 'N/A' }}</td>
         </tr>
       </table>
     </div>
@@ -39,7 +39,7 @@
     </tr>
     <tr>
       <td class="label">Dirección</td>
-      <td class="value">{{ cliente.address }}</td> 
+      <td class="value">{{ cliente.address }}</td>
       <td class="label">Equipo Reportado</td>
       <td class="value">{{ report.equipo || 'N/A' }}</td>
     </tr>
@@ -60,10 +60,9 @@
       <td class="content-cell" [innerHTML]="report.trabajoRealizado"></td>
     </tr>
   </table>
-  
+
   <!-- Sección de Refacciones -->
   <table class="items-table">
-    <!-- --- CORRECCIÓN: Mover título dentro de thead --- -->
     <thead class="items-header">
       <tr class="section-header">
         <td colspan="4">Refacciones Solicitadas</td>
@@ -108,16 +107,33 @@
         <p><strong>COD. INTERBANC.:</strong> {{ empresa.cuentasBancarias[0].numero || 'N/A' }}</p>
     </div>
     <div class="terms">
-      <p [innerHTML]="report.terminosCondiciones"> </p>
+      <p [innerHTML]="empresa.terminosCondiciones"></p>
     </div>
   </div>
 
-  <!-- Firma -->
-  <div class="signature-section">
-    <p class="signature-name">{{ report.nombreAcepta || 'Firma del Cliente' }}</p>
-    <img [src]="getSanitizedUrl(report.firma)" alt="Firma del Cliente" class="signature-image" *ngIf="report.firma">
-    <p class="signature-title">Nombre Y Firma Del Cliente</p>
+  <!-- Sección de Firmas (Layout de 2 Columnas) -->
+  <div class="signatures-container">
+    
+    <!-- Columna Izquierda: Firma del Responsable -->
+    <div class="signature-block">
+      <div class="signature-space">
+        <img [src]="getSanitizedUrl(report.firma)" alt="Firma del Responsable" class="signature-image" *ngIf="report.firma">
+      </div>
+      <div class="signature-line"></div>
+      <p class="signature-text">{{ profileUserName }}</p>
+    </div>
+    
+    <!-- Columna Derecha: Firma del Cliente -->
+    <div class="signature-block">
+      <div class="signature-space">
+        <!-- Espacio para la firma manual del cliente -->
+      </div>
+      <div class="signature-line"></div>
+      <p class="signature-text">Nombre y Firma del Cliente</p>
+    </div>
+
   </div>
+
 </div>
 
 <!-- Plantilla de Carga o Error -->

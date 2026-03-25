@@ -9,6 +9,8 @@
   font-family: Arial, sans-serif;
   font-size: 10pt; /* Tamaño de fuente base */
   box-shadow: 0 0 10px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
 }
 
 /* --- Encabezado --- */
@@ -20,13 +22,8 @@
   padding-bottom: 10px;
 }
 
-.logo-container {
-  width: 150px;
-}
-
-.logo-container img {
-  max-width: 100%;
-}
+.logo-container { width: 150px; }
+.logo-container img { max-width: 100%; }
 
 .company-details {
   text-align: center;
@@ -41,30 +38,11 @@
   color: #333;
 }
 
-.company-details p {
-  margin: 2px 0;
-  font-size: 9pt;
-}
-
-.report-info-box {
-  border: 2px solid #000;
-}
-
-.info-table {
-  border-collapse: collapse;
-  width: 200px;
-}
-
-.info-table td {
-  border: 1px solid #000;
-  padding: 4px;
-  text-align: center;
-}
-
-.info-table .label {
-  font-weight: bold;
-  background-color: #f2f2f2;
-}
+.company-details p { margin: 2px 0; font-size: 9pt; }
+.report-info-box { border: 2px solid #000; }
+.info-table { border-collapse: collapse; width: 200px; }
+.info-table td { border: 1px solid #000; padding: 4px; text-align: center; }
+.info-table .label { font-weight: bold; background-color: #f2f2f2; }
 
 .report-title {
   text-align: center;
@@ -86,51 +64,18 @@
   padding: 5px;
 }
 
-.details-table .label {
-  font-weight: bold;
-  background-color: #f2f2f2;
-  width: 150px;
-}
-
-.section-header td {
-  font-weight: bold;
-  text-align: center;
-  background-color: #f2f2f2;
-  padding: 6px;
-}
-
-.content-cell {
-  min-height: 100px;
-  vertical-align: top;
-}
+.details-table .label { font-weight: bold; background-color: #f2f2f2; width: 150px; }
+.section-header td { font-weight: bold; text-align: center; background-color: #f2f2f2; padding: 6px; }
+.content-cell { min-height: 100px; vertical-align: top; }
 
 /* --- Tabla de Ítems/Refacciones --- */
-.items-table thead th {
-  background-color: #e0e0e0;
-  font-weight: bold;
-  text-align: center;
-}
+.items-table thead th { background-color: #e0e0e0; font-weight: bold; text-align: center; }
+.items-table tbody td { text-align: center; }
+.items-table tbody td:nth-child(2) { text-align: left; }
+.items-table tfoot .total-label { text-align: right; font-weight: bold; }
+.items-table tfoot .total-value { font-weight: bold; text-align: center; background-color: #f2f2f2; }
 
-.items-table tbody td {
-  text-align: center;
-}
-
-.items-table tbody td:nth-child(2) { /* Columna de descripción */
-  text-align: left;
-}
-
-.items-table tfoot .total-label {
-  text-align: right;
-  font-weight: bold;
-}
-
-.items-table tfoot .total-value {
-  font-weight: bold;
-  text-align: center;
-  background-color: #f2f2f2;
-}
-
-/* --- Pie de Página y Firma --- */
+/* --- Pie de Página (Contenido antes de las firmas) --- */
 .report-footer {
   display: flex;
   justify-content: space-between;
@@ -140,40 +85,47 @@
   border-top: 1px solid #000;
 }
 
-.bank-info {
-    flex-basis: 50%;
+.bank-info { flex-basis: 50%; }
+.terms { flex-basis: 50%; text-align: justify; }
+
+
+/* --- Nueva Sección de Firmas (Layout de 2 Columnas) --- */
+.signatures-container {
+  display: flex;
+  justify-content: space-around; /* Asegura espacio entre las firmas */
+  align-items: flex-end; /* Alinea los bloques en la parte inferior */
+  margin-top: auto; /* Empuja las firmas al final del contenedor flex principal */
+  padding-top: 40px; /* Espacio antes de las firmas */
+  page-break-inside: avoid; /* Evita cortes en la impresión */
 }
 
-.terms {
-    flex-basis: 50%;
-    text-align: justify;
+.signature-block {
+  flex-basis: 40%; /* Cada bloque de firma ocupa el 40% del ancho */
+  text-align: center; /* Centra el contenido del bloque */
 }
 
-.signature-section {
-  margin-top: 40px;
-  text-align: center;
+.signature-space {
+  height: 70px; /* Espacio vertical para la firma */
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 .signature-image {
-  width: 200px;
-  height: auto;
-  margin: 0 auto;
+  max-width: 180px;
+  max-height: 65px;
+  object-fit: contain;
 }
 
-.signature-name, .signature-title {
-    margin: 5px 0;
+.signature-line {
+  border-top: 1px solid #000;
+  width: 90%;
+  margin: 0 auto; /* Centra la línea horizontal */
 }
 
-.signature-title {
-    border-top: 1px solid #000;
-    display: inline-block;
-    padding-top: 5px;
-}
-
-.footer-contact {
-    text-align: center;
-    margin-top: 30px;
-    font-size: 9pt;
+.signature-text {
+  margin-top: 8px; /* Espacio entre la línea y el texto */
+  font-size: 10pt;
 }
 
 /* --- Estado de Carga y Error --- */
@@ -184,11 +136,5 @@
   height: 80vh;
 }
 
-.status-message {
-  font-size: 1.5em;
-  color: #555;
-}
-
-.status-message.error {
-  color: #d9534f;
-}
+.status-message { font-size: 1.5em; color: #555; }
+.status-message.error { color: #d9534f; }

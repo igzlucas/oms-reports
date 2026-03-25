@@ -74,7 +74,7 @@ export class PublicReportViewerComponent implements OnInit {
 
   verifyPin(): void {
     if (this.pinForm.invalid) {
-      this.pinError = 'Por favor, ingrese un PIN de 4 dígitos.';
+      this.pinError = 'Por favor, ingrese un PIN de 6 dígitos.';
       return;
     }
 

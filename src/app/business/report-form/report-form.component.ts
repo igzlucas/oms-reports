@@ -10,6 +10,7 @@ import { Detalle } from '../../core/models/detalle.model';
 import { ReportService } from '../../core/services/report.service';
 import { CustomersService } from '../../core/services/customers.service';
 import { EmpresaService } from '../../core/services/empresa.service';
+import { AuthService } from '../../core/services/auth.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
 import { SignaturePadModule } from 'angular2-signaturepad';
 import { SignatureModalComponent } from '../../shared/signature-modal/signature-modal.component';
@@ -34,6 +35,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
   private reportService = inject(ReportService);
   private customersService = inject(CustomersService);
   private empresaService = inject(EmpresaService);
+  private authService = inject(AuthService);
   private cdr = inject(ChangeDetectorRef);
 
   reportForm: FormGroup;
@@ -47,6 +49,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
   isSaving = false;
   signatureDataUrl: string | null = null;
   showSignatureModal = false;
+  profileUserName: string = ''; // Variable para el nombre del perfil del usuario
   private subscriptions = new Subscription();
 
   tinyMceConfig = {
@@ -62,7 +65,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       fecha: [new Date().toISOString().substring(0, 10), Validators.required],
       clientId: ['', Validators.required],
       equipo: [''],
-      personaQuienReporta: [''], 
+      personaQuienReporta: [''], // Este campo empieza vacío
       problema: [''],
       trabajoRealizado: [''],
       observaciones: [''],
@@ -83,10 +86,21 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     this.loadInitialData();
     this.setupClientChangeListener();
     this.subscribeToDetallesChanges();
+    this.loadCurrentUser(); // Carga el nombre del perfil
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
+  }
+
+  // Carga el nombre del usuario del perfil para la firma
+  private loadCurrentUser(): void {
+    const userSub = this.authService.user$.pipe(take(1)).subscribe(user => {
+      if (user && user.displayName) {
+        this.profileUserName = user.displayName;
+      }
+    });
+    this.subscriptions.add(userSub);
   }
 
   private subscribeToDetallesChanges(): void {
@@ -112,7 +126,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
           return throwError(() => new Error('Empresa no encontrada. No se puede continuar.'));
         }
         this.empresaId = empresa.id;
-        // --- CORRECCIÓN DEL ERROR DE COMPILACIÓN ---
         this.reportForm.patchValue({ terminosCondiciones: empresa.terminosCondiciones || '' });
 
         const clients$ = this.customersService.getCustomers().pipe(take(1));

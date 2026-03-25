@@ -47,7 +47,7 @@
               </select>
             </div>
           </div>
-          <!-- --- NUEVO CAMPO EN EL HTML --- -->
+          <!-- Persona Quien Reporta -->
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
             <div class="form-group">
               <label for="personaQuienReporta" class="block text-sm font-medium text-gray-600 mb-1">Persona quien reporta</label>
@@ -126,7 +126,7 @@
       <!-- Signature and Terms Card -->
       <div class="card bg-white rounded-xl shadow-md overflow-hidden">
         <div class="card-header bg-gray-100 px-6 py-4 border-b border-gray-200">
-            <h2 class="text-lg font-semibold text-gray-700">Aceptación y Firma del Cliente</h2>
+            <h2 class="text-lg font-semibold text-gray-700">Firma de {{ profileUserName }}</h2>
         </div>
         <div class="card-body p-6">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -141,14 +141,10 @@
                 <textarea formControlName="terminosCondiciones" rows="4" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"></textarea>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-end">
-                <div class="form-group">
-                    <label for="nombreFirmaCliente" class="block text-sm font-medium text-gray-600 mb-1">Nombre de quien firma</label>
-                    <input id="nombreFirmaCliente" type="text" formControlName="nombreFirmaCliente" class="form-control w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm">
-                </div>
                 <div class="signature-area">
-                    <label class="block text-sm font-medium text-gray-600 mb-1">Firma del Cliente</label>
+                    <label class="block text-sm font-medium text-gray-600 mb-1">Firma de {{ profileUserName }}</label>
                     <div class="signature-pad w-full h-40 border-2 border-dashed border-gray-300 rounded-md flex justify-center items-center bg-gray-50">
-                        <img *ngIf="signatureDataUrl" [src]="signatureDataUrl" alt="Firma del cliente" class="max-w-full max-h-full object-contain">
+                        <img *ngIf="signatureDataUrl" [src]="signatureDataUrl" alt="Firma de {{ profileUserName }}" class="max-w-full max-h-full object-contain">
                         <div *ngIf="!signatureDataUrl" class="signature-placeholder text-gray-500 italic">La firma aparecerá aquí</div>
                     </div>
                     <div class="signature-actions mt-3 flex gap-4">
