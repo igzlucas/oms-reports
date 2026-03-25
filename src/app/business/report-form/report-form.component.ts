@@ -62,8 +62,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       fecha: [new Date().toISOString().substring(0, 10), Validators.required],
       clientId: ['', Validators.required],
       equipo: [''],
-      // --- NUEVO CAMPO EN EL FORMULARIO ---
-      personaQuienReporta: [''], // Campo para la persona que reporta
+      personaQuienReporta: [''], 
       problema: [''],
       trabajoRealizado: [''],
       observaciones: [''],
@@ -113,7 +112,8 @@ export class ReportFormComponent implements OnInit, OnDestroy {
           return throwError(() => new Error('Empresa no encontrada. No se puede continuar.'));
         }
         this.empresaId = empresa.id;
-        this.reportForm.patchValue({ terminosCondiciones: empresa.terminosCondicionesPorDefecto || '' });
+        // --- CORRECCIÓN DEL ERROR DE COMPILACIÓN ---
+        this.reportForm.patchValue({ terminosCondiciones: empresa.terminosCondiciones || '' });
 
         const clients$ = this.customersService.getCustomers().pipe(take(1));
         

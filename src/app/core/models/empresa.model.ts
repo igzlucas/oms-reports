@@ -11,5 +11,5 @@ export interface Empresa {
   correo: string;
   logoUrl?: string;
   cuentasBancarias: CuentaBancaria[];
-  terminosCondicionesPorDefecto?: string; // Propiedad añadida
+  terminosCondiciones?: string; // Campo para los términos y condiciones
 }

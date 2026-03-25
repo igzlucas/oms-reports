@@ -97,6 +97,15 @@
                     </ul>
                 </div>
 
+                <!-- Terminos y Condiciones -->
+                <div>
+                    <h3 class="text-lg font-semibold mb-2">Términos y Condiciones</h3>
+                    <div>
+                        <label for="terminosCondiciones" class="block text-sm font-medium text-gray-700">Contenido de los términos y condiciones que se mostrarán en los reportes.</label>
+                        <textarea id="terminosCondiciones" name="terminosCondiciones" [(ngModel)]="empresa.terminosCondiciones" rows="6" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm"></textarea>
+                    </div>
+                </div>
+
                 <!-- Cuentas Bancarias -->
                 <div>
                     <h3 class="text-lg font-semibold mb-2">Cuentas Bancarias</h3>
@@ -115,7 +124,6 @@
                                     <td class="px-6 py-4 whitespace-nowrap">{{ cuenta.numero }}</td>
                                     <td class="px-6 py-4"><button (click)="removeCuenta(i)" class="text-red-500 hover:text-red-700 text-sm">Eliminar</button></td>
                                 </tr>
-                                <!-- Form to add new account -->
                                 <tr>
                                     <td class="px-6 py-4"><input [(ngModel)]="newCuenta.banco" placeholder="Nombre del Banco" class="w-full border-gray-300 rounded-md"></td>
                                     <td class="px-6 py-4"><input [(ngModel)]="newCuenta.numero" placeholder="Número de Cuenta" class="w-full border-gray-300 rounded-md"></td>
