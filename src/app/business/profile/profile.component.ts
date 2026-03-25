@@ -3,6 +3,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { Empresa, CuentaBancaria } from '../../core/models/empresa.model';
 import { ToastService } from '../../core/services/toast.service';
+import { ConfirmationService } from '../../core/services/confirmation.service';
 import { User } from 'firebase/auth';
 import { getAuth, updatePassword, EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import { FormsModule } from '@angular/forms';
@@ -46,7 +47,8 @@ export class ProfileComponent implements OnInit {
     private authService: AuthService,
     private empresaService: EmpresaService,
     private toastService: ToastService,
-    private cdr: ChangeDetectorRef // Inyectar ChangeDetectorRef
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
   ) { }
 
   ngOnInit(): void {
@@ -61,7 +63,7 @@ export class ProfileComponent implements OnInit {
 
   switchTab(tab: 'profile' | 'empresa'): void {
     this.activeTab = tab;
-    this.cdr.detectChanges(); // Forzar la detección de cambios
+    this.cdr.detectChanges();
   }
 
   loadEmpresaData(): void {
@@ -74,7 +76,7 @@ export class ProfileComponent implements OnInit {
         };
         this.isNewEmpresa = false;
       }
-      this.cdr.detectChanges(); // Asegurarse de que la vista se actualice después de cargar datos
+      this.cdr.detectChanges();
     });
   }
 
@@ -85,14 +87,13 @@ export class ProfileComponent implements OnInit {
       const reader = new FileReader();
       reader.onload = () => {
         this.empresa.logoUrl = reader.result as string;
-        this.cdr.detectChanges(); // Actualizar la vista con la imagen previa
+        this.cdr.detectChanges();
       };
       reader.readAsDataURL(file);
     }
   }
 
   async onSave(): Promise<void> {
-    // --- Profile & Password --- //
     if (this.activeTab === 'profile') {
       if (this.user && this.displayName !== this.user.displayName) {
         try {
@@ -118,7 +119,6 @@ export class ProfileComponent implements OnInit {
       }
     }
 
-    // --- Company Data --- //
     if (this.activeTab === 'empresa' && this.user) {
       if (this.isNewEmpresa) {
         const { id, ...empresaData } = this.empresa;
@@ -164,8 +164,14 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  removeTelefono(index: number): void {
-    this.empresa.telefonos.splice(index, 1);
+  async removeTelefono(index: number): Promise<void> {
+    const confirmed = await this.confirmationService.confirm(
+      '¿Estás seguro de que quieres eliminar este teléfono?'
+    );
+    if (confirmed) {
+      this.empresa.telefonos.splice(index, 1);
+      this.toastService.show('Teléfono eliminado. No olvides guardar los cambios.', 'info');
+    }
   }
 
   addCuenta(): void {
@@ -175,8 +181,14 @@ export class ProfileComponent implements OnInit {
     }
   }
 
-  removeCuenta(index: number): void {
-    this.empresa.cuentasBancarias.splice(index, 1);
+  async removeCuenta(index: number): Promise<void> {
+    const confirmed = await this.confirmationService.confirm(
+      '¿Estás seguro de que quieres eliminar esta cuenta bancaria?'
+    );
+    if (confirmed) {
+      this.empresa.cuentasBancarias.splice(index, 1);
+      this.toastService.show('Cuenta bancaria eliminada. No olvides guardar los cambios.', 'info');
+    }
   }
 
   onCancel(): void {
