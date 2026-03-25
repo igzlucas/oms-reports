@@ -33,7 +33,7 @@
     "firebase": "^10.12.2",
     "flowbite": "^2.3.0",
     "html2canvas": "^1.4.1",
-    "jspdf": "^2.5.1",
+    "jspdf": "^2.5.2",
     "ngx-toastr": "^19.0.0",
     "rxjs": "~7.8.0",
     "signature_pad": "^4.1.7",

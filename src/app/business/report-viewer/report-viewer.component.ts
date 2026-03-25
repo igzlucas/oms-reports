@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, ViewEncapsulation } from '@angular/core';
+import { Component, OnInit, inject, ViewEncapsulation, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -6,6 +6,8 @@ import { FormsModule } from '@angular/forms';
 import { switchMap, catchError, take } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 import { Timestamp } from 'firebase/firestore';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // Componentes
 import { SignatureModalComponent } from '../signature-modal/signature-modal.component';
@@ -38,6 +40,9 @@ export class ReportViewerComponent implements OnInit {
   private sanitizer = inject(DomSanitizer);
   private datePipe = inject(DatePipe);
   private authService = inject(AuthService);
+
+  // Elemento para captura de PDF
+  @ViewChild('reportContent') reportContent!: ElementRef;
 
   // Estado del componente
   report: Report | null = null;
@@ -103,16 +108,60 @@ export class ReportViewerComponent implements OnInit {
         if (this.report && this.report.nombreClienteFirma) {
           this.clientSignatureName = this.report.nombreClienteFirma;
         }
+        this.isLoading = false;
+
+        // Disparar la descarga si el parámetro está presente
+        if (this.route.snapshot.queryParamMap.get('download') === 'true') {
+          setTimeout(() => this.downloadAsPdf(), 200); // Pequeño delay para asegurar renderizado completo
+        }
+
+      } else {
+        this.isLoading = false;
       }
-      this.isLoading = false;
     });
   }
+  
+  public async downloadAsPdf(): Promise<void> {
+    const elementToCapture = this.reportContent.nativeElement;
+    if (!elementToCapture || !this.report) {
+      console.error('No se puede capturar el contenido del reporte.');
+      return;
+    }
+
+    // Ocultar temporalmente elementos no deseados en el PDF
+    const elementsToHide: HTMLElement[] = elementToCapture.querySelectorAll('.btn-sign, .client-signature-input-area, .success-notification');
+    elementsToHide.forEach(el => el.style.setProperty('display', 'none', 'important'));
+
+    const canvas = await html2canvas(elementToCapture, {
+      scale: 3, // Escala alta para máxima calidad de imagen
+      useCORS: true,
+      logging: false,
+    });
+
+    // Volver a mostrar los elementos ocultos
+    elementsToHide.forEach(el => el.style.display = '');
+
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF({
+      orientation: 'portrait',
+      unit: 'px', // Usar píxeles para mantener la relación de aspecto
+      format: [canvas.width, canvas.height]
+    });
+
+    pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+
+    const fileName = `Reporte-${this.report.reporteId || 'N_A'}.pdf`;
+    pdf.save(fileName);
+
+    // Opcional: cerrar la pestaña después de un breve momento
+    setTimeout(() => window.close(), 1000);
+  }
+
 
   // --- Lógica del Modal de Firma ---
 
   openSignatureModal(): void {
     if (!this.clientSignatureName.trim()) {
-      // Reemplazamos el alert por un mensaje de error más sutil si es necesario en el futuro
       alert('Por favor, ingrese su nombre antes de firmar.');
       return;
     }
@@ -132,7 +181,6 @@ export class ReportViewerComponent implements OnInit {
     const reportId = this.report.id;
     this.reportService.updateClientSignature(reportId, signatureDataUrl, this.clientSignatureName)
       .then(() => {
-        // Actualizar el estado local para reflejar el cambio inmediatamente
         if (this.report) {
           this.report.firmaCliente = signatureDataUrl;
           this.report.nombreClienteFirma = this.clientSignatureName;
@@ -141,16 +189,15 @@ export class ReportViewerComponent implements OnInit {
         }
         this.closeSignatureModal();
 
-        // Mostrar notificación de éxito personalizada
         this.showSuccessMessage = true;
         setTimeout(() => {
           this.showSuccessMessage = false;
-        }, 3000); // La notificación se ocultará después de 3 segundos
+        }, 3000);
 
       })
       .catch(error => {
         console.error("Error al guardar la firma:", error);
-        this.handleLoadError('Ocurrió un error al guardar la firma. Por favor, intente de nuevo.');
+        this.handleLoadError('Ocurrió un error al guardar la firma.');
       });
   }
 

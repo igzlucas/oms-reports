@@ -3,7 +3,8 @@
   ¡Reporte firmado con éxito!
 </div>
 
-<div class="report-container" *ngIf="!isLoading && report && empresa && cliente; else loadingOrError">
+<!-- Contenedor del Reporte con ID para Captura de PDF -->
+<div #reportContent class="report-container" *ngIf="!isLoading && report && empresa && cliente; else loadingOrError">
 
   <!-- Encabezado y resto del reporte... (sin cambios) -->
   <div class="report-header">
@@ -112,7 +113,6 @@
       
       <ng-template #clientSignaturePresent>
         <div class="signature-space">
-          <!-- CORRECCIÓN: Añadido *ngIf para asegurar que report.firmaCliente no es undefined -->
           <img *ngIf="report.firmaCliente" [src]="getSanitizedUrl(report.firmaCliente)" alt="Firma del Cliente" class="signature-image">
         </div>
         <div class="signature-line"></div>

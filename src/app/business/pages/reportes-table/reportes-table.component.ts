@@ -40,22 +40,15 @@ export class ReportesTableComponent implements OnInit {
     });
   }
 
-  // --- NUEVA FUNCIÓN PARA ELIMINAR REPORTES ---
   async deleteReport(reportId: string, event: MouseEvent): Promise<void> {
-    event.stopPropagation(); // Detenemos cualquier otro evento de clic.
-
+    event.stopPropagation();
     const confirmation = window.confirm('¿Estás seguro de que quieres eliminar este reporte? Esta acción no se puede deshacer.');
-
     if (confirmation) {
       try {
         await this.reportService.deleteReport(reportId);
-        // Eliminamos el reporte de la lista local para actualizar la vista al instante.
         this.reports = this.reports.filter(report => report.id !== reportId);
-        console.log('Reporte eliminado con éxito.');
-        // Aquí podrías añadir una notificación Toast para el usuario.
       } catch (error) {
         console.error('Error al eliminar el reporte:', error);
-        // Y aquí, una notificación de error.
       }
     }
   }
@@ -82,11 +75,16 @@ export class ReportesTableComponent implements OnInit {
   }
 
   getShareableLink(report: Report): string | null {
-    if (!report.publicLinkToken) {
-      console.warn('Este reporte no tiene un token público para compartir.', report);
-      return null;
-    }
+    if (!report.publicLinkToken) return null;
     return `${window.location.origin}/report-viewer/${report.publicLinkToken}/auth`;
+  }
+
+  getReportViewUrl(report: Report, download: boolean = false): string {
+    if (!report.publicLinkToken || !report.pin) {
+      return `javascript:alert('Falta información (token o pin) para generar el enlace de este reporte.');`;
+    }
+    const baseUrl = `${window.location.origin}/report-viewer/${report.publicLinkToken}/view?pin=${report.pin}`;
+    return download ? `${baseUrl}&download=true` : baseUrl;
   }
 
   private setCopiedState(type: 'pin' | 'link', id: string): void {

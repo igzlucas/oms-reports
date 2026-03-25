@@ -56,17 +56,20 @@
 
           <!-- Columna de Acciones Modificada -->
           <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-            <div class="flex items-center justify-center space-x-4">
+            <div class="flex items-center justify-center space-x-2">
               <!-- Botón Compartir Link -->
               <button (click)="copyShareLink(report, $event)" class="text-blue-600 hover:text-blue-900 transition-colors duration-200 font-semibold" [disabled]="!report.publicLinkToken">
                  <span *ngIf="!(copiedState?.type === 'link' && copiedState?.id === report.id)">Compartir Link</span>
                  <span *ngIf="copiedState?.type === 'link' && copiedState?.id === report.id" class="text-green-600 font-semibold">¡Enlace Copiado!</span>
               </button>
               <span class="text-gray-300">|</span>
-              <!-- Botón Ver (sin cambios) -->
-              <a [routerLink]="['/reports', report.id]" (click)="$event.stopPropagation()" class="text-green-600 hover:text-green-900">Ver</a>
+              <!-- Ver -->
+              <a [routerLink]="['/reports', report.id]" (click)="$event.stopPropagation()" class="text-green-600 hover:text-green-900 font-semibold">Ver</a>
               <span class="text-gray-300">|</span>
-              <!-- Nuevo Botón Eliminar -->
+              <!-- NUEVO: Descargar PDF -->
+               <a [href]="getReportViewUrl(report, true)" target="_blank" (click)="$event.stopPropagation()" class="text-purple-600 hover:text-purple-900 font-semibold">Descargar PDF</a>
+              <span class="text-gray-300">|</span>
+              <!-- Eliminar -->
               <button (click)="deleteReport(report.id, $event)" class="text-red-600 hover:text-red-900 font-semibold">Eliminar</button>
             </div>
           </td>
