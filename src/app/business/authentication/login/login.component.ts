@@ -30,18 +30,6 @@ export class LoginComponent {
     this.router.navigate(['/dashboard']);
   }
 
-  loginWithGoogle(): void {
-    this.authService.loginWithGoogle().subscribe({
-      next: () => {
-        this.handleLoginSuccess();
-      },
-      error: (error: any) => {
-        console.error('Login error', error);
-        this.toastService.show('Hubo un problema al iniciar sesión con Google.', 'error');
-      },
-    });
-  }
-
   loginWithEmail(): void {
     if (!this.email || !this.password) {
       this.toastService.show('Por favor, ingresa tu correo y contraseña.', 'info');
@@ -67,7 +55,8 @@ export class LoginComponent {
 
     this.authService.resetPassword(this.email).subscribe({
       next: () => {
-        this.toastService.show('Se ha enviado un enlace a tu correo para restablecer la contraseña.', 'success');
+        this.toastService.show('Enlace enviado. Serás redirigido al inicio de sesión.', 'success');
+        this.showLoginForm();
       },
       error: (err: any) => {
         console.error('Password reset error', err);
