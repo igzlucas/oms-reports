@@ -6,10 +6,10 @@ import { CommonModule } from '@angular/common';
 import { forkJoin, of, throwError, Observable, Subscription } from 'rxjs';
 import { switchMap, catchError, finalize, take } from 'rxjs/operators';
 import { Report } from '../../core/models/report.model';
-import { Customer } from '../../core/models/customer.model'; // <-- MODELO CORRECTO
+import { Customer } from '../../core/models/customer.model';
 import { Detalle } from '../../core/models/detalle.model';
 import { ReportService } from '../../core/services/report.service';
-import { CustomersService } from '../../core/services/customers.service'; // <-- SERVICIO CORRECTO
+import { CustomersService } from '../../core/services/customers.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
 import { SignaturePadModule } from 'angular2-signaturepad';
@@ -33,14 +33,14 @@ export class ReportFormComponent implements OnInit, OnDestroy {
   private router = inject(Router);
   private fb = inject(FormBuilder);
   private reportService = inject(ReportService);
-  private customersService = inject(CustomersService); // <-- INYECCIÓN CORRECTA
+  private customersService = inject(CustomersService);
   private empresaService = inject(EmpresaService);
   private cdr = inject(ChangeDetectorRef);
 
   reportForm: FormGroup;
   isEditMode = false;
   reportId: string | null = null;
-  clients: Customer[] = []; // <-- TIPO CORRECTO
+  clients: Customer[] = [];
   equipos: any[] = [];
   empresaId: string | null = null;
   initializationError: string | null = null;
@@ -73,7 +73,10 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       detalles: this.fb.array([]),
       diasVigencia: [0],
       nombreFirmaCliente: [''],
-      firma: ['']
+      firma: [''],
+      // Añadimos los campos que faltaban en el form group
+      pin: [''],
+      publicLinkToken: ['']
     });
   }
 
@@ -87,6 +90,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
   }
 
   loadInitialData(): void {
+    // ... (el resto de la función se mantiene igual)
     this.isLoading = true;
     this.reportId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.reportId;
@@ -99,7 +103,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
         this.empresaId = empresa.id;
         this.reportForm.patchValue({ terminosCondiciones: empresa.terminosCondicionesPorDefecto || '' });
 
-        // --- LA CORRECCIÓN FINAL ---
         const clients$ = this.customersService.getCustomers().pipe(take(1));
         
         const reportData$: Observable<Report | number | null> = this.isEditMode && this.reportId
@@ -125,6 +128,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
         const report = result.reportData as Report;
         if (report) {
           this.detalles.clear();
+          // Ahora el patchValue también incluye pin y publicLinkToken si existen
           this.reportForm.patchValue(report);
           if (report.detalles) {
             report.detalles.forEach(d => this.addDetalle(d));
@@ -141,6 +145,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
   }
   
   private setupClientChangeListener(): void {
+    // ... (sin cambios)
     const clientChangesSub = this.reportForm.get('clientId')!.valueChanges.subscribe(clientId => {
       this.equipos = [];
       this.reportForm.get('equipo')!.setValue('');
@@ -161,6 +166,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
   }
 
   addDetalle(detalle?: Detalle): void {
+    // ... (sin cambios)
     const detalleForm = this.fb.group({
       descripcion: ['', Validators.required],
       cantidad: [1, [Validators.required, Validators.min(1)]],
@@ -176,6 +182,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     this.detalles.removeAt(index);
   }
 
+  // --- FUNCIÓN ONSUBMIT CORREGIDA ---
   onSubmit(): void {
     if (this.reportForm.invalid) {
       this.reportForm.markAllAsTouched();
@@ -187,11 +194,25 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     }
     this.isSaving = true;
 
+    // Usamos getRawValue() para obtener todos los campos, incluidos los deshabilitados como reporteId
     const reportData: Partial<Report> = {
       ...this.reportForm.getRawValue(),
       empresaId: this.empresaId,
-      firma: this.signatureDataUrl || ''
+      firma: this.signatureDataUrl || this.reportForm.get('firma')?.value || ''
     };
+
+    // Lógica mejorada para generar PIN y Token
+    let isNewReport = !this.isEditMode;
+    let currentPin = this.reportForm.get('pin')?.value;
+    let currentToken = this.reportForm.get('publicLinkToken')?.value;
+
+    if (isNewReport || !currentPin) {
+      reportData.pin = Math.floor(100000 + Math.random() * 900000).toString();
+    }
+
+    if (isNewReport || !currentToken) {
+      reportData.publicLinkToken = this.generateSecureToken();
+    }
     
     const savePromise = this.isEditMode && this.reportId
       ? this.reportService.updateReport(this.reportId, reportData)
@@ -208,19 +229,17 @@ export class ReportFormComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
       });
   }
+
+  private generateSecureToken(): string {
+    const randomPart = Math.random().toString(36).substring(2, 15);
+    const timePart = Date.now().toString(36);
+    return randomPart + timePart;
+  }
   
-  openSignatureModal(): void {
-    this.showSignatureModal = true;
-  }
-
-  clearSignature(): void {
-    this.signatureDataUrl = null;
-  }
-
-  onModalClosed(): void {
-    this.showSignatureModal = false;
-  }
-
+  // --- (resto de funciones sin cambios) ---
+  openSignatureModal(): void { this.showSignatureModal = true; }
+  clearSignature(): void { this.signatureDataUrl = null; }
+  onModalClosed(): void { this.showSignatureModal = false; }
   onSignatureSaved(data: string): void {
     this.signatureDataUrl = data;
     this.showSignatureModal = false;

@@ -14,7 +14,7 @@ export interface Report {
   montoTotal: number;
   moneda: 'USD' | 'MXN';
   detalles: Detalle[]; // Ahora usa la definición importada y correcta
-  status: 'borrador' | 'completado';
+  status: 'borrador' | 'completado' | 'pendiente'; // <-- CORREGIDO
 
   // Campos de la firma y aceptación
   nombreAcepta?: string;

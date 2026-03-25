@@ -1,41 +1,139 @@
-<div *ngIf="isPinValid && report; else loadingOrError">
-    <div *ngIf="!isLinkExpired; else linkExpiredTemplate">
-        <div class="report-container">
-            <header>
-                <h1>Reporte de Servicio</h1>
-                <div class="report-meta">
-                    <p><strong>Reporte ID:</strong> {{ report.reporteId }}</p>
-                    <p><strong>Fecha:</strong> {{ getFormattedDate(report.fecha) }}</p>
-                </div>
-            </header>
+<div class="report-container" *ngIf="!isLoading && report && empresa && cliente; else loadingOrError">
 
-            <!-- ... resto del contenido del reporte ... -->
-            <section class="client-actions">
-                <h2>Acciones del Cliente</h2>
-                <div *ngIf="report.clientStatus === 'pending'">
-                    <button (click)="approveReport()" class="btn btn-success">Aprobar</button>
-                    <button (click)="openSignatureModal()" class="btn btn-primary">Firmar</button>
-                </div>
-                <div *ngIf="report.clientStatus === 'approved'">
-                    <p class="badge badge-success">Reporte Aprobado</p>
-                </div>
-                <div *ngIf="report.firma">
-                    <h4>Firma:</h4>
-                    <img [src]="getSanitizedUrl(report.firma)" alt="Firma del Cliente">
-                </div>
-            </section>
-
-        </div>
+  <!-- Encabezado Principal -->
+  <div class="report-header">
+    <div class="logo-container">
+      <img [src]="empresa.logoUrl" alt="Logo de la Empresa" *ngIf="empresa.logoUrl">
     </div>
+    <div class="company-details">
+      <h1 class="company-name">{{ empresa.nombre }}</h1>
+      <p>{{ empresa.direccion }}</p>
+      <!-- Corregido: Usar el primer teléfono de la lista -->
+      <p>{{ empresa.telefonos[0] }}</p> 
+      <!-- Corregido: Usar 'correo' en lugar de 'email' -->
+      <p>{{ empresa.correo }}</p> 
+    </div>
+    <div class="report-info-box">
+      <table class="info-table">
+        <tr>
+          <td class="label">No De Reporte</td>
+          <td class="value">{{ report.reporteId }}</td>
+        </tr>
+        <tr>
+          <td class="label">Fecha:</td>
+          <td class="value">{{ getFormattedDate(report.fecha) }}</td>
+        </tr>
+        <tr>
+          <td class="label">Persona Quien Reporta</td>
+          <!-- Corregido: Usar 'nombreAcepta' -->
+          <td class="value">{{ report.nombreAcepta || 'N/A' }}</td> 
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <h2 class="report-title">REPORTE DE TRABAJO</h2>
+
+  <!-- Detalles del Cliente y Equipo -->
+  <table class="details-table">
+    <tr>
+      <td class="label">Cliente</td>
+      <td class="value" colspan="3">{{ cliente.nombre }}</td>
+    </tr>
+    <tr>
+      <td class="label">Dirección</td>
+      <!-- Corregido: Usar 'address' -->
+      <td class="value">{{ cliente.address }}</td> 
+      <td class="label">Equipo Reportado</td>
+      <td class="value">{{ report.equipo || 'N/A' }}</td>
+    </tr>
+  </table>
+
+  <!-- Problema y Trabajo Realizado -->
+  <table class="content-table">
+    <tr class="section-header">
+      <td>Problema</td>
+    </tr>
+    <tr>
+      <td class="content-cell" [innerHTML]="report.problema"></td>
+    </tr>
+    <tr class="section-header">
+      <td>Reporte Herramientas y Consumibles</td>
+    </tr>
+    <tr>
+      <td class="content-cell" [innerHTML]="report.trabajoRealizado"></td>
+    </tr>
+  </table>
+  
+  <!-- Sección de Refacciones -->
+  <table class="items-table">
+    <tr class="section-header">
+      <td colspan="4">Refacciones Solicitadas</td>
+    </tr>
+    <thead class="items-header">
+      <tr>
+        <th>Cantidad</th>
+        <th>Descripción</th>
+        <th>Precio</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let item of report.detalles">
+        <td>{{ item.cantidad }}</td>
+        <td>{{ item.descripcion }}</td>
+        <td>{{ item.precioUnitario | number:'1.2-2' }}</td>
+        <td>{{ (item.cantidad * item.precioUnitario) | number:'1.2-2' }}</td>
+      </tr>
+    </tbody>
+    <tfoot>
+      <tr>
+        <td colspan="3" class="total-label">MONTO TOTAL DE MANO DE OBRA Y REFACCIONES.:</td>
+        <td class="total-value">{{ getTotalDetalles() | number:'1.2-2' }} {{ report.moneda }}</td>
+      </tr>
+    </tfoot>
+  </table>
+
+  <!-- Observaciones -->
+  <table class="content-table">
+    <tr class="section-header">
+      <td>Observaciones</td>
+    </tr>
+    <tr>
+      <td class="content-cell" [innerHTML]="report.observaciones"></td>
+    </tr>
+  </table>
+
+  <!-- Pie de Página -->
+  <div class="report-footer">
+    <div class="bank-info">
+        <!-- Corregido: Usar 'cuentasBancarias' -->
+        <p><strong>S/N:</strong> {{ empresa.cuentasBancarias[0]?.banco || 'N/A' }}</p>
+        <p><strong>COD. INTERBANC.:</strong> {{ empresa.cuentasBancarias[0]?.numero || 'N/A' }}</p>
+    </div>
+    <div class="terms">
+      <p [innerHTML]="report.terminosCondiciones"> </p>
+    </div>
+  </div>
+
+  <!-- Firma -->
+  <div class="signature-section">
+    <!-- Corregido: Usar 'nombreAcepta' -->
+    <p class="signature-name">{{ report.nombreAcepta || 'Firma del Cliente' }}</p>
+    <img [src]="getSanitizedUrl(report.firma)" alt="Firma del Cliente" class="signature-image" *ngIf="report.firma">
+    <p class="signature-title">Nombre Y Firma Del Cliente</p>
+  </div>
+  
+  <!-- Eliminado 'website' ya que no está en el modelo -->
+
 </div>
 
+<!-- Plantilla de Carga o Error -->
 <ng-template #loadingOrError>
-    <p>Verificando PIN o reporte no encontrado...</p>
-</ng-template>
-
-<ng-template #linkExpiredTemplate>
-    <div class="link-expired">
-        <h2>El enlace ha expirado</h2>
-        <p>Por favor, contacte al soporte para más información.</p>
-    </div>
+  <div class="status-container">
+    <div *ngIf="isLoading; else errorTemplate" class="status-message">Cargando reporte...</div>
+    <ng-template #errorTemplate>
+      <div class="status-message error">{{ errorMessage }}</div>
+    </ng-template>
+  </div>
 </ng-template>

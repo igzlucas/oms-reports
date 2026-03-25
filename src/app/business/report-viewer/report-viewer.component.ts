@@ -1,96 +1,112 @@
 import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { ReportService } from '../../core/services/report.service';
-import { Report } from '../../core/models/report.model';
-import { switchMap } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { switchMap, catchError } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
 import { Timestamp } from 'firebase/firestore';
-import { SignatureModalComponent } from '../../shared/signature-modal/signature-modal.component';
-import { MatDialog } from '@angular/material/dialog';
+
+// Modelos y Servicios
+import { Report } from '../../core/models/report.model';
+import { Empresa } from '../../core/models/empresa.model';
+import { Customer } from '../../core/models/customer.model';
+import { ReportService } from '../../core/services/report.service';
+import { EmpresaService } from '../../core/services/empresa.service';
+import { CustomersService } from '../../core/services/customers.service';
 
 @Component({
   selector: 'app-report-viewer',
   standalone: true,
-  imports: [CommonModule, SignatureModalComponent],
+  imports: [CommonModule],
   templateUrl: './report-viewer.component.html',
   styleUrls: ['./report-viewer.component.css'],
   providers: [DatePipe]
 })
 export class ReportViewerComponent implements OnInit {
+  // Inyecciones
   private route = inject(ActivatedRoute);
-  private reportService = inject(ReportService);
-  private sanitizer = inject(DomSanitizer);
-  private dialog = inject(MatDialog);
   private router = inject(Router);
+  private reportService = inject(ReportService);
+  private empresaService = inject(EmpresaService);
+  private customersService = inject(CustomersService);
+  private sanitizer = inject(DomSanitizer);
   private datePipe = inject(DatePipe);
 
+  // Estado del componente
   report: Report | null = null;
-  isLinkExpired = false;
-  isPinValid = false;
+  empresa: Empresa | null = null;
+  cliente: Customer | null = null;
+  isLoading = true;
+  errorMessage: string | null = null;
 
   ngOnInit(): void {
     const token = this.route.snapshot.paramMap.get('token') || '';
     const pin = this.route.snapshot.queryParamMap.get('pin') || '';
 
-    this.reportService.getReportByToken(token).subscribe(report => {
-      if (report) {
-        if (report.publicLinkExpiresAt && report.publicLinkExpiresAt.toDate() < new Date()) {
-          this.isLinkExpired = true;
-          return;
+    if (!token || !pin) {
+      this.handleLoadError('Falta información de seguridad para cargar el reporte.');
+      return;
+    }
+
+    this.reportService.getReportByToken(token).pipe(
+      switchMap(report => {
+        if (!report || report.pin !== pin) {
+          this.router.navigate(['/report-viewer', token, 'auth']);
+          throw new Error('PIN incorrecto o reporte no encontrado.');
         }
 
-        if (report.pin === pin) {
-          this.isPinValid = true;
-          if (report.fecha instanceof Timestamp) {
-            report.fecha = report.fecha.toDate();
-          }
-          this.report = report;
-        } else {
-          // Redirigir a la página de autenticación si el PIN es incorrecto
-          this.router.navigate(['/report-viewer', token]);
+        if (report.fecha instanceof Timestamp) {
+          report.fecha = report.fecha.toDate();
         }
-      } else {
-        // Manejar el caso en que el reporte no se encuentra
+        this.report = report;
+
+        // --- CORRECCIÓN FINAL Y DEFINITIVA ---
+        // Usamos la nueva función para obtener la empresa por su ID, sin depender de un usuario
+        const empresa$ = this.empresaService.getEmpresaById(report.empresaId);
+        const cliente$ = this.customersService.getCustomerById(report.clientId);
+
+        return forkJoin({ empresa: empresa$, cliente: cliente$ });
+      }),
+      catchError(error => {
+        this.handleLoadError(error.message || 'Ocurrió un error al cargar los datos.');
+        return of(null); // Terminar la cadena en caso de error
+      })
+    ).subscribe(result => {
+      if (result) {
+        this.empresa = result.empresa;
+        this.cliente = result.cliente;
+        
+        if (!result.empresa) {
+            this.handleLoadError(`No se encontró una empresa con el ID: ${this.report?.empresaId}`);
+        }
+        if (!result.cliente) {
+            this.handleLoadError(`No se encontró un cliente con el ID: ${this.report?.clientId}`);
+        }
       }
+      this.isLoading = false;
     });
   }
 
-  getFormattedDate(date: any): string | null {
-    if (!date) {
-        return '';
-    }
+  private handleLoadError(message: string): void {
+    this.errorMessage = message;
+    this.isLoading = false;
+  }
+
+  // --- Funciones de Ayuda para la Plantilla ---
+
+  getFormattedDate(date: any, format: string = 'dd/MM/yyyy'): string | null {
+    if (!date) return null;
     const jsDate = date instanceof Timestamp ? date.toDate() : date;
-    return this.datePipe.transform(jsDate, 'yyyy-MM-dd HH:mm');
-  }
-
-  approveReport(): void {
-    if (this.report && this.report.id) {
-        this.report.clientStatus = 'approved';
-        const reportToUpdate = { ...this.report };
-        if (reportToUpdate.fecha instanceof Date) {
-            reportToUpdate.fecha = Timestamp.fromDate(reportToUpdate.fecha);
-        }
-        this.reportService.updateReport(this.report.id, reportToUpdate);
-    }
-  }
-
-  openSignatureModal(): void {
-    const dialogRef = this.dialog.open(SignatureModalComponent);
-    dialogRef.afterClosed().subscribe(result => {
-      if (result && this.report && this.report.id) {
-        this.report.firma = result;
-        const reportToUpdate = { ...this.report };
-        if (reportToUpdate.fecha instanceof Date) {
-            reportToUpdate.fecha = Timestamp.fromDate(reportToUpdate.fecha);
-        }
-        this.reportService.updateReport(this.report.id, reportToUpdate);
-      }
-    });
+    return this.datePipe.transform(jsDate, format);
   }
 
   getSanitizedUrl(url: string): SafeResourceUrl {
     return this.sanitizer.bypassSecurityTrustResourceUrl(url);
+  }
+
+  getTotalDetalles(): number {
+    if (!this.report || !this.report.detalles) return 0;
+    return this.report.detalles.reduce((total, item) => 
+      total + (Number(item.cantidad) * Number(item.precioUnitario)), 0);
   }
 }

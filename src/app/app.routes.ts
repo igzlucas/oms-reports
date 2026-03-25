@@ -15,7 +15,8 @@ import { ProfileComponent } from './business/profile/profile.component';
 export const routes: Routes = [
     // Rutas públicas
     { path: 'login', component: LoginComponent },
-    { path: 'report-viewer/:token', component: ReportAuthComponent },
+    // --- RUTA CORREGIDA ---
+    { path: 'report-viewer/:token/auth', component: ReportAuthComponent }, 
     { path: 'report-viewer/:token/view', component: ReportViewerComponent },
 
     // Rutas privadas con layout principal

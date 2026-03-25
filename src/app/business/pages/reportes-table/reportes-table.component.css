@@ -1,132 +1,95 @@
-table {
-  border-collapse: collapse;
-  width: 100%;
+
+/* Usamos :host para asegurar que los estilos no se filtren a otros componentes */
+:host {
+  display: block;
+  background-color: #f9fafb; /* Un fondo gris muy claro para toda la página */
 }
+
+.container {
+  max-width: 1280px; /* Ancho máximo para el contenido */
+}
+
+/* Estilos para las tarjetas de estado (status badges) */
+.status-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px; /* Totalmente redondeado */
+  font-size: 0.75rem; /* 12px */
+  font-weight: 600; /* Semibold */
+  line-height: 1.25;
+  display: inline-flex;
+  align-items: center;
+  text-transform: capitalize;
+}
+
+.status-badge.completado {
+  background-color: #d1fae5; /* Verde claro */
+  color: #065f46; /* Verde oscuro */
+}
+
+.status-badge.pendiente {
+  background-color: #fef3c7; /* Amarillo claro */
+  color: #92400e; /* Amarillo/Naranja oscuro */
+}
+
+.status-badge.borrador {
+  background-color: #f3f4f6; /* Gris claro */
+  color: #374151; /* Gris oscuro */
+}
+
+/* Estilo para el botón de acción principal */
+.btn-primary {
+  background-color: #2563eb; /* Azul */
+  color: white;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem; /* Bordes redondeados */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+  transition: background-color 0.3s ease-in-out;
+}
+
+.btn-primary:hover {
+  background-color: #1d4ed8; /* Azul más oscuro */
+}
+
+/* Contenedor de la tabla */
+.table-container {
+  background-color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 0.75rem; /* Bordes más pronunciados */
+  overflow: hidden; /* Para que los bordes redondeados se apliquen a la tabla interior */
+}
+
+/* Estilo de la cabecera de la tabla */
+thead {
+  background-color: #f9fafb;
+}
+
 th, td {
-  text-align: left;
-  padding: 8px;
+  padding: 1rem 1.5rem; /* Más espaciado */
+  white-space: nowrap;
 }
+
 th {
-  background-color: #f2f2f2;
-}
-tr:hover {
-  background-color: #f5f5f5;
-}
-
-
-
-/* From Uiverse.io by Nawsome */ 
-.pl {
-  display: flex;
-  width: auto;
-  height: auto;
+  font-weight: 500; /* Medium */
+  font-size: 0.75rem; /* 12px */
+  color: #6b7280; /* Gris */
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
-.pl__arrows,
-.pl__ring-rotate,
-.pl__ring-stroke,
-.pl__tick {
-  animation-duration: 2s;
-  animation-timing-function: linear;
-  animation-iteration-count: infinite;
+/* Estilo para las filas de la tabla */
+tr.hover\:bg-gray-50:hover {
+    background-color: #f9fafb;
 }
 
-.pl__arrows {
-  animation-name: arrows42;
-  transform: rotate(45deg);
-  transform-origin: 16px 52px;
+/* Estilo del PIN */
+.font-mono {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  background-color: #f3f4f6;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
 }
 
-.pl__ring-rotate,
-.pl__ring-stroke {
-  transform-origin: 80px 80px;
-}
-
-.pl__ring-rotate {
-  animation-name: ringRotate42;
-}
-
-.pl__ring-stroke {
-  animation-name: ringStroke42;
-  transform: rotate(-45deg);
-}
-
-.pl__tick {
-  animation-name: tick42;
-}
-
-.pl__tick:nth-child(2) {
-  animation-delay: -1.75s;
-}
-
-.pl__tick:nth-child(3) {
-  animation-delay: -1.5s;
-}
-
-.pl__tick:nth-child(4) {
-  animation-delay: -1.25s;
-}
-
-.pl__tick:nth-child(5) {
-  animation-delay: -1s;
-}
-
-.pl__tick:nth-child(6) {
-  animation-delay: -0.75s;
-}
-
-.pl__tick:nth-child(7) {
-  animation-delay: -0.5s;
-}
-
-.pl__tick:nth-child(8) {
-  animation-delay: -0.25s;
-}
-
-/* Animations */
-@keyframes arrows42 {
-  from {
-    transform: rotate(45deg);
-  }
-
-  to {
-    transform: rotate(405deg);
-  }
-}
-
-@keyframes ringRotate42 {
-  from {
-    transform: rotate(0);
-  }
-
-  to {
-    transform: rotate(720deg);
-  }
-}
-
-@keyframes ringStroke42 {
-  from,
-    to {
-    stroke-dashoffset: 452;
-    transform: rotate(-45deg);
-  }
-
-  50% {
-    stroke-dashoffset: 169.5;
-    transform: rotate(-180deg);
-  }
-}
-
-@keyframes tick42 {
-  from,
-    3%,
-    47%,
-    to {
-    stroke-dashoffset: -12;
-  }
-
-  14%,
-    36% {
-    stroke-dashoffset: 0;
-  }
+.text-green-600 {
+    color: #059669;
 }

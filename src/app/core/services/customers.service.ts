@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { Firestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, DocumentData, CollectionReference } from '@angular/fire/firestore';
+import { Firestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, DocumentData, CollectionReference } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Customer } from '../models/customer.model';
@@ -18,6 +18,21 @@ export class CustomersService {
   getCustomers(): Observable<Customer[]> {
     return from(getDocs(this.customersCollection)).pipe(
       map(snapshot => snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Customer)))
+    );
+  }
+
+  // --- NUEVA FUNCIÓN --- 
+  // Obtiene un cliente específico por su ID
+  getCustomerById(id: string): Observable<Customer | null> {
+    const customerDoc = doc(this.firestore, `clientes/${id}`);
+    return from(getDoc(customerDoc)).pipe(
+      map(snapshot => {
+        if (snapshot.exists()) {
+          return { id: snapshot.id, ...snapshot.data() } as Customer;
+        } else {
+          return null;
+        }
+      })
     );
   }
 
