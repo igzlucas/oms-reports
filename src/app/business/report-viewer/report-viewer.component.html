@@ -8,7 +8,8 @@
     <div class="company-details">
       <h1 class="company-name">{{ empresa.nombre }}</h1>
       <p>{{ empresa.direccion }}</p>
-      <p>{{ empresa.telefonos[0] }}</p>
+      <!-- Bucle para mostrar todos los teléfonos -->
+      <p *ngFor="let telefono of empresa.telefonos">{{ telefono }}</p>
       <p>{{ empresa.correo }}</p>
     </div>
     <div class="report-info-box">
@@ -48,13 +49,13 @@
   <!-- Problema y Trabajo Realizado -->
   <table class="content-table">
     <tr class="section-header">
-      <td>Problema</td>
+      <td>PROBLEMA</td>
     </tr>
     <tr>
       <td class="content-cell" [innerHTML]="report.problema"></td>
     </tr>
     <tr class="section-header">
-      <td>Reporte Herramientas y Consumibles</td>
+      <td>TRABAJO REALIZADO</td>
     </tr>
     <tr>
       <td class="content-cell" [innerHTML]="report.trabajoRealizado"></td>
@@ -102,9 +103,11 @@
 
   <!-- Pie de Página -->
   <div class="report-footer">
+    <!-- Bucle para mostrar todas las cuentas bancarias -->
     <div class="bank-info">
-        <p><strong>S/N:</strong> {{ empresa.cuentasBancarias[0].banco || 'N/A' }}</p>
-        <p><strong>COD. INTERBANC.:</strong> {{ empresa.cuentasBancarias[0].numero || 'N/A' }}</p>
+      <div *ngFor="let cuenta of empresa.cuentasBancarias">
+        <p><strong>{{ cuenta.banco }}:</strong> {{ cuenta.numero }}</p>
+      </div>
     </div>
     <div class="terms">
       <p [innerHTML]="empresa.terminosCondiciones"></p>
