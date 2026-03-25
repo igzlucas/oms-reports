@@ -2,9 +2,13 @@ import { Component, OnInit, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { FormsModule } from '@angular/forms';
 import { switchMap, catchError, take } from 'rxjs/operators';
 import { forkJoin, of } from 'rxjs';
 import { Timestamp } from 'firebase/firestore';
+
+// Componentes
+import { SignatureModalComponent } from '../signature-modal/signature-modal.component';
 
 // Modelos y Servicios
 import { Report } from '../../core/models/report.model';
@@ -18,7 +22,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'app-report-viewer',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule, SignatureModalComponent],
   templateUrl: './report-viewer.component.html',
   styleUrls: ['./report-viewer.component.css'],
   providers: [DatePipe],
@@ -42,6 +46,10 @@ export class ReportViewerComponent implements OnInit {
   isLoading = true;
   errorMessage: string | null = null;
   profileUserName: string = '';
+
+  // Lógica de la firma del cliente
+  showSignatureModal = false;
+  clientSignatureName = '';
 
   ngOnInit(): void {
     this.loadCurrentUserProfile();
@@ -71,7 +79,6 @@ export class ReportViewerComponent implements OnInit {
           this.router.navigate(['/report-viewer', token, 'auth']);
           throw new Error('PIN incorrecto o reporte no encontrado.');
         }
-
         if (report.fecha instanceof Timestamp) {
           report.fecha = report.fecha.toDate();
         }
@@ -90,22 +97,58 @@ export class ReportViewerComponent implements OnInit {
       if (result) {
         this.empresa = result.empresa;
         this.cliente = result.cliente;
-        
-        if (!result.empresa) {
-            this.handleLoadError(`No se encontró una empresa con el ID: ${this.report?.empresaId}`);
-        }
-        if (!result.cliente) {
-            this.handleLoadError(`No se encontró un cliente con el ID: ${this.report?.clientId}`);
+        if (this.report && this.report.nombreClienteFirma) {
+          this.clientSignatureName = this.report.nombreClienteFirma;
         }
       }
       this.isLoading = false;
     });
   }
 
+  // --- Lógica del Modal de Firma ---
+
+  openSignatureModal(): void {
+    this.showSignatureModal = true;
+  }
+
+  closeSignatureModal(): void {
+    this.showSignatureModal = false;
+  }
+
+  onSignatureSaved(signatureDataUrl: string): void {
+    if (!this.clientSignatureName.trim()) {
+      alert('Por favor, ingrese su nombre antes de firmar.');
+      return;
+    }
+    if (!this.report) {
+      this.handleLoadError('No se puede guardar la firma porque el reporte no está cargado.');
+      return;
+    }
+
+    const reportId = this.report.id;
+    this.reportService.updateClientSignature(reportId, signatureDataUrl, this.clientSignatureName)
+      .then(() => {
+        // Actualizar el estado local para reflejar el cambio inmediatamente
+        if (this.report) {
+          this.report.firmaCliente = signatureDataUrl;
+          this.report.nombreClienteFirma = this.clientSignatureName;
+          this.report.clientStatus = 'approved';
+        }
+        alert('Reporte firmado con éxito.');
+        this.closeSignatureModal();
+      })
+      .catch(error => {
+        console.error("Error al guardar la firma:", error);
+        this.handleLoadError('Ocurrió un error al guardar la firma. Por favor, intente de nuevo.');
+      });
+  }
+
   private handleLoadError(message: string): void {
     this.errorMessage = message;
     this.isLoading = false;
   }
+
+  // --- Funciones de Ayuda para la Plantilla ---
 
   getFormattedDate(date: any, format: string = 'dd/MM/yyyy'): string | null {
     if (!date) return null;

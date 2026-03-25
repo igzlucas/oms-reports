@@ -79,6 +79,17 @@ export class ReportService {
     return updateDoc(reportDoc, report);
   }
 
+  // --- NUEVA FUNCIÓN PARA LA FIRMA DEL CLIENTE ---
+  async updateClientSignature(reportId: string, signatureDataUrl: string, clientName: string): Promise<void> {
+    const reportDoc = doc(this.firestore, `reportes/${reportId}`);
+    const updateData = {
+      firmaCliente: signatureDataUrl,
+      nombreClienteFirma: clientName,
+      clientStatus: 'approved' // Opcional: Marcar el reporte como aprobado por el cliente
+    };
+    return updateDoc(reportDoc, updateData);
+  }
+
   // --- NUEVA FUNCIÓN PARA ELIMINAR REPORTES ---
   deleteReport(id: string): Promise<void> {
     const reportDoc = doc(this.firestore, `reportes/${id}`);

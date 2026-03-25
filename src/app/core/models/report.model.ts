@@ -19,9 +19,13 @@ export interface Report {
   // --- NUEVO CAMPO ---
   personaQuienReporta?: string; // Nombre de la persona que levanta el reporte.
 
-  // Campos de la firma y aceptación
+  // Campos de la firma del técnico
   nombreAcepta?: string;
   firma?: string;
+
+  // Campos de la firma del cliente
+  firmaCliente?: string; // Data URL de la firma del cliente
+  nombreClienteFirma?: string; // Nombre del cliente que firma
 
   // Campos de la garantía
   diasVigencia: number;

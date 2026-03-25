@@ -1,14 +1,13 @@
 <div class="report-container" *ngIf="!isLoading && report && empresa && cliente; else loadingOrError">
 
-  <!-- Encabezado Principal -->
+  <!-- Encabezado y resto del reporte... (sin cambios) -->
   <div class="report-header">
     <div class="logo-container">
-      <img [src]="empresa.logoUrl" alt="Logo de la Empresa" *ngIf="empresa.logoUrl">
+      <img [src]="getSanitizedUrl(empresa.logoUrl)" alt="Logo de la Empresa" *ngIf="empresa.logoUrl">
     </div>
     <div class="company-details">
       <h1 class="company-name">{{ empresa.nombre }}</h1>
       <p>{{ empresa.direccion }}</p>
-      <!-- Bucle para mostrar todos los teléfonos -->
       <p *ngFor="let telefono of empresa.telefonos">{{ telefono }}</p>
       <p>{{ empresa.correo }}</p>
     </div>
@@ -32,7 +31,6 @@
 
   <h2 class="report-title">REPORTE DE TRABAJO</h2>
 
-  <!-- Detalles del Cliente y Equipo -->
   <table class="details-table">
     <tr>
       <td class="label">Cliente</td>
@@ -46,34 +44,17 @@
     </tr>
   </table>
 
-  <!-- Problema y Trabajo Realizado -->
   <table class="content-table">
-    <tr class="section-header">
-      <td>PROBLEMA</td>
-    </tr>
-    <tr>
-      <td class="content-cell" [innerHTML]="report.problema"></td>
-    </tr>
-    <tr class="section-header">
-      <td>TRABAJO REALIZADO</td>
-    </tr>
-    <tr>
-      <td class="content-cell" [innerHTML]="report.trabajoRealizado"></td>
-    </tr>
+    <tr class="section-header"><td>PROBLEMA</td></tr>
+    <tr><td class="content-cell" [innerHTML]="report.problema"></td></tr>
+    <tr class="section-header"><td>TRABAJO REALIZADO</td></tr>
+    <tr><td class="content-cell" [innerHTML]="report.trabajoRealizado"></td></tr>
   </table>
 
-  <!-- Sección de Refacciones -->
   <table class="items-table">
     <thead class="items-header">
-      <tr class="section-header">
-        <td colspan="4">Refacciones Solicitadas</td>
-      </tr>
-      <tr>
-        <th>Cantidad</th>
-        <th>Descripción</th>
-        <th>Precio</th>
-        <th>Total</th>
-      </tr>
+      <tr class="section-header"><td colspan="4">Refacciones Solicitadas</td></tr>
+      <tr><th>Cantidad</th><th>Descripción</th><th>Precio</th><th>Total</th></tr>
     </thead>
     <tbody>
       <tr *ngFor="let item of report.detalles">
@@ -91,33 +72,22 @@
     </tfoot>
   </table>
 
-  <!-- Observaciones -->
   <table class="content-table">
-    <tr class="section-header">
-      <td>Observaciones</td>
-    </tr>
-    <tr>
-      <td class="content-cell" [innerHTML]="report.observaciones"></td>
-    </tr>
+    <tr class="section-header"><td>Observaciones</td></tr>
+    <tr><td class="content-cell" [innerHTML]="report.observaciones"></td></tr>
   </table>
 
-  <!-- Pie de Página -->
   <div class="report-footer">
-    <!-- Bucle para mostrar todas las cuentas bancarias -->
     <div class="bank-info">
       <div *ngFor="let cuenta of empresa.cuentasBancarias">
         <p><strong>{{ cuenta.banco }}:</strong> {{ cuenta.numero }}</p>
       </div>
     </div>
-    <div class="terms">
-      <p [innerHTML]="empresa.terminosCondiciones"></p>
-    </div>
+    <div class="terms"><p [innerHTML]="empresa.terminosCondiciones"></p></div>
   </div>
 
-  <!-- Sección de Firmas (Layout de 2 Columnas) -->
+  <!-- Sección de Firmas con Lógica para Firma de Cliente -->
   <div class="signatures-container">
-    
-    <!-- Columna Izquierda: Firma del Responsable -->
     <div class="signature-block">
       <div class="signature-space">
         <img [src]="getSanitizedUrl(report.firma)" alt="Firma del Responsable" class="signature-image" *ngIf="report.firma">
@@ -125,19 +95,35 @@
       <div class="signature-line"></div>
       <p class="signature-text">{{ profileUserName }}</p>
     </div>
-    
-    <!-- Columna Derecha: Firma del Cliente -->
-    <div class="signature-block">
-      <div class="signature-space">
-        <!-- Espacio para la firma manual del cliente -->
-      </div>
-      <div class="signature-line"></div>
-      <p class="signature-text">Nombre y Firma del Cliente</p>
-    </div>
 
+    <div class="signature-block">
+      <!-- Lógica condicional para la firma del cliente -->
+      <ng-container *ngIf="!report.firmaCliente; else clientSignaturePresent">
+        <div class="client-signature-input-area">
+          <input type="text" [(ngModel)]="clientSignatureName" placeholder="Escriba su nombre completo" class="signature-name-input">
+          <button class="btn-sign" (click)="openSignatureModal()">Firmar y Aceptar</button>
+        </div>
+      </ng-container>
+      
+      <ng-template #clientSignaturePresent>
+        <div class="signature-space">
+          <!-- CORRECCIÓN: Añadido *ngIf para asegurar que report.firmaCliente no es undefined -->
+          <img *ngIf="report.firmaCliente" [src]="getSanitizedUrl(report.firmaCliente)" alt="Firma del Cliente" class="signature-image">
+        </div>
+        <div class="signature-line"></div>
+        <p class="signature-text">{{ report.nombreClienteFirma }}</p>
+      </ng-template>
+    </div>
   </div>
 
 </div>
+
+<!-- Modal de Firma (se muestra u oculta dinámicamente) -->
+<app-signature-modal 
+  *ngIf="showSignatureModal" 
+  (signatureSaved)="onSignatureSaved($event)" 
+  (modalClosed)="closeSignatureModal()">
+</app-signature-modal>
 
 <!-- Plantilla de Carga o Error -->
 <ng-template #loadingOrError>
