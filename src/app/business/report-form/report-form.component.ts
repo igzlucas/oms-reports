@@ -1,4 +1,3 @@
-
 import { Component, OnInit, OnDestroy, inject, ChangeDetectorRef } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormArray } from '@angular/forms';
@@ -74,7 +73,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       diasVigencia: [0],
       nombreFirmaCliente: [''],
       firma: [''],
-      // Añadimos los campos que faltaban en el form group
       pin: [''],
       publicLinkToken: ['']
     });
@@ -83,14 +81,27 @@ export class ReportFormComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadInitialData();
     this.setupClientChangeListener();
+    this.subscribeToDetallesChanges();
   }
 
   ngOnDestroy(): void {
     this.subscriptions.unsubscribe();
   }
 
+  // --- FUNCIÓN CORREGIDA CON TIPOS EXPLÍCITOS ---
+  private subscribeToDetallesChanges(): void {
+    const sub = this.detalles.valueChanges.subscribe(detalles => {
+      const total = detalles.reduce((acc: number, current: any) => {
+        const cantidad = Number(current.cantidad) || 0;
+        const precioUnitario = Number(current.precioUnitario) || 0;
+        return acc + (cantidad * precioUnitario);
+      }, 0);
+      this.reportForm.get('montoTotal')?.setValue(total, { emitEvent: false });
+    });
+    this.subscriptions.add(sub);
+  }
+
   loadInitialData(): void {
-    // ... (el resto de la función se mantiene igual)
     this.isLoading = true;
     this.reportId = this.route.snapshot.paramMap.get('id');
     this.isEditMode = !!this.reportId;
@@ -128,7 +139,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
         const report = result.reportData as Report;
         if (report) {
           this.detalles.clear();
-          // Ahora el patchValue también incluye pin y publicLinkToken si existen
           this.reportForm.patchValue(report);
           if (report.detalles) {
             report.detalles.forEach(d => this.addDetalle(d));
@@ -144,8 +154,8 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     this.subscriptions.add(dataSub);
   }
   
+  // --- FUNCIÓN CORREGIDA CON EL ERROR DE TIPEO ---
   private setupClientChangeListener(): void {
-    // ... (sin cambios)
     const clientChangesSub = this.reportForm.get('clientId')!.valueChanges.subscribe(clientId => {
       this.equipos = [];
       this.reportForm.get('equipo')!.setValue('');
@@ -153,7 +163,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       if (clientId) {
         const selectedClient = this.clients.find(client => client.id === clientId);
         if (selectedClient && selectedClient.equipos) {
-          this.equipos = selectedClient.equipos;
+          this.equipos = selectedClient.equipos; // Corregido: equipos en lugar de equipios
         }
       }
       this.cdr.detectChanges();
@@ -166,15 +176,11 @@ export class ReportFormComponent implements OnInit, OnDestroy {
   }
 
   addDetalle(detalle?: Detalle): void {
-    // ... (sin cambios)
     const detalleForm = this.fb.group({
-      descripcion: ['', Validators.required],
-      cantidad: [1, [Validators.required, Validators.min(1)]],
-      precioUnitario: [0, [Validators.required, Validators.min(0)]]
+      descripcion: [detalle ? detalle.descripcion : '', Validators.required],
+      cantidad: [detalle ? detalle.cantidad : 1, [Validators.required, Validators.min(1)]],
+      precioUnitario: [detalle ? detalle.precioUnitario : 0, [Validators.required, Validators.min(0)]]
     });
-    if (detalle) {
-      detalleForm.patchValue(detalle);
-    }
     this.detalles.push(detalleForm);
   }
 
@@ -182,7 +188,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     this.detalles.removeAt(index);
   }
 
-  // --- FUNCIÓN ONSUBMIT CORREGIDA ---
   onSubmit(): void {
     if (this.reportForm.invalid) {
       this.reportForm.markAllAsTouched();
@@ -194,14 +199,12 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     }
     this.isSaving = true;
 
-    // Usamos getRawValue() para obtener todos los campos, incluidos los deshabilitados como reporteId
     const reportData: Partial<Report> = {
       ...this.reportForm.getRawValue(),
       empresaId: this.empresaId,
       firma: this.signatureDataUrl || this.reportForm.get('firma')?.value || ''
     };
 
-    // Lógica mejorada para generar PIN y Token
     let isNewReport = !this.isEditMode;
     let currentPin = this.reportForm.get('pin')?.value;
     let currentToken = this.reportForm.get('publicLinkToken')?.value;
@@ -236,7 +239,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     return randomPart + timePart;
   }
   
-  // --- (resto de funciones sin cambios) ---
   openSignatureModal(): void { this.showSignatureModal = true; }
   clearSignature(): void { this.signatureDataUrl = null; }
   onModalClosed(): void { this.showSignatureModal = false; }

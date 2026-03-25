@@ -8,9 +8,7 @@
     <div class="company-details">
       <h1 class="company-name">{{ empresa.nombre }}</h1>
       <p>{{ empresa.direccion }}</p>
-      <!-- Corregido: Usar el primer teléfono de la lista -->
       <p>{{ empresa.telefonos[0] }}</p> 
-      <!-- Corregido: Usar 'correo' en lugar de 'email' -->
       <p>{{ empresa.correo }}</p> 
     </div>
     <div class="report-info-box">
@@ -25,7 +23,6 @@
         </tr>
         <tr>
           <td class="label">Persona Quien Reporta</td>
-          <!-- Corregido: Usar 'nombreAcepta' -->
           <td class="value">{{ report.nombreAcepta || 'N/A' }}</td> 
         </tr>
       </table>
@@ -42,7 +39,6 @@
     </tr>
     <tr>
       <td class="label">Dirección</td>
-      <!-- Corregido: Usar 'address' -->
       <td class="value">{{ cliente.address }}</td> 
       <td class="label">Equipo Reportado</td>
       <td class="value">{{ report.equipo || 'N/A' }}</td>
@@ -107,9 +103,8 @@
   <!-- Pie de Página -->
   <div class="report-footer">
     <div class="bank-info">
-        <!-- Corregido: Usar 'cuentasBancarias' -->
-        <p><strong>S/N:</strong> {{ empresa.cuentasBancarias[0]?.banco || 'N/A' }}</p>
-        <p><strong>COD. INTERBANC.:</strong> {{ empresa.cuentasBancarias[0]?.numero || 'N/A' }}</p>
+        <p><strong>S/N:</strong> {{ empresa.cuentasBancarias[0].banco || 'N/A' }}</p>
+        <p><strong>COD. INTERBANC.:</strong> {{ empresa.cuentasBancarias[0].numero || 'N/A' }}</p>
     </div>
     <div class="terms">
       <p [innerHTML]="report.terminosCondiciones"> </p>
@@ -118,14 +113,10 @@
 
   <!-- Firma -->
   <div class="signature-section">
-    <!-- Corregido: Usar 'nombreAcepta' -->
     <p class="signature-name">{{ report.nombreAcepta || 'Firma del Cliente' }}</p>
     <img [src]="getSanitizedUrl(report.firma)" alt="Firma del Cliente" class="signature-image" *ngIf="report.firma">
     <p class="signature-title">Nombre Y Firma Del Cliente</p>
   </div>
-  
-  <!-- Eliminado 'website' ya que no está en el modelo -->
-
 </div>
 
 <!-- Plantilla de Carga o Error -->
