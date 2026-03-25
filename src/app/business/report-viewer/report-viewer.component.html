@@ -1,3 +1,8 @@
+<!-- Notificación de Éxito -->
+<div class="success-notification" *ngIf="showSuccessMessage">
+  ¡Reporte firmado con éxito!
+</div>
+
 <div class="report-container" *ngIf="!isLoading && report && empresa && cliente; else loadingOrError">
 
   <!-- Encabezado y resto del reporte... (sin cambios) -->

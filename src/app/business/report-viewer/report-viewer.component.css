@@ -156,3 +156,62 @@
   font-style: italic;
   color: #555;
 }
+
+/* --- Notificación de Éxito Personalizada --- */
+@keyframes fadeInOut {
+  0% { opacity: 0; transform: translate(-50%, -20px); }
+  20% { opacity: 1; transform: translate(-50%, 0); }
+  80% { opacity: 1; transform: translate(-50%, 0); }
+  100% { opacity: 0; transform: translate(-50%, -20px); }
+}
+
+.success-notification {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #4CAF50; /* Verde éxito */
+  color: white;
+  padding: 15px 25px;
+  border-radius: 8px;
+  z-index: 2000; /* Asegura que esté por encima de todo */
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+  font-size: 1.1em;
+  font-weight: bold;
+  animation: fadeInOut 3s ease-in-out forwards;
+}
+
+/* --- Input y Botón de Firma del Cliente --- */
+.client-signature-input-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Ocupa el espacio del bloque */
+}
+
+.signature-name-input {
+    width: 90%;
+    padding: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    text-align: center;
+    font-size: 10pt;
+}
+
+.btn-sign {
+    background-color: #007bff; /* Azul primario */
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 10pt;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+}
+
+.btn-sign:hover {
+    background-color: #0056b3;
+}

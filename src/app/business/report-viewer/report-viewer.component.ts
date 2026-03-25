@@ -51,6 +51,9 @@ export class ReportViewerComponent implements OnInit {
   showSignatureModal = false;
   clientSignatureName = '';
 
+  // Notificación de éxito
+  showSuccessMessage = false;
+
   ngOnInit(): void {
     this.loadCurrentUserProfile();
     this.loadReportData();
@@ -108,6 +111,11 @@ export class ReportViewerComponent implements OnInit {
   // --- Lógica del Modal de Firma ---
 
   openSignatureModal(): void {
+    if (!this.clientSignatureName.trim()) {
+      // Reemplazamos el alert por un mensaje de error más sutil si es necesario en el futuro
+      alert('Por favor, ingrese su nombre antes de firmar.');
+      return;
+    }
     this.showSignatureModal = true;
   }
 
@@ -116,10 +124,6 @@ export class ReportViewerComponent implements OnInit {
   }
 
   onSignatureSaved(signatureDataUrl: string): void {
-    if (!this.clientSignatureName.trim()) {
-      alert('Por favor, ingrese su nombre antes de firmar.');
-      return;
-    }
     if (!this.report) {
       this.handleLoadError('No se puede guardar la firma porque el reporte no está cargado.');
       return;
@@ -133,9 +137,16 @@ export class ReportViewerComponent implements OnInit {
           this.report.firmaCliente = signatureDataUrl;
           this.report.nombreClienteFirma = this.clientSignatureName;
           this.report.clientStatus = 'approved';
+          this.report.status = 'completado';
         }
-        alert('Reporte firmado con éxito.');
         this.closeSignatureModal();
+
+        // Mostrar notificación de éxito personalizada
+        this.showSuccessMessage = true;
+        setTimeout(() => {
+          this.showSuccessMessage = false;
+        }, 3000); // La notificación se ocultará después de 3 segundos
+
       })
       .catch(error => {
         console.error("Error al guardar la firma:", error);
