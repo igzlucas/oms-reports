@@ -23,7 +23,7 @@
         </tr>
         <tr>
           <td class="label">Persona Quien Reporta</td>
-          <td class="value">{{ report.nombreAcepta || 'N/A' }}</td> 
+          <td class="value">{{ report.personaQuienReporta || 'N/A' }}</td> 
         </tr>
       </table>
     </div>
@@ -63,10 +63,11 @@
   
   <!-- Sección de Refacciones -->
   <table class="items-table">
-    <tr class="section-header">
-      <td colspan="4">Refacciones Solicitadas</td>
-    </tr>
+    <!-- --- CORRECCIÓN: Mover título dentro de thead --- -->
     <thead class="items-header">
+      <tr class="section-header">
+        <td colspan="4">Refacciones Solicitadas</td>
+      </tr>
       <tr>
         <th>Cantidad</th>
         <th>Descripción</th>
