@@ -1,3 +1,4 @@
+
 import { Injectable } from '@angular/core';
 import { Firestore, collection, addDoc, getDocs, doc, getDoc, updateDoc, deleteDoc, DocumentData, CollectionReference } from '@angular/fire/firestore';
 import { Observable, from } from 'rxjs';
@@ -21,8 +22,6 @@ export class CustomersService {
     );
   }
 
-  // --- NUEVA FUNCIÓN --- 
-  // Obtiene un cliente específico por su ID
   getCustomerById(id: string): Observable<Customer | null> {
     const customerDoc = doc(this.firestore, `clientes/${id}`);
     return from(getDoc(customerDoc)).pipe(
@@ -37,12 +36,28 @@ export class CustomersService {
   }
 
   addCustomer(customer: Omit<Customer, 'id'>): Observable<any> {
-    return from(addDoc(this.customersCollection, customer));
+    // --- CORRECCIÓN ---
+    // Asegurarse de que los campos opcionales no sean undefined
+    const sanitizedCustomer = {
+      ...customer,
+      phone: customer.phone || ''
+    };
+    return from(addDoc(this.customersCollection, sanitizedCustomer));
   }
 
   updateCustomer(id: string, customer: Partial<Customer>): Observable<void> {
     const customerDoc = doc(this.firestore, `clientes/${id}`);
-    return from(updateDoc(customerDoc, { ...customer }));
+    
+    // --- CORRECIÓN ---
+    // Crear una copia para no mutar el objeto original y sanitizar
+    const dataToUpdate = { ...customer };
+
+    // Si 'phone' está siendo actualizado y es undefined, se cambia por string vacío
+    if (Object.prototype.hasOwnProperty.call(dataToUpdate, 'phone')) {
+      dataToUpdate.phone = dataToUpdate.phone || '';
+    }
+
+    return from(updateDoc(customerDoc, dataToUpdate));
   }
 
   deleteCustomer(id: string): Observable<void> {

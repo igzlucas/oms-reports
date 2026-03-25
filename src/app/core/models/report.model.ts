@@ -1,5 +1,5 @@
 import { Timestamp } from 'firebase/firestore';
-import { Detalle } from './detalle.model'; // Importa la definición correcta
+import { Detalle } from './detalle.model';
 
 export interface Report {
   id: string;
@@ -13,8 +13,11 @@ export interface Report {
   observaciones: string;
   montoTotal: number;
   moneda: 'USD' | 'MXN';
-  detalles: Detalle[]; // Ahora usa la definición importada y correcta
-  status: 'borrador' | 'completado' | 'pendiente'; // <-- CORREGIDO
+  detalles: Detalle[];
+  status: 'borrador' | 'completado' | 'pendiente';
+
+  // --- NUEVO CAMPO ---
+  personaQuienReporta?: string; // Nombre de la persona que levanta el reporte.
 
   // Campos de la firma y aceptación
   nombreAcepta?: string;

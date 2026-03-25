@@ -62,6 +62,8 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       fecha: [new Date().toISOString().substring(0, 10), Validators.required],
       clientId: ['', Validators.required],
       equipo: [''],
+      // --- NUEVO CAMPO EN EL FORMULARIO ---
+      personaQuienReporta: [''], // Campo para la persona que reporta
       problema: [''],
       trabajoRealizado: [''],
       observaciones: [''],
@@ -88,7 +90,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     this.subscriptions.unsubscribe();
   }
 
-  // --- FUNCIÓN CORREGIDA CON TIPOS EXPLÍCITOS ---
   private subscribeToDetallesChanges(): void {
     const sub = this.detalles.valueChanges.subscribe(detalles => {
       const total = detalles.reduce((acc: number, current: any) => {
@@ -154,7 +155,6 @@ export class ReportFormComponent implements OnInit, OnDestroy {
     this.subscriptions.add(dataSub);
   }
   
-  // --- FUNCIÓN CORREGIDA CON EL ERROR DE TIPEO ---
   private setupClientChangeListener(): void {
     const clientChangesSub = this.reportForm.get('clientId')!.valueChanges.subscribe(clientId => {
       this.equipos = [];
@@ -163,7 +163,7 @@ export class ReportFormComponent implements OnInit, OnDestroy {
       if (clientId) {
         const selectedClient = this.clients.find(client => client.id === clientId);
         if (selectedClient && selectedClient.equipos) {
-          this.equipos = selectedClient.equipos; // Corregido: equipos en lugar de equipios
+          this.equipos = selectedClient.equipos;
         }
       }
       this.cdr.detectChanges();
