@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../core/services/auth.service';
-import { ToastrService } from 'ngx-toastr';
+import { ToastService } from '../../../core/services/toast.service';
 
 @Component({
   selector: 'app-login',
@@ -22,12 +22,11 @@ export class LoginComponent {
   constructor(
     private authService: AuthService,
     private router: Router,
-    private toastr: ToastrService
+    private toastService: ToastService
   ) {}
 
-  // Simplified login success handler
   private handleLoginSuccess(): void {
-    this.toastr.success('¡Bienvenido!', 'Inicio de Sesión Exitoso');
+    this.toastService.show('¡Bienvenido!', 'success');
     this.router.navigate(['/dashboard']);
   }
 
@@ -38,20 +37,14 @@ export class LoginComponent {
       },
       error: (error: any) => {
         console.error('Login error', error);
-        this.toastr.error(
-          'Hubo un problema al iniciar sesión con Google.',
-          'Error de Autenticación'
-        );
+        this.toastService.show('Hubo un problema al iniciar sesión con Google.', 'error');
       },
     });
   }
 
   loginWithEmail(): void {
     if (!this.email || !this.password) {
-      this.toastr.warning(
-        'Por favor, ingresa tu correo y contraseña.',
-        'Campos Incompletos'
-      );
+      this.toastService.show('Por favor, ingresa tu correo y contraseña.', 'info');
       return;
     }
 
@@ -61,36 +54,24 @@ export class LoginComponent {
       },
       error: (error: any) => {
         console.error('Login error', error);
-        this.toastr.error(
-          'Credenciales incorrectas. Por favor, verifica tu correo y contraseña.',
-          'Error de Autenticación'
-        );
+        this.toastService.show('Credenciales incorrectas. Por favor, verifica tu correo y contraseña.', 'error');
       },
     });
   }
 
   resetPassword(): void {
     if (!this.email) {
-      this.toastr.info(
-        'Por favor, ingresa tu dirección de correo para restablecer la contraseña.',
-        'Restablecer Contraseña'
-      );
+      this.toastService.show('Por favor, ingresa tu dirección de correo para restablecer la contraseña.', 'info');
       return;
     }
 
     this.authService.resetPassword(this.email).subscribe({
       next: () => {
-        this.toastr.success(
-          'Se ha enviado un enlace a tu correo para restablecer la contraseña.',
-          'Revisa tu Email'
-        );
+        this.toastService.show('Se ha enviado un enlace a tu correo para restablecer la contraseña.', 'success');
       },
       error: (err: any) => {
         console.error('Password reset error', err);
-        this.toastr.error(
-          'Hubo un problema al intentar restablecer la contraseña.',
-          'Error'
-        );
+        this.toastService.show('Hubo un problema al intentar restablecer la contraseña.', 'error');
       },
     });
   }

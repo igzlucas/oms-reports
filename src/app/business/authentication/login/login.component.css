@@ -1,78 +1,101 @@
+/* Main container for the whole login page */
 :host {
   display: block;
   width: 100%;
   height: 100vh;
-  overflow: hidden;
+  overflow: hidden; /* Prevent scrollbars on the body */
 }
 
 .login-container {
   display: flex;
   width: 100%;
   height: 100%;
-  background-color: #f8f9fa; /* Un fondo gris claro para toda la página */
+  background-color: #f3f4f6; /* Light gray background */
 }
 
-/* Columna del formulario (izquierda) */
+/* Left side: Form container */
 .login-form-container {
-  flex: 1; /* Ocupa el 50% en pantallas grandes */
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  overflow-y: auto; /* Permite scroll si el contenido es muy alto */
+  background-color: #ffffff; /* White background for the form area */
 }
 
-.login-form {
+.login-box {
   width: 100%;
-  max-width: 420px; /* Ancho máximo del formulario */
-  background: #ffffff;
-  padding: 2.5rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  max-width: 400px; /* Limit form width for better readability */
 }
 
-/* Columna de la imagen (derecha) */
-.login-image-container {
-  flex: 1; /* Ocupa el 50% en pantallas grandes */
-  background-image: url('https://images.unsplash.com/photo-1610194352361-c72a85d93339?q=80&w=1974&auto=format&fit=crop');
-  background-size: cover;
-  background-position: center;
+/* Right side: Carousel container */
+.login-carousel-container {
+  flex: 1.5; /* Takes more space */
+  display: flex;
   position: relative;
+  overflow: hidden;
 }
 
-/* Overlay oscuro sobre la imagen para dar un mejor contraste */
-.login-image-container::before {
-  content: '';
+.carousel-slide {
+  width: 100%;
+  height: 100%;
+}
+
+.carousel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Cover the entire area without distortion */
   position: absolute;
   top: 0;
   left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(10, 38, 71, 0.3); /* Un overlay azul oscuro */
+  z-index: 1;
+  /* Simple fade animation */
+  animation: fade 8s infinite alternate;
 }
 
-/* --- Estilos responsive --- */
-@media (max-width: 992px) {
-  .login-image-container {
-    display: none; /* Oculta la imagen en tablets y móviles */
+.carousel-caption {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 3rem 2.5rem;
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+  color: #ffffff;
+  z-index: 2;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.5);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .login-carousel-container {
+    display: none; /* Hide carousel on smaller screens */
   }
 
   .login-form-container {
-    padding: 1.5rem;
-  }
-
-  .login-form {
-    box-shadow: none; /* Quita la sombra en pantallas pequeñas */
-    padding: 2rem;
+    flex: 1 1 100%; /* Take full width */
   }
 }
 
-/* Estilos adicionales para los inputs y botones (ya definidos con Tailwind en el HTML, pero esto asegura consistencia) */
-input.ng-invalid.ng-touched {
-  border-color: #e53e3e; /* Borde rojo para inputs inválidos */
+/* Keyframe animation for the fade effect */
+@keyframes fade {
+  0%, 25% {
+    opacity: 1;
+  }
+  75%, 100% {
+    opacity: 0;
+  }
 }
 
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.7;
+/* Additional styling for form elements to match the new design */
+.login-box h2 {
+    font-family: 'Inter', sans-serif; /* A more modern font */
+}
+
+input[type="email"],
+input[type="password"] {
+    transition: all 0.3s ease-in-out;
+}
+
+button[type="submit"] {
+    transition: background-color 0.3s ease;
 }
