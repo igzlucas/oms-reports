@@ -6,6 +6,8 @@ import { take } from 'rxjs/operators';
 import { Customer } from '../../../core/models/customer.model';
 import { CustomersService } from '../../../core/services/customers.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
+import { ConfirmationService } from '../../../core/services/confirmation.service';
+import { ToastService } from '../../../core/services/toast.service';
 import { NumberOnlyDirective } from '../../../core/directives/number-only.directive';
 
 @Component({
@@ -18,6 +20,8 @@ import { NumberOnlyDirective } from '../../../core/directives/number-only.direct
 export class CustomerComponent implements OnInit {
   private customersService = inject(CustomersService);
   private empresaService = inject(EmpresaService);
+  private confirmationService = inject(ConfirmationService);
+  private toastService = inject(ToastService);
 
   customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
@@ -144,11 +148,13 @@ export class CustomerComponent implements OnInit {
 
       if (this.isEditMode) {
         this.customersService.updateCustomer(this.currentCustomerId, customerData).subscribe(() => {
+          this.toastService.show('Cliente actualizado con éxito', 'success');
           this.loadCustomers();
           this.closeModal();
         });
       } else {
         this.customersService.addCustomer(customerData).subscribe(() => {
+          this.toastService.show('Cliente creado con éxito', 'success');
           this.loadCustomers();
           this.closeModal();
         });
@@ -156,10 +162,16 @@ export class CustomerComponent implements OnInit {
     });
   }
 
-  deleteCustomer(id: string): void {
-     this.customersService.deleteCustomer(id).subscribe(() => {
-      this.loadCustomers();
-    });
+  async deleteCustomer(id: string): Promise<void> {
+    const confirmed = await this.confirmationService.confirm(
+      '¿Estás seguro de que quieres eliminar este cliente? Esta acción no se puede deshacer.'
+    );
+    if (confirmed) {
+      this.customersService.deleteCustomer(id).subscribe(() => {
+        this.toastService.show('Cliente eliminado con éxito', 'success');
+        this.loadCustomers();
+      });
+    }
   }
 
   filterCustomers(): void {
@@ -188,7 +200,7 @@ export class CustomerComponent implements OnInit {
   toggleSelectAll(checked: boolean): void {
     if (checked) {
       this.filteredCustomers.forEach(c => {
-        if (c.id) { // Solo añadir si el ID existe
+        if (c.id) {
           this.selectedCustomerIds.add(c.id);
         }
       });
@@ -205,13 +217,19 @@ export class CustomerComponent implements OnInit {
       }
   }
 
-  deleteSelectedCustomers(): void {
-    const deletePromises = Array.from(this.selectedCustomerIds).map(id => 
-        this.customersService.deleteCustomer(id).toPromise()
+  async deleteSelectedCustomers(): Promise<void> {
+    const confirmed = await this.confirmationService.confirm(
+      `¿Estás seguro de que quieres eliminar los ${this.selectedCustomerIds.size} clientes seleccionados? Esta acción no se puede deshacer.`
     );
-    Promise.all(deletePromises).then(() => {
-        this.loadCustomers();
-        this.selectedCustomerIds.clear();
-    });
+    if (confirmed) {
+      const deletePromises = Array.from(this.selectedCustomerIds).map(id => 
+          this.customersService.deleteCustomer(id).toPromise()
+      );
+      Promise.all(deletePromises).then(() => {
+          this.toastService.show('Clientes eliminados con éxito', 'success');
+          this.loadCustomers();
+          this.selectedCustomerIds.clear();
+      });
+    }
   }
 }
