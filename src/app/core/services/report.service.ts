@@ -85,7 +85,8 @@ export class ReportService {
     const updateData = {
       firmaCliente: signatureDataUrl,
       nombreClienteFirma: clientName,
-      clientStatus: 'approved' // Opcional: Marcar el reporte como aprobado por el cliente
+      clientStatus: 'approved',
+      status: 'completado' // <-- ¡AQUÍ ESTÁ EL CAMBIO!
     };
     return updateDoc(reportDoc, updateData);
   }
