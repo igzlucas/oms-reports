@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, ViewEncapsulation } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -13,7 +13,7 @@ import { Customer } from '../../core/models/customer.model';
 import { ReportService } from '../../core/services/report.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { CustomersService } from '../../core/services/customers.service';
-import { AuthService } from '../../core/services/auth.service'; // Importa AuthService
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-report-viewer',
@@ -21,7 +21,8 @@ import { AuthService } from '../../core/services/auth.service'; // Importa AuthS
   imports: [CommonModule],
   templateUrl: './report-viewer.component.html',
   styleUrls: ['./report-viewer.component.css'],
-  providers: [DatePipe]
+  providers: [DatePipe],
+  encapsulation: ViewEncapsulation.None
 })
 export class ReportViewerComponent implements OnInit {
   // Inyecciones
@@ -32,7 +33,7 @@ export class ReportViewerComponent implements OnInit {
   private customersService = inject(CustomersService);
   private sanitizer = inject(DomSanitizer);
   private datePipe = inject(DatePipe);
-  private authService = inject(AuthService); // Inyecta AuthService
+  private authService = inject(AuthService);
 
   // Estado del componente
   report: Report | null = null;
@@ -40,10 +41,10 @@ export class ReportViewerComponent implements OnInit {
   cliente: Customer | null = null;
   isLoading = true;
   errorMessage: string | null = null;
-  profileUserName: string = ''; // Variable para el nombre de perfil
+  profileUserName: string = '';
 
   ngOnInit(): void {
-    this.loadCurrentUserProfile(); // Carga el perfil del usuario primero
+    this.loadCurrentUserProfile();
     this.loadReportData();
   }
 
@@ -83,7 +84,7 @@ export class ReportViewerComponent implements OnInit {
       }),
       catchError(error => {
         this.handleLoadError(error.message || 'Ocurrió un error al cargar los datos.');
-        return of(null); // Terminar la cadena en caso de error
+        return of(null);
       })
     ).subscribe(result => {
       if (result) {
@@ -105,8 +106,6 @@ export class ReportViewerComponent implements OnInit {
     this.errorMessage = message;
     this.isLoading = false;
   }
-
-  // --- Funciones de Ayuda para la Plantilla ---
 
   getFormattedDate(date: any, format: string = 'dd/MM/yyyy'): string | null {
     if (!date) return null;

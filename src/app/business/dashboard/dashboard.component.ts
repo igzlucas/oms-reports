@@ -98,6 +98,6 @@ export class DashboardComponent implements OnInit {
   }
 
   goToNewReport(): void {
-    this.router.navigate(['/reports/new']);
+    this.router.navigate(['/new-report']);
   }
 }

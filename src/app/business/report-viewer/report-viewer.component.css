@@ -138,3 +138,21 @@
 
 .status-message { font-size: 1.5em; color: #555; }
 .status-message.error { color: #d9534f; }
+
+/* --- Estilos para contenido dinámico de TinyMCE --- */
+.content-cell p {
+  margin: 0 0 10px 0;
+}
+
+.content-cell strong,
+.content-cell b {
+  font-weight: bold;
+}
+
+.content-cell blockquote {
+  margin-left: 20px;
+  padding-left: 15px;
+  border-left: 3px solid #ccc;
+  font-style: italic;
+  color: #555;
+}
