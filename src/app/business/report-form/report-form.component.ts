@@ -12,7 +12,6 @@ import { CustomersService } from '../../core/services/customers.service';
 import { EmpresaService } from '../../core/services/empresa.service';
 import { AuthService } from '../../core/services/auth.service';
 import { EditorComponent } from '@tinymce/tinymce-angular';
-import { SignaturePadModule } from 'angular2-signaturepad';
 import { SignatureModalComponent } from '../../shared/signature-modal/signature-modal.component';
 
 @Component({
@@ -22,7 +21,6 @@ import { SignatureModalComponent } from '../../shared/signature-modal/signature-
     CommonModule,
     ReactiveFormsModule,
     EditorComponent,
-    SignaturePadModule,
     SignatureModalComponent
   ],
   templateUrl: './report-form.component.html',
