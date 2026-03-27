@@ -1,10 +1,11 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, inject, HostListener } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { Timestamp } from 'firebase/firestore';
 import { Clipboard } from '@angular/cdk/clipboard';
+import { FormsModule } from '@angular/forms';
 
 // Modelos y Servicios
 import { Report } from '../../../core/models/report.model';
@@ -19,7 +20,7 @@ import { ToastService } from '../../../core/services/toast.service';
 @Component({
   selector: 'app-reportes-table',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './reportes-table.component.html',
   styleUrls: ['./reportes-table.component.css'],
   providers: [DatePipe]
@@ -36,6 +37,7 @@ export class ReportesTableComponent implements OnInit {
 
   // Estado de los Datos
   private allReports: Report[] = [];
+  filteredReports: Report[] = [];
   paginatedReports: Report[] = [];
   private customerNames = new Map<string, string>();
   
@@ -43,13 +45,23 @@ export class ReportesTableComponent implements OnInit {
   sortColumn: keyof Report | 'cliente' = 'reporteId';
   sortDirection: 'asc' | 'desc' = 'desc';
 
-  // Estado de la Paginación
+  // Paginación
   currentPage = 1;
   itemsPerPage = 8;
   totalPages = 0;
 
-  // Estado de la UI
+  // UI
   copiedState: { type: 'pin' | 'link'; id: string } | null = null;
+  searchTerm: string = '';
+  openDropdownId: string | null = null;
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (!target.closest('.dropdown-toggle')) {
+      this.openDropdownId = null;
+    }
+  }
 
   ngOnInit(): void {
     this.empresaService.getEmpresa().pipe(
@@ -70,29 +82,40 @@ export class ReportesTableComponent implements OnInit {
       });
       
       this.allReports = reports;
-      this.sortData(this.sortColumn);
+      this.filterAndSort();
     });
   }
 
-  updatePaginatedReports(): void {
-    this.totalPages = Math.ceil(this.allReports.length / this.itemsPerPage);
-    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-    const endIndex = startIndex + this.itemsPerPage;
-    this.paginatedReports = this.allReports.slice(startIndex, endIndex);
+  filterAndSort(): void {
+    this.filteredReports = this.allReports.filter(report => 
+      this.getClientName(report.clientId).toLowerCase().includes(this.searchTerm.toLowerCase())
+    );
+    this.sortData(this.sortColumn, false);
   }
 
-  sortData(column: keyof Report | 'cliente'): void {
-    if (this.sortColumn === column) {
+  updatePaginatedReports(): void {
+    this.totalPages = Math.ceil(this.filteredReports.length / this.itemsPerPage);
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    const endIndex = startIndex + this.itemsPerPage;
+    this.paginatedReports = this.filteredReports.slice(startIndex, endIndex);
+    
+    if (this.paginatedReports.length === 0 && this.currentPage > 1) {
+      this.goToPage(this.currentPage - 1);
+    }
+  }
+
+  sortData(column: keyof Report | 'cliente', toggleDirection: boolean = true): void {
+    if (toggleDirection && this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortColumn = column;
-      this.sortDirection = 'asc';
+      if (toggleDirection) {
+        this.sortDirection = 'asc';
+      }
     }
 
-    this.allReports.sort((a, b) => {
-      let valA: any;
-      let valB: any;
-
+    this.filteredReports.sort((a, b) => {
+      let valA: any, valB: any;
       switch (column) {
         case 'cliente':
           valA = this.getClientName(a.clientId).toLowerCase();
@@ -106,16 +129,11 @@ export class ReportesTableComponent implements OnInit {
           valA = a.montoTotal || 0;
           valB = b.montoTotal || 0;
           break;
-        case 'reporteId':
-          valA = a.reporteId;
-          valB = b.reporteId;
-          break;
         default:
           valA = a[column as keyof Report] || '';
           valB = b[column as keyof Report] || '';
           break;
       }
-      
       if (valA < valB) return this.sortDirection === 'asc' ? -1 : 1;
       if (valA > valB) return this.sortDirection === 'asc' ? 1 : -1;
       return 0;
@@ -140,12 +158,18 @@ export class ReportesTableComponent implements OnInit {
     this.goToPage(this.currentPage - 1);
   }
 
+  toggleDropdown(reportId: string, event: MouseEvent): void {
+    event.stopPropagation();
+    this.openDropdownId = this.openDropdownId === reportId ? null : reportId;
+  }
+
   getClientName(clientId: string): string {
     return this.customerNames.get(clientId) || 'Cliente Desconocido';
   }
 
   async deleteReport(reportId: string, event: MouseEvent): Promise<void> {
     event.stopPropagation();
+    this.openDropdownId = null;
     const confirmed = await this.confirmationService.confirm(
       '¿Estás seguro de que quieres eliminar este reporte? Esta acción no se puede deshacer.'
     );
@@ -154,12 +178,7 @@ export class ReportesTableComponent implements OnInit {
       try {
         await this.reportService.deleteReport(reportId);
         this.allReports = this.allReports.filter(report => report.id !== reportId);
-        this.updatePaginatedReports();
-
-        if (this.paginatedReports.length === 0 && this.currentPage > 1) {
-            this.goToPage(this.currentPage - 1);
-        }
-
+        this.filterAndSort();
         this.toastService.show('Reporte eliminado con éxito', 'success');
       } catch (error) {
         console.error('Error al eliminar el reporte:', error);
@@ -187,6 +206,7 @@ export class ReportesTableComponent implements OnInit {
       this.clipboard.copy(link);
       this.setCopiedState('link', report.id);
     }
+    setTimeout(() => this.openDropdownId = null, 300);
   }
 
   getShareableLink(report: Report): string | null {

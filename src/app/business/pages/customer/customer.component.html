@@ -15,12 +15,6 @@
       <input type="text" class="form-control w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500" 
         placeholder="Buscar por nombre o email..." [(ngModel)]="searchTerm" (ngModelChange)="filterCustomers()">
     </div>
-    <div class="actions-wrapper">
-      <button class="btn btn-danger bg-red-500 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-red-600 disabled:bg-gray-400 disabled:cursor-not-allowed"
-        [disabled]="selectedCustomerIds.size === 0" (click)="deleteSelectedCustomers()">
-        Eliminar Seleccionados
-      </button>
-    </div>
   </div>
 
   <!-- Customer Table -->
@@ -29,7 +23,6 @@
       <table class="data-table w-full">
         <thead>
           <tr class="bg-gray-100">
-            <th class="p-4 w-12 text-left"><input type="checkbox" (change)="toggleSelectAll($any($event.target).checked)" class="form-checkbox h-5 w-5 text-indigo-600"></th>
             <th class="p-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Nombre</th>
             <th class="p-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Dirección</th>
             <th class="p-4 text-left text-sm font-semibold text-gray-600 uppercase tracking-wider">Email</th>
@@ -37,8 +30,7 @@
           </tr>
         </thead>
         <tbody class="divide-y divide-gray-200">
-          <tr *ngFor="let customer of filteredCustomers" class="hover:bg-gray-50">
-            <td class="p-4"><input type="checkbox" [checked]="isCustomerSelected(customer.id!)" (change)="toggleCustomerSelection(customer.id!, $any($event.target).checked)" class="form-checkbox h-5 w-5 text-indigo-600"></td>
+          <tr *ngFor="let customer of paginatedCustomers" class="hover:bg-gray-50">
             <td class="p-4 text-sm text-gray-800">{{ customer.nombre }}</td>
             <td class="p-4 text-sm text-gray-600">{{ customer.address }}</td>
             <td class="p-4 text-sm text-gray-600">{{ customer.email }}</td>
@@ -52,7 +44,7 @@
             </td>
           </tr>
           <tr *ngIf="filteredCustomers.length === 0">
-            <td colspan="5" class="text-center p-8 text-gray-500">
+            <td colspan="4" class="text-center p-8 text-gray-500">
               <div class="flex flex-col items-center">
                 <svg class="w-12 h-12 text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
                 <p class="font-semibold">No se encontraron clientes.</p>
@@ -62,6 +54,54 @@
           </tr>
         </tbody>
       </table>
+    </div>
+    <!-- Pagination Controls -->
+    <div class="pagination-controls bg-gray-50 px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
+      <div class="flex-1 flex justify-between sm:hidden">
+        <button (click)="previousPage()" [disabled]="currentPage === 1" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          Anterior
+        </button>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
+          Siguiente
+        </button>
+      </div>
+      <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+        <div>
+          <p class="text-sm text-gray-700">
+            Mostrando
+            <span class="font-medium">{{ (currentPage - 1) * itemsPerPage + 1 }}</span>
+            a
+            <span class="font-medium">{{ currentPage * itemsPerPage > filteredCustomers.length ? filteredCustomers.length : currentPage * itemsPerPage }}</span>
+            de
+            <span class="font-medium">{{ filteredCustomers.length }}</span>
+            resultados
+          </p>
+        </div>
+        <div>
+          <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
+            <button (click)="previousPage()" [disabled]="currentPage === 1" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <span class="sr-only">Previous</span>
+              <!-- Heroicon name: solid/chevron-left -->
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+            <button *ngFor="let page of [].constructor(totalPages); let i = index" 
+                    (click)="goToPage(i + 1)" 
+                    [ngClass]="{'z-10 bg-indigo-50 border-indigo-500 text-indigo-600': currentPage === i + 1, 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50': currentPage !== i + 1}" 
+                    class="relative inline-flex items-center px-4 py-2 border text-sm font-medium">
+              {{ i + 1 }}
+            </button>
+            <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
+              <span class="sr-only">Next</span>
+              <!-- Heroicon name: solid/chevron-right -->
+              <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </div>
     </div>
   </div>
 

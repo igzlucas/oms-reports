@@ -1,0 +1,59 @@
+<div class="flex flex-col h-full bg-gray-50">
+
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+        <div class="flex justify-between items-center">
+            <h1 class="text-2xl font-bold text-gray-800">Gestión de Clientes</h1>
+            <button (click)="goToNewClient()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                + Nuevo Cliente
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg p-4 mb-4">
+        <div class="flex items-center">
+            <input type="text" placeholder="Buscar por nombre..." [(ngModel)]="searchTerm" (input)="filterClients()" 
+                   class="form-input w-full p-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
+        </div>
+    </div>
+
+    <div class="flex-grow bg-white shadow-md rounded-lg overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="min-w-full leading-normal">
+                <thead class="bg-gray-100">
+                    <tr>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Nombre</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Dirección</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Email</th>
+                        <th class="px-5 py-3 border-b-2 border-gray-200"></th>
+                    </tr>
+                </thead>
+                <tbody *ngIf="filteredClients.length > 0">
+                    <tr *ngFor="let client of filteredClients" class="border-b border-gray-200 hover:bg-gray-50">
+                        <td class="px-5 py-5 text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ client.nombre }}</p>
+                        </td>
+                        <td class="px-5 py-5 text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ client.direccion }}</p>
+                        </td>
+                        <td class="px-5 py-5 text-sm">
+                            <p class="text-gray-900 whitespace-no-wrap">{{ client.email }}</p>
+                        </td>
+                        <td class="px-5 py-5 text-sm text-right">
+                            <button (click)="editClient(client.id)" class="text-blue-500 hover:text-blue-700 font-semibold py-1 px-3 rounded text-xs">Editar</button>
+                            <button (click)="deleteClient(client.id)" class="text-red-500 hover:text-red-700 font-semibold py-1 px-3 rounded text-xs ml-2">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody *ngIf="filteredClients.length === 0">
+                    <tr>
+                        <td colspan="4" class="text-center py-10">
+                            <p class="text-gray-500">No se encontraron clientes.</p>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <app-footer></app-footer>
+</div>

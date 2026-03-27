@@ -1,8 +1,16 @@
 <div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-  <!-- Encabezado -->
-  <div class="flex justify-between items-center mb-6">
+  <!-- Encabezado y Búsqueda -->
+  <div class="flex flex-wrap justify-between items-center mb-6 gap-4">
     <h1 class="text-2xl font-bold text-gray-800">Mis Reportes</h1>
+    
+    <div class="w-full sm:w-auto flex-grow sm:flex-grow-0 sm:max-w-xs">
+      <input type="text" placeholder="Buscar por cliente..."
+             [(ngModel)]="searchTerm"
+             (ngModelChange)="filterAndSort()"
+             class="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-blue-500 focus:border-blue-500">
+    </div>
+
     <a routerLink="/new-report" class="bg-blue-600 text-white font-semibold py-2 px-4 rounded-lg shadow-md hover:bg-blue-700 transition-colors duration-300">
       Crear Nuevo Reporte
     </a>
@@ -14,7 +22,6 @@
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">
           <tr>
-            <!-- Encabezados con Ordenamiento -->
             <th scope="col" (click)="sortData('reporteId')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
               ID <span *ngIf="sortColumn === 'reporteId'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
@@ -24,31 +31,21 @@
             <th scope="col" (click)="sortData('fecha')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
               Fecha <span *ngIf="sortColumn === 'fecha'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
-            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PIN Cliente</th>
             <th scope="col" (click)="sortData('montoTotal')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
               Monto <span *ngIf="sortColumn === 'montoTotal'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
             <th scope="col" (click)="sortData('status')" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer">
               Estado <span *ngIf="sortColumn === 'status'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
             </th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">PIN Cliente</th>
             <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
           </tr>
         </thead>
         <tbody class="bg-white divide-y divide-gray-200">
-          <!-- MODIFICADO: Iterar sobre paginatedReports -->
           <tr *ngFor="let report of paginatedReports" class="hover:bg-gray-50">
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#{{ report.reporteId }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600 font-medium">{{ getClientName(report.clientId) }}</td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">{{ getFormattedDate(report.fecha) }}</td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
-              <div class="flex items-center space-x-2">
-                <span class="font-mono bg-gray-100 px-2 py-1 rounded">{{ report.pin }}</span>
-                <button (click)="copyPin(report.pin || '', report.id, $event)" class="p-1.5 rounded-md hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition">
-                  <span *ngIf="!(copiedState?.type === 'pin' && copiedState?.id === report.id)">Copiar</span>
-                  <span *ngIf="copiedState?.type === 'pin' && copiedState?.id === report.id" class="text-green-600 font-semibold">¡Copiado!</span>
-                </button>
-              </div>
-            </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-800 font-semibold">{{ report.montoTotal | number:'1.2-2' }} {{ report.moneda }}</td>
             <td class="px-6 py-4 whitespace-nowrap">
               <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full"
@@ -58,18 +55,46 @@
                       'bg-gray-100 text-gray-800': report.status === 'borrador'
                     }">{{ report.status }}</span>
             </td>
-            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
-              <div class="flex items-center justify-center space-x-2">
-                <button (click)="copyShareLink(report, $event)" class="text-blue-600 hover:text-blue-900 font-semibold" [disabled]="!report.publicLinkToken">
-                  <span *ngIf="!(copiedState?.type === 'link' && copiedState?.id === report.id)">Compartir Link</span>
-                  <span *ngIf="copiedState?.type === 'link' && copiedState?.id === report.id" class="text-green-600 font-semibold">¡Copiado!</span>
+            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
+              <div class="flex items-center space-x-2">
+                <span class="font-mono bg-gray-100 px-2 py-1 rounded">{{ report.pin }}</span>
+                <button (click)="copyPin(report.pin || '', report.id, $event)" class="p-1.5 rounded-md hover:bg-gray-200 text-gray-500 hover:text-gray-700 transition">
+                  <span *ngIf="!(copiedState?.type === 'pin' && copiedState?.id === report.id)">Copiar</span>
+                  <span *ngIf="copiedState?.type === 'pin' && copiedState?.id === report.id" class="text-green-600 font-semibold">¡Copiado!</span>
                 </button>
-                <span class="text-gray-300">|</span>
-                <a [routerLink]="['/reports', report.id]" (click)="$event.stopPropagation()" class="text-green-600 hover:text-green-900">Ver</a>
-                <span class="text-gray-300">|</span>
-                <a [href]="getReportViewUrl(report, true)" target="_blank" (click)="$event.stopPropagation()" class="text-purple-600 hover:text-purple-900">Descargar PDF</a>
-                <span class="text-gray-300">|</span>
-                <button (click)="deleteReport(report.id, $event)" class="text-red-600 hover:text-red-900 font-semibold">Eliminar</button>
+              </div>
+            </td>
+            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+              <!-- Dropdown de Acciones -->
+              <div class="relative inline-block text-left">
+                <button (click)="toggleDropdown(report.id, $event)" class="dropdown-toggle inline-flex items-center p-2 rounded-full text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                  <svg class="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
+                  </svg>
+                </button>
+
+                <!-- Contenido del Dropdown -->
+                <div *ngIf="openDropdownId === report.id" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none z-10">
+                  <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                    <button (click)="copyShareLink(report, $event)" [disabled]="!report.publicLinkToken" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50" role="menuitem">
+                      <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+                      <span *ngIf="!(copiedState?.type === 'link' && copiedState?.id === report.id)">Compartir Link</span>
+                      <span *ngIf="copiedState?.type === 'link' && copiedState?.id === report.id" class="text-green-600 font-semibold">¡Copiado!</span>
+                    </button>
+                    <a [routerLink]="['/reports', report.id]" (click)="$event.stopPropagation()" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                      <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+                      Ver Detalles
+                    </a>
+                    <a [href]="getReportViewUrl(report, true)" target="_blank" (click)="$event.stopPropagation()" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
+                      <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                      Descargar PDF
+                    </a>
+                    <button (click)="deleteReport(report.id, $event)" class="w-full text-left flex items-center px-4 py-2 text-sm text-red-700 hover:bg-red-50 hover:text-red-900" role="menuitem">
+                       <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                      Eliminar
+                    </button>
+                  </div>
+                </div>
               </div>
             </td>
           </tr>
@@ -82,7 +107,7 @@
       </table>
     </div>
     
-    <!-- NUEVO: Controles de Paginación -->
+    <!-- Controles de Paginación -->
     <div *ngIf="totalPages > 1" class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
       <button (click)="previousPage()" [disabled]="currentPage === 1" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">
         Anterior

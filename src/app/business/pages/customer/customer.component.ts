@@ -25,6 +25,7 @@ export class CustomerComponent implements OnInit {
 
   customers: Customer[] = [];
   filteredCustomers: Customer[] = [];
+  paginatedCustomers: Customer[] = [];
   isModalOpen: boolean = false;
   
   currentCustomer: any = { nombre: '', direccion: '', email: '', telefono: '', equipos: [] };
@@ -32,7 +33,10 @@ export class CustomerComponent implements OnInit {
   isEditMode: boolean = false;
   currentCustomerId: string = '';
   searchTerm: string = '';
-  selectedCustomerIds = new Set<string>();
+
+  currentPage: number = 1;
+  itemsPerPage: number = 8;
+  totalPages: number = 0;
 
   nombreError: string | null = null;
   direccionError: string | null = null;
@@ -48,8 +52,38 @@ export class CustomerComponent implements OnInit {
   loadCustomers(): void {
     this.customersService.getCustomers().subscribe((data) => {
       this.customers = data;
-      this.filteredCustomers = data;
+      this.filterCustomers();
     });
+  }
+
+  updatePagination(): void {
+    this.totalPages = Math.ceil(this.filteredCustomers.length / this.itemsPerPage);
+    if (this.totalPages > 0 && this.currentPage > this.totalPages) {
+      this.currentPage = this.totalPages;
+    }
+    const startIndex = (this.currentPage - 1) * this.itemsPerPage;
+    this.paginatedCustomers = this.filteredCustomers.slice(startIndex, startIndex + this.itemsPerPage);
+  }
+
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.updatePagination();
+    }
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.updatePagination();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.updatePagination();
+    }
   }
 
   openModal(isEdit: boolean, customer?: Customer): void {
@@ -146,19 +180,15 @@ export class CustomerComponent implements OnInit {
         equipos: this.currentCustomer.equipos.map((e: any) => ({ nombre: e.nombre })) 
       };
 
-      if (this.isEditMode) {
-        this.customersService.updateCustomer(this.currentCustomerId, customerData).subscribe(() => {
-          this.toastService.show('Cliente actualizado con éxito', 'success');
-          this.loadCustomers();
-          this.closeModal();
-        });
-      } else {
-        this.customersService.addCustomer(customerData).subscribe(() => {
-          this.toastService.show('Cliente creado con éxito', 'success');
-          this.loadCustomers();
-          this.closeModal();
-        });
-      }
+      const action = this.isEditMode
+        ? this.customersService.updateCustomer(this.currentCustomerId, customerData)
+        : this.customersService.addCustomer(customerData);
+
+      action.subscribe(() => {
+        this.toastService.show(this.isEditMode ? 'Cliente actualizado con éxito' : 'Cliente creado con éxito', 'success');
+        this.loadCustomers();
+        this.closeModal();
+      });
     });
   }
 
@@ -180,6 +210,8 @@ export class CustomerComponent implements OnInit {
         c.nombre.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         (c.email && c.email.toLowerCase().includes(this.searchTerm.toLowerCase()))
     );
+    this.currentPage = 1;
+    this.updatePagination();
   }
 
   addEquipo(): void {
@@ -191,45 +223,5 @@ export class CustomerComponent implements OnInit {
 
   removeEquipo(index: number): void {
     this.currentCustomer.equipos?.splice(index, 1);
-  }
-  
-  isCustomerSelected(customerId: string): boolean {
-    return this.selectedCustomerIds.has(customerId);
-  }
-
-  toggleSelectAll(checked: boolean): void {
-    if (checked) {
-      this.filteredCustomers.forEach(c => {
-        if (c.id) {
-          this.selectedCustomerIds.add(c.id);
-        }
-      });
-    } else {
-      this.selectedCustomerIds.clear();
-    }
-  }
-  
-  toggleCustomerSelection(customerId: string, checked: boolean): void {
-      if(checked) {
-          this.selectedCustomerIds.add(customerId);
-      } else {
-          this.selectedCustomerIds.delete(customerId);
-      }
-  }
-
-  async deleteSelectedCustomers(): Promise<void> {
-    const confirmed = await this.confirmationService.confirm(
-      `¿Estás seguro de que quieres eliminar los ${this.selectedCustomerIds.size} clientes seleccionados? Esta acción no se puede deshacer.`
-    );
-    if (confirmed) {
-      const deletePromises = Array.from(this.selectedCustomerIds).map(id => 
-          this.customersService.deleteCustomer(id).toPromise()
-      );
-      Promise.all(deletePromises).then(() => {
-          this.toastService.show('Clientes eliminados con éxito', 'success');
-          this.loadCustomers();
-          this.selectedCustomerIds.clear();
-      });
-    }
   }
 }
