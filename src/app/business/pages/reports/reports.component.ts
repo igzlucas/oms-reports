@@ -14,11 +14,12 @@ import { ClientService } from '../../../core/services/client.service';
 import { EmpresaService } from '../../../core/services/empresa.service';
 import { SignatureModalComponent } from '../../../shared/signature-modal/signature-modal.component';
 import { MatDialog } from '@angular/material/dialog';
+import { FooterComponent } from '../../../shared/components/footer/footer.component';
 
 @Component({
   selector: 'app-reports',
   standalone: true,
-  imports: [CommonModule, FormsModule, SignatureModalComponent],
+  imports: [CommonModule, FormsModule, SignatureModalComponent, FooterComponent],
   templateUrl: './reports.component.html',
   styleUrls: ['./reports.component.css'],
   providers: [DatePipe]

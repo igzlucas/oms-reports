@@ -37,9 +37,9 @@
   text-decoration: none; /* Add this for routerLink */
 }
 
-.stats-cards {
+.stats-cards-grid {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   margin-bottom: 2rem;
 }
@@ -61,17 +61,18 @@
 }
 
 .stat-info span {
-  font-size: 3rem;
+  font-size: 2.2rem;
   font-weight: 700;
 }
 
 .stat-icon {
-  width: 70px;
-  height: 70px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
+  font-size: 1.5rem;
 }
 
 .icon-reports {
@@ -84,9 +85,25 @@
   color: #28a745;
 }
 
+.icon-usd {
+  background-color: #fff0e6;
+  color: #fd7e14;
+}
+
+.icon-mxn {
+  background-color: #e6f7ff;
+  color: #17a2b8;
+}
+
 .main-content {
   display: grid;
   grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+.right-column {
+  display: flex;
+  flex-direction: column;
   gap: 2rem;
 }
 
@@ -95,7 +112,6 @@
   padding: 2rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  overflow-x: auto; /* Allow horizontal scroll on tables if needed */
 }
 
 .card h2 {
@@ -103,6 +119,10 @@
   margin-bottom: 1.5rem;
   font-size: 1.5rem;
   font-weight: 700;
+}
+
+.recent-reports {
+  overflow-x: auto;
 }
 
 .recent-reports table {
@@ -128,43 +148,15 @@
   padding: 2rem 0;
 }
 
-.actions .btn-icon {
+.actions a {
     color: #007bff;
     text-decoration: none;
-    margin-right: 1rem;
 }
 
-.recent-activity ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.recent-activity li {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-/* Ensure the last item has no margin bottom */
-.recent-activity li:last-child {
-    margin-bottom: 0;
-}
-
-.activity-icon {
-  font-size: 1.2rem;
-  color: #6c757d;
-}
-
-.activity-details p {
-  margin: 0;
-  font-weight: 500;
-}
-
-.activity-details span {
-  color: #6c757d;
-  font-size: 0.9rem;
+.chart-container {
+  position: relative;
+  height: 300px;
+  width: 100%;
 }
 
 .app-footer {
@@ -176,18 +168,13 @@
 
 /* --- Responsive Design --- */
 
-/* For tablets and smaller devices */
 @media (max-width: 992px) {
   .main-content {
     grid-template-columns: 1fr; /* Stack the main content columns */
   }
 }
 
-/* For small tablets */
-@media (max-width: 768px) {
-  .stats-cards {
-    grid-template-columns: 1fr; /* Stack the stat cards */
-  }
+@media (max-width: 576px) {
 
   .dashboard-container {
     padding: 1.5rem;
@@ -196,17 +183,10 @@
   .stat-card, .card {
     padding: 1.5rem;
   }
-}
 
-/* For mobile phones */
-@media (max-width: 576px) {
   .dashboard-header {
     flex-direction: column; /* Stack header items */
     align-items: flex-start;
-  }
-
-  .dashboard-header h1 {
-    font-size: 1.8rem;
   }
 
   .btn-primary {
@@ -216,11 +196,7 @@
   }
 
   .stat-info span {
-    font-size: 2.5rem;
-  }
-
-   .dashboard-container {
-    padding: 1rem;
+    font-size: 2rem;
   }
 
 }
