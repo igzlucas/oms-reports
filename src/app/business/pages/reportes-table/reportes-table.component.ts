@@ -202,9 +202,14 @@ export class ReportesTableComponent implements OnInit {
   copyShareLink(report: Report, event: MouseEvent): void {
     event.stopPropagation();
     const link = this.getShareableLink(report);
-    if (link) {
-      this.clipboard.copy(link);
+    if (link && report.pin) {
+
+      const message = `Estimado ${report.personaQuienReporta} ,\n\nLe compartimos la información para que pueda acceder a su reporte de servicio:\n\nEnlace: ${link}\nPIN de acceso: ${report.pin}\n\nDesde este enlace, podrá revisar el detalle del reporte y firmarlo digitalmente para confirmar su conformidad.\n\nGracias por su confianza.`;
+      this.clipboard.copy(message);
+
       this.setCopiedState('link', report.id);
+      
+      this.toastService.show('Mensaje para compartir copiado al portapapeles', 'success');
     }
     setTimeout(() => this.openDropdownId = null, 300);
   }

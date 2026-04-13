@@ -78,7 +78,7 @@
                   <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
                     <button (click)="copyShareLink(report, $event)" [disabled]="!report.publicLinkToken" class="w-full text-left flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50" role="menuitem">
                       <svg class="h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
-                      <span *ngIf="!(copiedState?.type === 'link' && copiedState?.id === report.id)">Compartir Link</span>
+                      <span *ngIf="!(copiedState?.type === 'link' && copiedState?.id === report.id)">Compartir Reporte y Pin</span>
                       <span *ngIf="copiedState?.type === 'link' && copiedState?.id === report.id" class="text-green-600 font-semibold">¡Copiado!</span>
                     </button>
                     <a [routerLink]="['/reports', report.id]" (click)="$event.stopPropagation()" class="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">
