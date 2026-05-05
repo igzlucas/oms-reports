@@ -1,0 +1,73 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Funciones auxiliares
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    // === USUARIOS ===
+    // Solo el dueño puede leer y escribir su propio perfil
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+    
+    // === TIENDAS ===
+    match /stores/{storeId} {
+      // Lectura pública para todas las tiendas
+      allow read: if true;
+      
+      // Solo puede crear si el ownerId coincide con el usuario autenticado
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      
+      // Solo el dueño puede actualizar o eliminar su tienda
+      allow update, delete: if isSignedIn() && resource.data.ownerId == request.auth.uid;
+      
+      // === CALIFICACIONES (subcolección) ===
+      match /ratings/{ratingId} {
+        // Lectura pública de calificaciones
+        allow read: if true;
+        
+        // Crear calificación: usuario autenticado, no puede calificar su propia tienda
+        allow create: if isSignedIn() 
+          && request.resource.data.userId == request.auth.uid
+          && request.resource.data.storeId == storeId
+          && request.auth.uid != get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId;
+        
+        // Actualizar: solo el dueño de la tienda puede responder (agregar ownerReply)
+        allow update: if isSignedIn() 
+          && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid
+          && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['id', 'userId', 'storeId', 'rating', 'date', 'comment', 'userName', 'userRole']);
+        
+        // No se pueden borrar calificaciones
+        allow delete: if false;
+      }
+      
+      // === TICKETS DE VENTA (subcolección) ===
+      match /saleTickets/{ticketId} {
+        // Solo el dueño de la tienda puede leer y escribir tickets
+        allow read, write: if isSignedIn() 
+          && get(/databases/$(database)/documents/stores/$(storeId)).data.ownerId == request.auth.uid;
+      }
+    }
+    
+    // === PRODUCTOS ===
+    match /products/{productId} {
+      // Lectura pública para todos los productos
+      allow read: if true;
+      
+      // Para crear, el usuario debe ser el dueño de la tienda a la que pertenece el producto
+      allow create: if isSignedIn() && 
+        get(/databases/$(database)/documents/stores/$(request.resource.data.storeId)).data.ownerId == request.auth.uid;
+      
+      // Solo el dueño de la tienda puede actualizar/eliminar el producto
+      allow update, delete: if isSignedIn() && 
+        get(/databases/$(database)/documents/stores/$(resource.data.storeId)).data.ownerId == request.auth.uid;
+    }
+  }
+}

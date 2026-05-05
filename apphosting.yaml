@@ -1,0 +1,18 @@
+# Settings to manage and configure a Firebase App Hosting backend.
+# https://firebase.google.com/docs/app-hosting/configure
+
+runConfig:
+  # Increase this value if you'd like to automatically spin up
+  # more instances in response to increased traffic.
+  maxInstances: 1
+  
+  # ESTO ES LO QUE FALTA: Las variables para que el servidor pueda conectar con Firebase
+  environmentVariables:
+    NEXT_PUBLIC_FIREBASE_PROJECT_ID: "mibazar-f10d5"
+    NEXT_PUBLIC_FIREBASE_APP_ID: "1:258781462057:web:bbbb00d3190946dd812638"
+    NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET: "mibazar-f10d5.firebasestorage.app"
+    NEXT_PUBLIC_FIREBASE_API_KEY: "AIzaSyATCOlL7Qt5RUOYsfCVpcANHbrvcJlcn4g"
+    NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN: "mibazar-f10d5.firebaseapp.com"
+    NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID: "258781462057"
+    GEMINI_API_KEY: "AIzaSyATCOlL7Qt5RUOYsfCVpcANHbrvcJlcn4g"
+    

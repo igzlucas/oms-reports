@@ -1,0 +1,388 @@
+
+{
+  "entities": {
+    "Store": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Store",
+      "type": "object",
+      "description": "Represents an online store within the MiBazar application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Store entity."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the store."
+        },
+        "slug": {
+          "type": "string",
+          "description": "A URL-friendly version of the store name."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the store."
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Reference to the User who owns the store. (Relationship: User 1:N Store)"
+        },
+        "isActive": {
+          "type": "boolean",
+          "description": "Indicates whether the store is currently active."
+        },
+        "phone": {
+            "type": "string",
+            "description": "The contact phone number for the store."
+        },
+        "whatsapp": {
+            "type": "string",
+            "description": "The WhatsApp contact number for the store."
+        },
+        "socials": {
+            "type": "object",
+            "description": "An object containing social media URLs for the store.",
+            "properties": {
+                "facebook": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "instagram": {
+                    "type": "string",
+                    "format": "uri"
+                },
+                "x": {
+                    "type": "string",
+                    "format": "uri"
+                }
+            }
+        },
+        "state": {
+            "type": "string",
+            "description": "The state in Mexico where the store is located."
+        },
+        "municipality": {
+            "type": "string",
+            "description": "The municipality or delegation where the store is located."
+        },
+        "bannerUrl": {
+          "type": "string",
+          "description": "URL or Base64 data URI for the store's banner image."
+        },
+        "bannerHint": {
+            "type": "string",
+            "description": "Hint for AI to find a relevant banner image."
+        }
+      },
+      "required": [
+        "id",
+        "name",
+        "slug",
+        "ownerId",
+        "isActive",
+        "state",
+        "municipality"
+      ]
+    },
+    "Product": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Product",
+      "type": "object",
+      "description": "Represents a product sold in a store.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Product entity."
+        },
+        "storeId": {
+          "type": "string",
+          "description": "Reference to the Store this product belongs to. (Relationship: Store 1:N Product)"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Reference to the User who owns the store and product."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the product."
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the product."
+        },
+        "costPrice": {
+          "type": "number",
+          "description": "The cost price of the product."
+        },
+        "price": {
+          "type": "number",
+          "description": "The selling price of the product."
+        },
+        "stock": {
+          "type": "number",
+          "description": "The current stock level of the product."
+        },
+        "category": {
+          "type": "string",
+          "description": "The category the product belongs to."
+        },
+        "imageUrl": {
+          "type": "string",
+          "description": "URL of the product image stored in Firebase Storage.",
+          "format": "uri"
+        },
+        "imageHint": {
+            "type": "string",
+            "description": "Hint for AI to find a relevant image."
+        },
+        "sizes": {
+          "type": "array",
+          "description": "Available sizes for the product.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "colors": {
+          "type": "array",
+          "description": "Available colors for the product.",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "storeId",
+        "ownerId",
+        "name",
+        "costPrice",
+        "price",
+        "stock",
+        "category"
+      ]
+    },
+    "SaleTicket": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "SaleTicket",
+      "type": "object",
+      "description": "Represents a sales ticket for a transaction in a store.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the SaleTicket entity."
+        },
+        "storeId": {
+          "type": "string",
+          "description": "Reference to the Store where the sale occurred. (Relationship: Store 1:N SaleTicket)"
+        },
+        "ownerId": {
+          "type": "string",
+          "description": "Reference to the User who owns the store."
+        },
+        "ticketNumber": {
+          "type": "string",
+          "description": "Automatically generated sequential number for the sales ticket."
+        },
+        "totalSales": {
+          "type": "number",
+          "description": "The total sales amount for the ticket."
+        },
+        "date": {
+          "type": "string",
+          "description": "The date of the sale.",
+          "format": "date-time"
+        },
+        "productIds": {
+          "type": "array",
+          "description": "References to Products included in the sale. (Relationship: SaleTicket 1:N Product)",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "required": [
+        "id",
+        "storeId",
+        "ownerId",
+        "ticketNumber",
+        "totalSales",
+        "date",
+        "productIds"
+      ]
+    },
+    "User": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "User",
+      "type": "object",
+      "description": "Represents a user of the MiBazar application.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the User entity."
+        },
+        "email": {
+          "type": "string",
+          "description": "The user's email address.",
+          "format": "email"
+        },
+        "displayName": {
+          "type": "string",
+          "description": "The user's display name."
+        },
+        "role": {
+            "type": "string",
+            "description": "The role of the user, determining their permissions.",
+            "enum": ["buyer", "seller"]
+        },
+        "favorites": {
+            "type": "array",
+            "description": "Array of favorite product IDs.",
+            "items": {
+                "type": "string"
+            }
+        },
+        "favoriteStores": {
+            "type": "array",
+            "description": "Array of favorite store IDs.",
+            "items": {
+                "type": "string"
+            }
+        },
+        "storeId": {
+            "type": "string",
+            "description": "The ID of the active store selected by the user."
+        }
+      },
+      "required": [
+        "id",
+        "email",
+        "role"
+      ]
+    },
+    "Rating": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Rating",
+      "type": "object",
+      "description": "Represents a rating given to a store by a user.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the Rating."
+        },
+        "storeId": {
+          "type": "string",
+          "description": "The ID of the store being rated."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who gave the rating."
+        },
+        "rating": {
+          "type": "number",
+          "description": "The star rating from 1 to 5."
+        },
+        "comment": {
+          "type": "string",
+          "description": "An optional comment with the rating."
+        },
+        "date": {
+          "type": "string",
+          "format": "date-time",
+          "description": "The date the rating was given."
+        }
+      },
+      "required": ["id", "storeId", "userId", "rating", "date"]
+    }
+  },
+  "auth": {
+    "providers": [
+      "password",
+      "google.com"
+    ]
+  },
+  "firestore": {
+    "structure": [
+      {
+        "path": "/users/{userId}",
+        "definition": {
+          "entityName": "User",
+          "schema": {
+            "$ref": "#/backend/entities/User"
+          },
+          "description": "Stores user profile information.",
+          "params": [
+            {
+              "name": "userId",
+              "description": "The unique identifier for the user."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/stores/{storeId}",
+        "definition": {
+          "entityName": "Store",
+          "schema": {
+            "$ref": "#/backend/entities/Store"
+          },
+          "description": "Stores data related to a specific store. Denormalizes 'ownerId' for independent authorization. This is a top-level collection to allow public access to store info.",
+          "params": [
+            {
+              "name": "storeId",
+              "description": "The unique identifier for the store."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/products/{productId}",
+        "definition": {
+          "entityName": "Product",
+          "schema": {
+            "$ref": "#/backend/entities/Product"
+          },
+          "description": "Contains all products from all stores. This is a top-level collection to allow public querying and filtering. Denormalizes 'storeId' and 'ownerId' for security and data retrieval.",
+          "params": [
+            {
+              "name": "productId",
+              "description": "The unique identifier for the product."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/stores/{storeId}/saleTickets/{saleTicketId}",
+        "definition": {
+          "entityName": "SaleTicket",
+          "schema": {
+            "$ref": "#/backend/entities/SaleTicket"
+          },
+          "description": "Contains sales tickets related to each store. It is nested under stores for clear ownership and security scoping.",
+          "params": [
+            {
+              "name": "storeId",
+              "description": "The unique identifier for the store."
+            },
+            {
+              "name": "saleTicketId",
+              "description": "The unique identifier for the sales ticket."
+            }
+          ]
+        }
+      },
+      {
+        "path": "/stores/{storeId}/ratings/{ratingId}",
+        "definition": {
+          "entityName": "Rating",
+          "schema": { "$ref": "#/backend/entities/Rating" },
+          "description": "Contains user ratings for a specific store.",
+          "params": [
+            { "name": "storeId", "description": "The unique identifier for the store." },
+            { "name": "ratingId", "description": "The unique identifier for the rating." }
+          ]
+        }
+      }
+    ],
+    "reasoning": "The Firestore structure is designed for a multi-tenant e-commerce platform. The key change is elevating `products` and `stores` to top-level collections. This is critical for the buyer-facing part of the application, as it allows for efficient, unauthenticated queries across all products (e.g., for a public catalog page with filtering). Security is maintained by denormalizing `ownerId` and `storeId` into each document. Security rules will use these denormalized fields to ensure that only the rightful owner can write to their own documents, while allowing global reads for public data."
+  }
+}

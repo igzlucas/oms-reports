@@ -1,0 +1,475 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+/* ======================================================
+ROOT VARIABLES
+====================================================== */
+
+@layer base {
+
+  :root {
+
+    --background: 36 50% 98%;
+    --foreground: 25 35% 12%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 25 35% 12%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 25 35% 12%;
+
+    --primary: 28 82% 44%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 35 60% 92%;
+    --secondary-foreground: 28 50% 25%;
+
+    --muted: 36 40% 94%;
+    --muted-foreground: 30 18% 48%;
+
+    --accent: 22 90% 50%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 34 28% 88%;
+    --input: 34 28% 90%;
+
+    --ring: 28 82% 44%;
+
+    --radius: 0.75rem;
+
+    --chart-1: 28 82% 44%;
+    --chart-2: 22 90% 50%;
+    --chart-3: 16 80% 42%;
+    --chart-4: 38 78% 48%;
+    --chart-5: 10 75% 38%;
+
+    --sidebar-background: 25 20% 10%;
+    --sidebar-foreground: 36 40% 92%;
+
+    --sidebar-primary: 28 82% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+
+    --sidebar-accent: 25 20% 16%;
+    --sidebar-accent-foreground: 36 40% 92%;
+
+    --sidebar-border: 25 20% 18%;
+    --sidebar-ring: 28 82% 50%;
+
+    --bazar-gold: #d97706;
+    --bazar-amber: #b45309;
+    --bazar-dark: #0f0d0b;
+    --bazar-warm: #fef3c7;
+    --bazar-glow: rgba(217, 119, 6, 0.15);
+
+  }
+
+
+  .dark {
+
+    --background: 25 20% 10%;
+    --foreground: 36 40% 93%;
+
+    --card: 25 20% 13%;
+    --card-foreground: 36 40% 93%;
+
+    --popover: 25 20% 13%;
+    --popover-foreground: 36 40% 93%;
+
+    --primary: 28 82% 52%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 25 20% 18%;
+    --secondary-foreground: 36 40% 85%;
+
+    --muted: 25 20% 18%;
+    --muted-foreground: 30 20% 58%;
+
+    --accent: 22 90% 55%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 36 40% 93%;
+
+    --border: 25 20% 22%;
+    --input: 25 20% 18%;
+
+    --ring: 28 82% 52%;
+
+    --sidebar-background: 25 22% 8%;
+    --sidebar-foreground: 36 40% 88%;
+
+    --sidebar-primary: 28 82% 52%;
+    --sidebar-primary-foreground: 0 0% 100%;
+
+    --sidebar-accent: 25 22% 14%;
+    --sidebar-accent-foreground: 36 40% 88%;
+
+    --sidebar-border: 25 22% 16%;
+    --sidebar-ring: 28 82% 52%;
+
+  }
+
+}
+
+
+/* ======================================================
+TYPOGRAPHY
+====================================================== */
+
+@layer base {
+
+  * {
+
+    @apply border-border;
+
+  }
+
+  html {
+
+    font-family: 'DM Sans', system-ui, sans-serif;
+    scroll-behavior: smooth;
+
+  }
+
+  body {
+
+    @apply bg-background text-foreground;
+
+    font-family: 'DM Sans', system-ui, sans-serif;
+
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+
+    font-family: 'Sora', system-ui, sans-serif;
+    letter-spacing: -0.02em;
+
+  }
+
+  .font-headline {
+
+    font-family: 'Sora', system-ui, sans-serif;
+
+  }
+
+  .font-mono-brand {
+
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+
+  }
+
+}
+
+
+/* ======================================================
+ANIMATIONS
+====================================================== */
+
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-8px);
+  }
+
+}
+
+@keyframes glow-pulse {
+
+  0%,
+  100% {
+    box-shadow: 0 0 20px rgba(217, 119, 6, 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 40px rgba(217, 119, 6, 0.5);
+  }
+
+}
+
+@keyframes slide-up-fade {
+
+  from {
+
+    opacity: 0;
+    transform: translateY(16px);
+
+  }
+
+  to {
+
+    opacity: 1;
+    transform: translateY(0);
+
+  }
+
+}
+
+@keyframes gradient-shift {
+
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+
+}
+
+
+.animate-float {
+
+  animation: float 4s ease-in-out infinite;
+
+}
+
+.animate-glow-pulse {
+
+  animation: glow-pulse 2s ease-in-out infinite;
+
+}
+
+.animate-slide-up {
+
+  animation: slide-up-fade 0.5s ease-out both;
+
+}
+
+
+/* ======================================================
+VISUAL EFFECTS
+====================================================== */
+
+.gradient-text {
+
+  background: linear-gradient(135deg, #f59e0b, #ea580c, #d97706);
+
+  background-clip: text;
+
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+
+}
+
+
+.gradient-text-animated {
+
+  background: linear-gradient(270deg, #f59e0b, #ea580c, #d97706, #f59e0b);
+
+  background-size: 400% 400%;
+
+  background-clip: text;
+
+  -webkit-background-clip: text;
+
+  -webkit-text-fill-color: transparent;
+
+  animation: gradient-shift 4s ease infinite;
+
+}
+
+
+.glass {
+
+  background: rgba(255, 255, 255, 0.08);
+
+  backdrop-filter: blur(12px);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+}
+
+
+.glass-warm {
+
+  background: rgba(255, 243, 220, 0.7);
+
+  backdrop-filter: blur(16px);
+
+  border: 1px solid rgba(217, 119, 6, 0.15);
+
+}
+
+
+.card-hover {
+
+  transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease;
+
+}
+
+.card-hover:hover {
+
+  transform: translateY(-4px);
+
+  box-shadow: 0 20px 60px -10px rgba(180, 83, 9, 0.18);
+
+  border-color: rgba(217, 119, 6, 0.35);
+
+}
+
+
+.card-shine {
+
+  position: relative;
+
+  overflow: hidden;
+
+}
+
+.card-shine::before {
+
+  content: '';
+
+  position: absolute;
+
+  top: -50%;
+  left: -75%;
+
+  width: 50%;
+  height: 200%;
+
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+
+  transform: skewX(-20deg);
+
+  transition: left .6s ease;
+
+}
+
+.card-shine:hover::before {
+
+  left: 125%;
+
+}
+
+
+/* ======================================================
+SCROLLBAR
+====================================================== */
+
+::-webkit-scrollbar {
+
+  width: 6px;
+  height: 6px;
+
+}
+
+::-webkit-scrollbar-thumb {
+
+  background: rgba(180, 83, 9, 0.25);
+
+  border-radius: 99px;
+
+}
+
+::-webkit-scrollbar-thumb:hover {
+
+  background: rgba(180, 83, 9, 0.5);
+
+}
+
+
+/* ======================================================
+PRINT MODE
+====================================================== */
+
+@media print {
+
+  body>*,
+  body * {
+
+    visibility: hidden !important;
+
+  }
+
+  .printable-ticket,
+  .printable-ticket * {
+
+    visibility: visible !important;
+
+  }
+
+  .printable-ticket {
+
+    position: fixed !important;
+
+    inset: 0 !important;
+
+    width: 100% !important;
+
+    height: 100% !important;
+
+    display: flex !important;
+
+    justify-content: center !important;
+
+    align-items: flex-start !important;
+
+    background: white !important;
+
+  }
+
+  #ticket-content {
+
+    width: 100% !important;
+
+    border: none !important;
+
+    box-shadow: none !important;
+
+    page-break-inside: avoid !important;
+
+  }
+
+  header,
+  nav,
+  footer,
+  [data-sidebar],
+  .print-hidden {
+
+    display: none !important;
+
+    visibility: hidden !important;
+
+  }
+
+  @page {
+
+    size: A4 portrait;
+
+    margin: 8mm 10mm;
+
+  }
+
+  * {
+
+    print-color-adjust: exact !important;
+
+  }
+
+}
